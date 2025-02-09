@@ -1,4 +1,6 @@
 plugins {
+  id 'java'
+  id 'eclipse'
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
 }
@@ -22,8 +24,16 @@ dependencies{
     implementation 'io.projectreactor:reactor-core:3.7.2'
 	
 	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0-M1'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0-RC1'
 
+	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
+	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.12.0-RC1'
+	
 }
 
-mainClassName = 'EM426'
+test{
+	useJUnitPlatform()
+	testLogging.showStandardStreams = true
+}
+
+mainClassName = 'EM426Main'
