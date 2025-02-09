@@ -12,7 +12,7 @@ public class EM426Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
     	
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("TestFXML.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("views/TestFXML.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         stage.setTitle("EM426Main");
