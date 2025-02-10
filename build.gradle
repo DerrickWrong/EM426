@@ -5,7 +5,9 @@ plugins {
   id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
-applicationDefaultJvmArgs = ['--module-path="C:\Program Files\JavaFX\javafx-sdk-23.0.2\lib" --add-modules=javafx.controls,javafx.fxml']
+//application {
+//    applicationDefaultJvmArgs = ['--module-path="C:\Program Files\JavaFX\javafx-sdk-23.0.2\lib"', '--add-modules=javafx.controls,javafx.fxml']
+//}
 
 repositories {
     mavenCentral()
@@ -24,19 +26,9 @@ dependencies{
 	// https://mvnrepository.com/artifact/io.projectreactor/reactor-core
     implementation 'io.projectreactor:reactor-core:3.7.2'
 	
-	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0-RC1'
-
-	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
-	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.12.0-RC1'
+	// Use JUnit Jupiter for testing.
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 	
-}
-
-sourceSets {
-    main.java.srcDirs += 'src'
-    main.resources.srcDirs += 'src'
-    test.java.srcDirs += 'test'
-    test.resources.srcDirs += 'test'
 }
 
 test {
@@ -52,4 +44,8 @@ test {
     }
 }
 
-mainClassName = 'EM426Main'
+application {
+	mainClass = 'EM426Main'
+	applicationDefaultJvmArgs = ['--module-path=C:\Program Files\JavaFX\javafx-sdk-23.0.2\lib', '--add-modules=javafx.controls,javafx.fxml']
+	
+}
