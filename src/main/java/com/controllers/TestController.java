@@ -1,7 +1,10 @@
 package com.controllers;
+import org.springframework.stereotype.Component;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
+@Component
 public class TestController {
 
 	@FXML

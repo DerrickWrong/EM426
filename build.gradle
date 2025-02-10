@@ -16,11 +16,14 @@ javafx {
 
 dependencies{
 	
-	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot
-	implementation 'org.springframework.boot:spring-boot:3.4.2'
-	
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter
+	implementation 'org.springframework.boot:spring-boot-starter:3.4.2'
+
 	// https://mvnrepository.com/artifact/io.projectreactor/reactor-core
     implementation 'io.projectreactor:reactor-core:3.7.2'
+	
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.2'
 	
 	// Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
