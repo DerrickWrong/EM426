@@ -5,10 +5,6 @@ plugins {
   id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
-//application {
-//    applicationDefaultJvmArgs = ['--module-path="C:\Program Files\JavaFX\javafx-sdk-23.0.2\lib"', '--add-modules=javafx.controls,javafx.fxml']
-//}
-
 repositories {
     mavenCentral()
 }
@@ -46,6 +42,6 @@ test {
 
 application {
 	mainClass = 'EM426Main'
-	applicationDefaultJvmArgs = ['--module-path=C:\Program Files\JavaFX\javafx-sdk-23.0.2\lib', '--add-modules=javafx.controls,javafx.fxml']
+	//applicationDefaultJvmArgs = '--module-path="C:\Program Files\JavaFX\javafx-sdk-23.0.2\lib" --add-modules=javafx.controls,javafx.fxml'
 	
 }
