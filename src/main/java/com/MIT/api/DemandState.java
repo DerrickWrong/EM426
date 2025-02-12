@@ -1,4 +1,4 @@
-package em426.api;
+package com.MIT.api;
 
 /**
  * A set of possible states for the demand, describing the stage across a life of the demand until it is complete or ignored.

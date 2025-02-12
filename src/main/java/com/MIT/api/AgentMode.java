@@ -1,4 +1,4 @@
-package em426.api;
+package com.MIT.api;
 
 public enum AgentMode {
 	INACTIVE, 

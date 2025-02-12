@@ -1,9 +1,12 @@
-package em426.agents;
+package com.MIT.agents;
 
-import em426.api.*;
 import javafx.beans.property.*;
 
 import java.util.*;
+
+import com.MIT.api.ActType;
+import com.MIT.api.DemandAPI;
+import com.MIT.api.DemandState;
 
 public class Demand implements DemandAPI {
 
@@ -60,10 +63,6 @@ public class Demand implements DemandAPI {
         return null;
     }
 
-    @Override
-    public void setType(ActType type) {
-
-    }
 
     @Override
     public ObjectProperty<DemandState> stateProperty() {
@@ -73,11 +72,6 @@ public class Demand implements DemandAPI {
     @Override
     public DemandState getState() {
         return null;
-    }
-
-    @Override
-    public void setState(DemandState state) {
-
     }
 
     @Override
@@ -204,4 +198,16 @@ public class Demand implements DemandAPI {
     public void setUntil(int until) {
 
     }
+
+	@Override
+	public void setType(ActType type) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setState(DemandState state) {
+		// TODO Auto-generated method stub
+		
+	}
 }

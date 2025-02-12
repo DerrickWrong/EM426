@@ -1,4 +1,4 @@
-package em426.api;
+package com.MIT.api;
 
 /**
  * A set of various activity types which describe the kind of activity that the demand is requesting.

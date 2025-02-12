@@ -1,11 +1,14 @@
 
-package em426.agents;
+package com.MIT.agents;
 
-import em426.api.*;
 import javafx.beans.property.*;
 import javafx.collections.*;
 
 import java.util.*;
+
+import com.MIT.api.AgentAPI;
+import com.MIT.api.AgentMode;
+import com.MIT.api.DemandAPI;
 
 public class Agent implements AgentAPI {
 
