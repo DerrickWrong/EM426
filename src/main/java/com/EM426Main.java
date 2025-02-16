@@ -27,7 +27,7 @@ public class EM426Main extends Application {
 	@Override
 	public void init() throws IOException {
 		springContext = SpringApplication.run(EM426Main.class);
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("views/TestFXML.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("views/MainDashboard.fxml"));
 		loader.setControllerFactory(springContext::getBean);
 		rootNode = loader.load();
 	}

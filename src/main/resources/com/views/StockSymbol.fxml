@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.Pane?>
+
+
+<Pane maxHeight="60.0" maxWidth="150.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="60.0" prefWidth="150.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <ImageView fitHeight="50.0" fitWidth="50.0" layoutX="94.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/stock%20symbol.jpg" />
+         </image>
+      </ImageView>
+      <Label fx:id="symbolLabel" layoutX="14.0" layoutY="9.0" text="SymbolName" />
+      <Label fx:id="symbolPrice" layoutX="37.0" layoutY="31.0" text="price" />
+   </children>
+</Pane>
