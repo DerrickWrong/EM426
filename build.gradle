@@ -6,7 +6,7 @@ plugins {
 }
 
 repositories {
-    mavenCentral()
+    mavenCentral() 
 }
 
 javafx {
@@ -20,13 +20,21 @@ dependencies{
 	implementation 'org.springframework.boot:spring-boot-starter:3.4.2'
 
 	// https://mvnrepository.com/artifact/io.projectreactor/reactor-core
-    implementation 'io.projectreactor:reactor-core:3.7.2'
+    implementation 'io.projectreactor:reactor-core:3.7.3'
+    
+    // https://mvnrepository.com/artifact/io.projectreactor/reactor-test
+	testImplementation 'io.projectreactor:reactor-test:3.7.3'
+    
 	
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.2'
 	
 	// Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    
+    // https://mvnrepository.com/artifact/com.faendir.jraw/JRAW
+	implementation 'com.faendir.jraw:JRAW:1.2.0'
+
 	
 }
 
