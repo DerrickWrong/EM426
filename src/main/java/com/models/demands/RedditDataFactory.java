@@ -8,9 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import com.models.interfaces.DemandStream;
-import com.models.interfaces.DemandTypeEnum;
+  
 
 import jakarta.annotation.PostConstruct;
 import net.dean.jraw.RedditClient;
@@ -34,9 +32,7 @@ public class RedditDataFactory {
 	@Autowired
 	@Qualifier("ioScheduler")
 	Scheduler ioScheduler;
-
-	@Autowired
-	DemandStream demandStream;
+ 
 
 	FluxSink<String> subredditProcessingStream;
 
@@ -71,7 +67,6 @@ public class RedditDataFactory {
 					News news = new News(title, id, url, commentCount);
 					
 					this.redditPostMap.get(subredditTitle).add(news);
-					// demandStream.publish(DemandTypeEnum.NEWS, news);
 				}
 			}
 		});
@@ -102,7 +97,7 @@ public class RedditDataFactory {
 
 		for (int i = 0; i < arr.size(); i++) {
 
-			demandStream.publish(DemandTypeEnum.NEWS, arr.get(i));
+			//demandStream.publish(DemandTypeEnum.NEWS, arr.get(i));
 		}
 
 	}

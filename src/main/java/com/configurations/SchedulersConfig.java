@@ -15,8 +15,7 @@ public class SchedulersConfig {
 		// To render things on JavaFX
 		return FxScheduler.fxThread();
 	}
-	
-	
+	 
 	@Bean
 	Scheduler ioScheduler() {
 		// ideal for IO, database and 3rd party accesses
