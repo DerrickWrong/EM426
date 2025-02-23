@@ -1,38 +1,41 @@
 package com.controllers;
+   
+import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.models.demands.RedditDataFactory;
+import com.models.demands.News;
 
-import jakarta.annotation.PostConstruct;
 import javafx.fxml.FXML; 
 import javafx.scene.control.TableColumn;
-
-@Component 
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+ 
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class NewsDashboardController {
  
 	@FXML
-	TableColumn titleColumn;
+	TableView<News> tableViewTable;
 	
 	@FXML
-	TableColumn postidColumn;
+	TableColumn<News, String> titleColumn, postidColumn, numCommColumn, scoreColumn;
 	
 	@FXML
-	TableColumn numCommColumn;
-	
-	@FXML
-	TableColumn scoreColumn;
-	
-	@Autowired
-	RedditDataFactory redditFac;
-	
-	
-	
-	@PostConstruct
-	void setup() {
+    public void initialize() {
 		
+		titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+		postidColumn.setCellValueFactory(new PropertyValueFactory<>("postId"));
+		numCommColumn.setCellValueFactory(new PropertyValueFactory<>("numOfComments"));
+		scoreColumn.setCellValueFactory(new PropertyValueFactory<>("score"));
+	}
+	
+	public void renderData(List<News> newsData) {
 		
+		tableViewTable.getItems().addAll(newsData);
+		  
 	}
 	
 	

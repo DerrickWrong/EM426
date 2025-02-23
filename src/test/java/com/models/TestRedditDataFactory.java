@@ -32,11 +32,9 @@ class TestRedditDataFactory {
 
 			News n = (News) d.getValue();
 
-			String a = n.title;
 
 		});
 
-		dataFactory.pollingPost("wallstreetbets");
 
 	}
 

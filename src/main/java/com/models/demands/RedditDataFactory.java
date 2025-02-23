@@ -8,9 +8,11 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-  
+
+import com.models.interfaces.DemandTypeEnum;
 
 import jakarta.annotation.PostConstruct;
+import javafx.util.Pair;
 import net.dean.jraw.RedditClient;
 import net.dean.jraw.models.Listing;
 import net.dean.jraw.models.Submission;
@@ -19,8 +21,7 @@ import net.dean.jraw.models.TimePeriod;
 import net.dean.jraw.pagination.DefaultPaginator;
 import net.dean.jraw.pagination.Paginator;
 import net.dean.jraw.references.SubredditReference;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks.Many;
 import reactor.core.scheduler.Scheduler;
 
 @Component
@@ -32,30 +33,33 @@ public class RedditDataFactory {
 	@Autowired
 	@Qualifier("ioScheduler")
 	Scheduler ioScheduler;
- 
 
-	FluxSink<String> subredditProcessingStream;
+	@Autowired
+	Many<Pair<DemandTypeEnum, String>> messageSink;
 
 	Map<String, List<News>> redditPostMap = new HashMap<>(); // subreddit name and posts
 
 	@PostConstruct
 	void setUp() {
 
-		Flux<String> redditStream = Flux.create(pub -> {
-			this.subredditProcessingStream = pub;
-		});
+		messageSink.asFlux().publishOn(ioScheduler).subscribe(d -> {
 
-		redditStream.publishOn(ioScheduler).subscribe(subredditTitle -> {
+			String redditTitle = d.getValue();
+
+			if (!redditPostMap.containsKey(redditTitle)) {
+
+				redditPostMap.put(redditTitle, new ArrayList<>());
+			}
 
 			// invoke web service to grab the subreddit
-			DefaultPaginator<Submission> page = getRedditPostBySubredditTitle(subredditTitle);
+			DefaultPaginator<Submission> page = getRedditPostBySubredditTitle(redditTitle);
 
 			Listing<Submission> posts = page.next();
 
 			if (!posts.isEmpty()) {
 
 				// bind to just the first 10 or so posts from first page
-				int count = posts.size() < 10 ? posts.size() : 10;
+				int count = posts.size();// < 10 ? posts.size() : 10;
 
 				for (int i = 0; i < count; i++) {
 
@@ -65,12 +69,12 @@ public class RedditDataFactory {
 					int commentCount = posts.get(i).getCommentCount();
 
 					News news = new News(title, id, url, commentCount);
-					
-					this.redditPostMap.get(subredditTitle).add(news);
+
+					this.redditPostMap.get(redditTitle).add(news);
 				}
 			}
 		});
- 
+
 	}
 
 	DefaultPaginator<Submission> getRedditPostBySubredditTitle(String subName) {
@@ -83,27 +87,9 @@ public class RedditDataFactory {
 		return paginator;
 	}
 
-	public void pollingPost(String subredditName) {
+	public List<News> getPosts(String redditTitle) {
 
-		this.redditPostMap.put(subredditName, new ArrayList<>());
-
-		this.subredditProcessingStream.next(subredditName);
-
-	}
-
-	public void pushPosts(String subredditName) {
-
-		List<News> arr = this.redditPostMap.get(subredditName);
-
-		for (int i = 0; i < arr.size(); i++) {
-
-			//demandStream.publish(DemandTypeEnum.NEWS, arr.get(i));
-		}
-
-	}
-
-	public List<News> getRedditPosts(String subredditName) {
-		return this.redditPostMap.get(subredditName);
+		return this.redditPostMap.get(redditTitle);
 	}
 
 }

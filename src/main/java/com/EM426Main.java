@@ -11,6 +11,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import com.controllers.MainDashboardController;
+
 // combining JavaFX with SpringBoot
 // source - https://github.com/mvpjava
 
@@ -28,10 +30,13 @@ public class EM426Main extends Application {
 		SpringFXLoader.getInstance().setSpringContext(springContext, stage);
 
 		FXMLLoader loader = SpringFXLoader.getInstance().loadFxml("views/MainDashboard.fxml");
-
+		
 		stage.setTitle("EM426Main");
 		stage.setScene(new Scene(loader.load()));
 		stage.show();
+		
+		MainDashboardController mdc = loader.getController();
+		mdc.preSeedEnvironment();
 	}
 
 	@Override

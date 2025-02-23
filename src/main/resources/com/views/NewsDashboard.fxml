@@ -4,15 +4,14 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.Pane?>
 
-
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.NewsDashboardController">
    <children>
-      <TableView layoutX="10.0" layoutY="6.0" prefHeight="385.0" prefWidth="581.0">
+      <TableView fx:id="tableViewTable" layoutX="10.0" layoutY="6.0" prefHeight="385.0" prefWidth="581.0">
         <columns>
             <TableColumn fx:id="titleColumn" prefWidth="322.0" text="Title" />
-          <TableColumn fx:id="postidColumn" prefWidth="75.0" text="PostID" />
-          <TableColumn fx:id="numCommColumn" prefWidth="123.0" text="Num of Comments" />
-            <TableColumn fx:id="scoreColumn" prefWidth="58.0" text="Score" />
+          <TableColumn fx:id="numCommColumn" prefWidth="116.5" text="Num of Comments" />
+            <TableColumn fx:id="scoreColumn" prefWidth="79.0" text="Score" />
+          <TableColumn fx:id="postidColumn" prefWidth="60.5" text="PostID" />
         </columns>
       </TableView>
    </children>

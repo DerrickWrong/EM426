@@ -16,8 +16,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 import reactor.core.publisher.Sinks.Many;
 import reactor.core.scheduler.Scheduler;
 
@@ -58,8 +56,6 @@ public class MainDashboardController {
 
 		});
 
-		// seed the board
-		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "wallstreetbets"));
 	}
 
 	@FXML
@@ -83,6 +79,17 @@ public class MainDashboardController {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("../views/AgentAvatar.fxml"));
 		Pane p = (Pane) loader.load();
 		playerHBox.getChildren().add(p);
+
+	}
+
+	// invoke at Main after everything has been setup
+	public void preSeedEnvironment() {
+
+		// seed the board
+		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "wallstreetbets"));
+		
+		// seed the players
+		
 
 	}
 
