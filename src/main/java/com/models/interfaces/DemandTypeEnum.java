@@ -1,5 +1,5 @@
 package com.models.interfaces;
 
 public enum DemandTypeEnum {
-	NEWS, STOCK, GEOPOLITICS, WEATHER
+	NEWS, STOCK, GEOPOLITICS, WEATHER, AGENTACTION
 }

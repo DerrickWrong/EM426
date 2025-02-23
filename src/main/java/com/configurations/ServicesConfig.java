@@ -26,25 +26,29 @@ public class ServicesConfig {
 	@Value("${reddit.tokenName}")
 	private String tokenName;
 	 
-	
-	
 	@Bean
-	RedditClient connectReddit() {
+	RedditAPIManager connectReddit() {
 		
+		RedditClient redditClient = null;
 		UserAgent userAgent = new UserAgent("bot", "com.mit.em426", "v0.1", tokenName);
 		
 		UUID id = UUID.randomUUID();
+		
+		try {
 		
 		// Create our credentials
 		Credentials credentials = Credentials.userless(clientId, secretClient, id);
 
 		OkHttpNetworkAdapter adapter = new OkHttpNetworkAdapter(userAgent);  
 		// Authenticate our client
-		RedditClient redditClient = OAuthHelper.automatic(adapter, credentials);
+		redditClient = OAuthHelper.automatic(adapter, credentials);
+	 
 		
-		return redditClient;
-	}
-	 
-	 
+		}catch(Exception e) {
+			System.out.println(e);
+		}
+		
+		return new RedditAPIManager(redditClient);
+	} 
 	
 }

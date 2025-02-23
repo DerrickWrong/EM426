@@ -9,18 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.configurations.RedditAPIManager;
 import com.models.interfaces.DemandTypeEnum;
 
 import jakarta.annotation.PostConstruct;
-import javafx.util.Pair;
-import net.dean.jraw.RedditClient;
+import javafx.util.Pair; 
 import net.dean.jraw.models.Listing;
-import net.dean.jraw.models.Submission;
-import net.dean.jraw.models.SubredditSort;
-import net.dean.jraw.models.TimePeriod;
-import net.dean.jraw.pagination.DefaultPaginator;
-import net.dean.jraw.pagination.Paginator;
-import net.dean.jraw.references.SubredditReference;
+import net.dean.jraw.models.Submission; 
+import net.dean.jraw.pagination.DefaultPaginator; 
 import reactor.core.publisher.Sinks.Many;
 import reactor.core.scheduler.Scheduler;
 
@@ -28,7 +24,7 @@ import reactor.core.scheduler.Scheduler;
 public class RedditDataFactory {
 
 	@Autowired
-	RedditClient redditClient;
+	RedditAPIManager redditAPI;
 
 	@Autowired
 	@Qualifier("ioScheduler")
@@ -42,7 +38,7 @@ public class RedditDataFactory {
 	@PostConstruct
 	void setUp() {
 
-		messageSink.asFlux().publishOn(ioScheduler).subscribe(d -> {
+		messageSink.asFlux().publishOn(ioScheduler).filter(f -> (redditAPI.isConnected2Internet())).subscribe(d -> {
 
 			String redditTitle = d.getValue();
 
@@ -52,7 +48,7 @@ public class RedditDataFactory {
 			}
 
 			// invoke web service to grab the subreddit
-			DefaultPaginator<Submission> page = getRedditPostBySubredditTitle(redditTitle);
+			DefaultPaginator<Submission> page = redditAPI.getPaginator(redditTitle);
 
 			Listing<Submission> posts = page.next();
 
@@ -75,16 +71,6 @@ public class RedditDataFactory {
 			}
 		});
 
-	}
-
-	DefaultPaginator<Submission> getRedditPostBySubredditTitle(String subName) {
-
-		SubredditReference subRed = redditClient.subreddit(subName);
-
-		DefaultPaginator<Submission> paginator = subRed.posts().limit(Paginator.RECOMMENDED_MAX_LIMIT)
-				.sorting(SubredditSort.TOP).timePeriod(TimePeriod.MONTH).build();
-
-		return paginator;
 	}
 
 	public List<News> getPosts(String redditTitle) {

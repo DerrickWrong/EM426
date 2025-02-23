@@ -21,14 +21,10 @@ public class ReactorStreamConfig {
 
 	@Bean
 	Sinks.Many<Pair<DemandTypeEnum, Demand>> demandSink() {
-		Many<Pair<DemandTypeEnum, Demand>> sink = Sinks.unsafe().many().multicast().directBestEffort();
+		Many<Pair<DemandTypeEnum, Demand>> sink = Sinks.many().multicast().directBestEffort();
 		return sink;
 	}
-
-	@Bean
-	Sinks.Many<String> redditPostSink() {
-		Many<String> sink = Sinks.unsafe().many().multicast().directBestEffort();
-		return sink;
-	}
+	
+	
 
 }

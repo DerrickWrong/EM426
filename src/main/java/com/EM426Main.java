@@ -27,9 +27,9 @@ public class EM426Main extends Application {
 	public void start(Stage stage) throws IOException {
 
 		ConfigurableApplicationContext springContext = SpringApplication.run(EM426Main.class);
-		SpringFXLoader.getInstance().setSpringContext(springContext, stage);
+		SpringFXManager.getInstance().setSpringContext(springContext, stage);
 
-		FXMLLoader loader = SpringFXLoader.getInstance().loadFxml("views/MainDashboard.fxml");
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/MainDashboard.fxml");
 		
 		stage.setTitle("EM426Main");
 		stage.setScene(new Scene(loader.load()));
@@ -41,7 +41,7 @@ public class EM426Main extends Application {
 
 	@Override
 	public void stop() {
-		SpringFXLoader.getInstance().cleanUp();
+		SpringFXManager.getInstance().cleanUp();
 	}
 
 }

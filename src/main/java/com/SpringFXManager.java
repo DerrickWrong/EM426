@@ -6,19 +6,19 @@ import jakarta.annotation.PreDestroy;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
 
-public class SpringFXLoader {
+public class SpringFXManager {
 
-	private static SpringFXLoader _instance;
+	private static SpringFXManager _instance;
 
 	private ConfigurableApplicationContext springContext;
 	private Stage mainFxStage;
 
-	private SpringFXLoader() {
+	private SpringFXManager() {
 	}
 
-	public static SpringFXLoader getInstance() {
+	public static SpringFXManager getInstance() {
 		if (_instance == null) {
-			_instance = new SpringFXLoader();
+			_instance = new SpringFXManager();
 		}
 		return _instance;
 	}
@@ -40,6 +40,11 @@ public class SpringFXLoader {
 	public Stage getMainStage() {
 
 		return mainFxStage;
+	}
+
+	public ConfigurableApplicationContext getSpringContext() {
+
+		return this.springContext;
 	}
 
 	@PreDestroy

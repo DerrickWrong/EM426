@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.SpringFXLoader;
+import com.SpringFXManager;
+import com.MIT.agents.Agent;
+import com.models.SimulatedTradingMarket;
 import com.models.interfaces.DemandTypeEnum;
 
 import jakarta.annotation.PostConstruct;
@@ -38,12 +40,15 @@ public class MainDashboardController {
 	@Qualifier("fxScheduler")
 	private Scheduler fxScheduler;
 
+	@Autowired
+	SimulatedTradingMarket market;
+
 	@PostConstruct
 	void setUp() {
 
 		this.messageSink.asFlux().publishOn(fxScheduler).subscribe(d -> {
 
-			FXMLLoader loader = SpringFXLoader.getInstance().loadFxml("views/NewsSymbol.fxml");
+			FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/NewsSymbol.fxml");
 			try {
 				stockHbox.getChildren().add(loader.load());
 				NewsSymbolController nsc = loader.getController();
@@ -61,35 +66,50 @@ public class MainDashboardController {
 	@FXML
 	private void addStockClicked() throws IOException {
 		System.out.println("add stock button clickeed");
-
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("../views/StockSymbol.fxml"));
-		Pane p = (Pane) loader.load();
-		stockHbox.getChildren().add(p);
-
-		FXMLLoader loader2 = new FXMLLoader(getClass().getResource("../views/NewsSymbol.fxml"));
-		Pane p2 = (Pane) loader2.load();
-		stockHbox.getChildren().add(p2);
-
 	}
 
 	@FXML
 	private void addPlayerClicked() throws IOException {
 		System.out.println("add player button clickeed");
+	}
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("../views/AgentAvatar.fxml"));
+	private void makePlayer(String name) throws IOException {
+
+		Agent modelAgent = this.market.createOrFindAgent(name);
+
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/AgentAvatar.fxml");
 		Pane p = (Pane) loader.load();
+
+		PlayerController pc = loader.getController();
+		pc.setAgent(modelAgent);
+
+		// add to main dash board
 		playerHBox.getChildren().add(p);
 
 	}
 
-	// invoke at Main after everything has been setup
-	public void preSeedEnvironment() {
+	private void makeStock(String name) throws IOException {
 
-		// seed the board
-		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "wallstreetbets"));
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/StockSymbol.fxml");
+		Pane p = (Pane) loader.load();
+
 		
+		
+		this.stockHbox.getChildren().add(p);
+
+	}
+
+	// invoke at Main after everything has been setup
+	public void preSeedEnvironment() throws IOException {
+
+		// seed the board with news
+		//this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "wallstreetbets"));
+		//this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "stocks"));
+
 		// seed the players
-		
+		this.makePlayer("LoneShark");
+		this.makePlayer("2Faces");
+		this.makePlayer("3rd Wheel");
 
 	}
 

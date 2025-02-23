@@ -8,7 +8,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.SpringFXLoader;
+import com.SpringFXManager;
 import com.models.demands.News;
 import com.models.demands.RedditDataFactory;
 import com.models.interfaces.DemandTypeEnum;
@@ -42,7 +42,7 @@ public class NewsSymbolController {
 	@FXML
 	void checkNewsClicked() throws IOException {
 
-		FXMLLoader loader = SpringFXLoader.getInstance().loadFxml("views/NewsDashboard.fxml");
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/NewsDashboard.fxml");
 		Pane p2 = (Pane) loader.load();
 
 		NewsDashboardController ndc = loader.getController();
