@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
 import com.MIT.agents.Agent;
+import com.configurations.RedditAPIManager;
 import com.models.SimulatedTradingMarket;
+import com.models.demands.Stock;
 import com.models.interfaces.DemandTypeEnum;
 
 import jakarta.annotation.PostConstruct;
@@ -41,12 +43,15 @@ public class MainDashboardController {
 	private Scheduler fxScheduler;
 
 	@Autowired
+	RedditAPIManager redditAPI;
+
+	@Autowired
 	SimulatedTradingMarket market;
 
 	@PostConstruct
 	void setUp() {
 
-		this.messageSink.asFlux().publishOn(fxScheduler).subscribe(d -> {
+		this.messageSink.asFlux().filter(f -> redditAPI.isConnected2Internet()).publishOn(fxScheduler).subscribe(d -> {
 
 			FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/NewsSymbol.fxml");
 			try {
@@ -93,8 +98,14 @@ public class MainDashboardController {
 		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/StockSymbol.fxml");
 		Pane p = (Pane) loader.load();
 
-		
-		
+		// TODO need to fix with API
+		Stock s = new Stock(name);
+		s.setCurrVolume(1000);
+		s.setCurrentPrice(100.12f);
+
+		StockSymbolController ssc = loader.getController();
+		ssc.setStock(s);
+
 		this.stockHbox.getChildren().add(p);
 
 	}
@@ -103,8 +114,10 @@ public class MainDashboardController {
 	public void preSeedEnvironment() throws IOException {
 
 		// seed the board with news
-		//this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "wallstreetbets"));
-		//this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "stocks"));
+		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "wallstreetbets"));
+		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "stocks"));
+
+		this.makeStock("GOOG");
 
 		// seed the players
 		this.makePlayer("LoneShark");
