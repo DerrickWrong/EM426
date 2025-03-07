@@ -4,6 +4,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import jakarta.annotation.PreDestroy;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class SpringFXManager {
@@ -46,7 +47,7 @@ public class SpringFXManager {
 
 		return this.springContext;
 	}
-
+  
 	@PreDestroy
 	public void cleanUp() {
 		this.springContext.close();

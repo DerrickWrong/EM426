@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.RetailInvestorController">
+   <top>
+      <HBox alignment="CENTER" prefHeight="53.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Retail Investors - (Agent)">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+   </top>
+   <left>
+      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Agent Type">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="Population per K">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="Balance ($k)">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="Gain Hold (%)">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="Loss Hold (%)">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="Buy Dip (Y/N)">
+               <VBox.margin>
+                  <Insets top="15.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="Bi-weekly ($)">
+               <VBox.margin>
+                  <Insets top="15.0" />
+               </VBox.margin>
+            </Label>
+            <Label text="CoolDown (Days)">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+            </Label>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <VBox prefHeight="260.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_LEFT" prefHeight="39.0" prefWidth="500.0">
+               <children>
+                  <RadioButton fx:id="dhRadio" mnemonicParsing="false" text="DiamondHands">
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                  </RadioButton>
+                  <RadioButton fx:id="phRadio" mnemonicParsing="false" text="PaperHands">
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                  </RadioButton>
+                  <RadioButton fx:id="BHradio" mnemonicParsing="false" text="BagHolders" />
+               </children>
+            </HBox>
+            <TextField fx:id="popPerK">
+               <VBox.margin>
+                  <Insets top="5.0" />
+               </VBox.margin>
+            </TextField>
+            <TextField fx:id="balancePerK">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </TextField>
+            <TextField fx:id="gainPercent">
+               <VBox.margin>
+                  <Insets top="15.0" />
+               </VBox.margin>
+            </TextField>
+            <TextField fx:id="lossPercent">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </TextField>
+            <CheckBox fx:id="reinvestCheck" mnemonicParsing="false" text="Re-Investing?">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </CheckBox>
+            <TextField fx:id="biweeklyBox">
+               <VBox.margin>
+                  <Insets top="15.0" />
+               </VBox.margin>
+            </TextField>
+            <ComboBox fx:id="cooldownDropBox" prefWidth="150.0">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </ComboBox>
+         </children>
+      </VBox>
+   </center>
+   <bottom>
+      <HBox alignment="CENTER_RIGHT" prefHeight="48.0" prefWidth="600.0" BorderPane.alignment="CENTER_RIGHT">
+         <children>
+            <Button mnemonicParsing="false" onAction="#saveBtn" text="Save">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#cancelBtn" text="Cancel">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin>
+            </Button>
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>

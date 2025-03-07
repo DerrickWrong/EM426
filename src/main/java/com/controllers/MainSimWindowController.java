@@ -39,7 +39,6 @@ public class MainSimWindowController {
 
 	@FXML
 	public void supplyClicked() throws IOException {
-		System.out.println("'Supply clicked");
 
 		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/MarketLenderWindow.fxml");
 		BorderPane bp = loader.load();
@@ -50,13 +49,24 @@ public class MainSimWindowController {
 	}
 
 	@FXML
-	public void demandClicked() {
-		System.out.println("'Demand clicked");
+	public void demandClicked() throws IOException {
+
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/HedgeFundWindow.fxml");
+		BorderPane bp = loader.load();
+		Stage newStage = new Stage();
+		newStage.setTitle("Configure Demand");
+		newStage.setScene(new Scene(bp));
+		newStage.show();
 	}
 
 	@FXML
-	public void agentClicked() {
-		System.out.println("'Agent clicked");
+	public void agentClicked() throws IOException {
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/RetailInvestorsWindow.fxml");
+		BorderPane bp = loader.load();
+		Stage newStage = new Stage();
+		newStage.setTitle("Configure Agent");
+		newStage.setScene(new Scene(bp));
+		newStage.show();
 	}
 
 	@FXML
