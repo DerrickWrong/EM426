@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.MIT.api.AgentAPI;
 import com.MIT.api.AgentMode;
 import com.MIT.api.DemandAPI;
+import com.models.SimulatedTradingMarket;
 import com.models.interfaces.DemandTypeEnum;
 
 import jakarta.annotation.PostConstruct;
@@ -27,6 +28,37 @@ public class Agent implements AgentAPI {
 	private String name;
 	private int score;
 
+	@Autowired
+	Sinks.Many<Pair<DemandTypeEnum, Demand>> demandSink;
+	
+	@Autowired
+	SimulatedTradingMarket market;
+
+	@PostConstruct
+	void setUp() {
+
+		demandSink.asFlux().subscribe(c -> {
+
+			// TODO - Listen to demands / Observe() / bascially training the Neural Nets
+			
+		});
+		
+		this.market.listen().subscribe(i->{
+			
+			// invoke select()??? TODO Need to add some sort of policy
+			
+			this.act();
+			
+		});
+		
+	}
+	
+	public void act() {
+		
+		// guess number 
+	}
+	
+	
 	public Agent() {
 	}
 
@@ -44,22 +76,6 @@ public class Agent implements AgentAPI {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@Autowired
-	Sinks.Many<Pair<DemandTypeEnum, Demand>> demandSink;
-
-	@PostConstruct
-	void setUp() {
-
-		demandSink.asFlux().subscribe(c -> {
-
-			// TODO - Add a filter to ignore self actions
-
-			// do things here
-
-		});
-
 	}
 
 	@Override

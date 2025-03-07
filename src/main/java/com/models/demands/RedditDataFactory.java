@@ -13,10 +13,10 @@ import com.configurations.RedditAPIManager;
 import com.models.interfaces.DemandTypeEnum;
 
 import jakarta.annotation.PostConstruct;
-import javafx.util.Pair; 
+import javafx.util.Pair;
 import net.dean.jraw.models.Listing;
-import net.dean.jraw.models.Submission; 
-import net.dean.jraw.pagination.DefaultPaginator; 
+import net.dean.jraw.models.Submission;
+import net.dean.jraw.pagination.DefaultPaginator;
 import reactor.core.publisher.Sinks.Many;
 import reactor.core.scheduler.Scheduler;
 
@@ -38,7 +38,7 @@ public class RedditDataFactory {
 	@PostConstruct
 	void setUp() {
 
-		messageSink.asFlux().publishOn(ioScheduler).filter(f -> (redditAPI.isConnected2Internet())).subscribe(d -> {
+		messageSink.asFlux().publishOn(ioScheduler).subscribe(d -> {
 
 			String redditTitle = d.getValue();
 

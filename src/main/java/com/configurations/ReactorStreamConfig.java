@@ -7,6 +7,7 @@ import com.MIT.agents.Demand;
 import com.models.interfaces.DemandTypeEnum;
 
 import javafx.util.Pair;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.core.publisher.Sinks.Many;
 
@@ -24,7 +25,16 @@ public class ReactorStreamConfig {
 		Many<Pair<DemandTypeEnum, Demand>> sink = Sinks.many().multicast().directBestEffort();
 		return sink;
 	}
-	
-	
+
+	@Bean
+	Sinks.Many<Pair<String, Float>> guessSink() {
+		return Sinks.many().multicast().directBestEffort();
+	}
+
+	@Bean
+	Flux<Pair<String, Float>> guessStream() {
+
+		return this.guessSink().asFlux();
+	}
 
 }

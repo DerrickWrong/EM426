@@ -29,14 +29,11 @@ public class EM426Main extends Application {
 		ConfigurableApplicationContext springContext = SpringApplication.run(EM426Main.class);
 		SpringFXManager.getInstance().setSpringContext(springContext, stage);
 
-		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/MainDashboard.fxml");
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/MainSimulationWindow.fxml");
 		
 		stage.setTitle("EM426Main");
 		stage.setScene(new Scene(loader.load()));
 		stage.show();
-		
-		MainDashboardController mdc = loader.getController();
-		mdc.preSeedEnvironment();
 	}
 
 	@Override

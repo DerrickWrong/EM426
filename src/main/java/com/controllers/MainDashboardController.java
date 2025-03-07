@@ -27,10 +27,10 @@ import reactor.core.scheduler.Scheduler;
 public class MainDashboardController {
 
 	@FXML
-	private Label dataLable;
+	private Label turnLabel;
 
 	@FXML
-	private HBox stockHbox;
+	private HBox stockHBox;
 
 	@FXML
 	private HBox playerHBox;
@@ -51,11 +51,11 @@ public class MainDashboardController {
 	@PostConstruct
 	void setUp() {
 
-		this.messageSink.asFlux().filter(f -> redditAPI.isConnected2Internet()).publishOn(fxScheduler).subscribe(d -> {
+		this.messageSink.asFlux().publishOn(fxScheduler).subscribe(d -> {
 
 			FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/NewsSymbol.fxml");
 			try {
-				stockHbox.getChildren().add(loader.load());
+				this.stockHBox.getChildren().add(loader.load());
 				NewsSymbolController nsc = loader.getController();
 				nsc.setupController(d.getKey(), d.getValue());
 
@@ -66,11 +66,17 @@ public class MainDashboardController {
 
 		});
 
+		this.market.listen().publishOn(fxScheduler).subscribe(d -> {
+
+			this.turnLabel.setText(String.valueOf(d));
+
+		});
+
 	}
 
 	@FXML
-	private void addStockClicked() throws IOException {
-		System.out.println("add stock button clickeed");
+	private void nextTurnBtnClicked() throws IOException {
+		this.market.moveTurn();
 	}
 
 	@FXML
@@ -106,7 +112,7 @@ public class MainDashboardController {
 		StockSymbolController ssc = loader.getController();
 		ssc.setStock(s);
 
-		this.stockHbox.getChildren().add(p);
+		this.stockHBox.getChildren().add(p);
 
 	}
 
@@ -115,7 +121,7 @@ public class MainDashboardController {
 
 		// seed the board with news
 		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "wallstreetbets"));
-		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "stocks"));
+		this.messageSink.tryEmitNext(new Pair<>(DemandTypeEnum.NEWS, "Bogleheads"));
 
 		this.makeStock("GOOG");
 
