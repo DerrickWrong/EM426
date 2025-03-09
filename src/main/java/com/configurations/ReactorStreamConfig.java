@@ -33,7 +33,6 @@ public class ReactorStreamConfig {
 
 	@Bean
 	Flux<Pair<String, Float>> guessStream() {
-
 		return this.guessSink().asFlux();
 	}
 

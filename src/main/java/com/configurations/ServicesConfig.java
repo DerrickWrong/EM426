@@ -26,6 +26,7 @@ public class ServicesConfig {
 	@Value("${reddit.tokenName}")
 	private String tokenName;
 	 
+	/*
 	@Bean
 	RedditAPIManager connectReddit() {
 		
@@ -50,5 +51,5 @@ public class ServicesConfig {
 		
 		return new RedditAPIManager(redditClient);
 	} 
-	
+	*/
 }

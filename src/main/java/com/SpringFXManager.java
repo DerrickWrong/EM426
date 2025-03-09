@@ -13,6 +13,7 @@ public class SpringFXManager {
 
 	private ConfigurableApplicationContext springContext;
 	private Stage mainFxStage;
+	private final Stage subStage = new Stage();
 
 	private SpringFXManager() {
 	}
@@ -43,13 +44,19 @@ public class SpringFXManager {
 		return mainFxStage;
 	}
 
+	public Stage getSubStage() {
+		return this.subStage;
+	}
+
 	public ConfigurableApplicationContext getSpringContext() {
 
 		return this.springContext;
 	}
-  
+
 	@PreDestroy
 	public void cleanUp() {
+		this.subStage.close();
+		this.mainFxStage.close();
 		this.springContext.close();
 	}
 

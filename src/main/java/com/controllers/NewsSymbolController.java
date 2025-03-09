@@ -9,8 +9,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
-import com.models.demands.News;
-import com.models.demands.RedditDataFactory;
+import com.models.demands.News; 
 import com.models.interfaces.DemandTypeEnum;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,10 +28,7 @@ public class NewsSymbolController {
 
 	@FXML
 	Label newsSource;
-
-	@Autowired
-	RedditDataFactory reddit;
-
+  
 	public void setupController(DemandTypeEnum demandEnum, String sourceText) {
 
 		demandLabel.setText(demandEnum.name());
@@ -41,20 +37,8 @@ public class NewsSymbolController {
 
 	@FXML
 	void checkNewsClicked() throws IOException {
-
-		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/NewsDashboard.fxml");
-		Pane p2 = (Pane) loader.load();
-
-		NewsDashboardController ndc = loader.getController();
-		List<News> newsPosts = reddit.getPosts(newsSource.getText());
-		ndc.renderData(newsPosts);
-
-		Stage s = new Stage();
-		s.setTitle(newsSource.getText());
-		s.initModality(Modality.WINDOW_MODAL);
-		s.setScene(new Scene(p2));
-		s.show();
-
+ 
+ 
 	}
 
 }

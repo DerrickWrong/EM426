@@ -41,9 +41,7 @@ public class MainDashboardController {
 	@Autowired
 	@Qualifier("fxScheduler")
 	private Scheduler fxScheduler;
-
-	@Autowired
-	RedditAPIManager redditAPI;
+ 
 
 	@Autowired
 	SimulatedTradingMarket market;

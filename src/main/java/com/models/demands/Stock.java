@@ -5,6 +5,11 @@ import com.MIT.agents.Demand;
 public class Stock extends Demand{
 	
 	private float currentPrice;
+	private int currVolume;
+	private float shortInterestRatio; 
+	private final String symbol; 
+	
+	
 	public float getCurrentPrice() {
 		return currentPrice;
 	}
@@ -29,12 +34,9 @@ public class Stock extends Demand{
 		this.shortInterestRatio = shortInterestRatio;
 	}
 
-	private int currVolume;
-	private float shortInterestRatio;
-
-	// call and put options
 	
-	private final String symbol;
+
+	
 	
 	public String getSymbol() {
 		return symbol;

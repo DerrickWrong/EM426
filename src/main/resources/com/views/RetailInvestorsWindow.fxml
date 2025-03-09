@@ -7,13 +7,15 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.RetailInvestorController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="406.0" prefWidth="620.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.RetailInvestorController">
    <top>
       <HBox alignment="CENTER" prefHeight="53.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
@@ -33,7 +35,7 @@
                   <Insets top="10.0" />
                </VBox.margin>
             </Label>
-            <Label text="Population per K">
+            <Label text="Number (per K)">
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin>
@@ -72,60 +74,156 @@
       </VBox>
    </left>
    <center>
-      <VBox prefHeight="260.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+      <HBox prefHeight="302.0" prefWidth="594.0" BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="39.0" prefWidth="500.0">
+            <VBox prefHeight="299.0" prefWidth="355.0">
                <children>
-                  <RadioButton fx:id="dhRadio" mnemonicParsing="false" text="DiamondHands">
-                     <HBox.margin>
-                        <Insets right="20.0" />
-                     </HBox.margin>
-                  </RadioButton>
-                  <RadioButton fx:id="phRadio" mnemonicParsing="false" text="PaperHands">
-                     <HBox.margin>
-                        <Insets right="20.0" />
-                     </HBox.margin>
-                  </RadioButton>
-                  <RadioButton fx:id="BHradio" mnemonicParsing="false" text="BagHolders" />
+                  <HBox alignment="CENTER_LEFT" prefHeight="39.0" prefWidth="500.0">
+                     <children>
+                        <RadioButton fx:id="dhRadio" mnemonicParsing="false" text="DiamondHands">
+                           <HBox.margin>
+                              <Insets right="20.0" />
+                           </HBox.margin>
+                        </RadioButton>
+                        <RadioButton fx:id="phRadio" mnemonicParsing="false" text="PaperHands">
+                           <HBox.margin>
+                              <Insets right="20.0" />
+                           </HBox.margin>
+                        </RadioButton>
+                        <RadioButton fx:id="BHradio" mnemonicParsing="false" text="BagHolders" />
+                     </children>
+                  </HBox>
+                  <TextField fx:id="popPerK">
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <TextField fx:id="balancePerK">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <TextField fx:id="gainPercent">
+                     <VBox.margin>
+                        <Insets top="15.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <TextField fx:id="lossPercent">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <CheckBox fx:id="reinvestCheck" mnemonicParsing="false" text="Re-Investing?">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <TextField fx:id="biweeklyBox">
+                     <VBox.margin>
+                        <Insets top="15.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <ComboBox fx:id="cooldownDropBox" prefWidth="150.0">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </ComboBox>
                </children>
-            </HBox>
-            <TextField fx:id="popPerK">
-               <VBox.margin>
-                  <Insets top="5.0" />
-               </VBox.margin>
-            </TextField>
-            <TextField fx:id="balancePerK">
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-            </TextField>
-            <TextField fx:id="gainPercent">
-               <VBox.margin>
-                  <Insets top="15.0" />
-               </VBox.margin>
-            </TextField>
-            <TextField fx:id="lossPercent">
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-            </TextField>
-            <CheckBox fx:id="reinvestCheck" mnemonicParsing="false" text="Re-Investing?">
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-            </CheckBox>
-            <TextField fx:id="biweeklyBox">
-               <VBox.margin>
-                  <Insets top="15.0" />
-               </VBox.margin>
-            </TextField>
-            <ComboBox fx:id="cooldownDropBox" prefWidth="150.0">
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-            </ComboBox>
+            </VBox>
+            <VBox prefHeight="302.0" prefWidth="209.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0">
+                     <children>
+                        <ImageView fitHeight="65.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                           <image>
+                              <Image url="@../images/diamondHand.jpg" />
+                           </image>
+                        </ImageView>
+                        <Label text="Diamond: ">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label text="#">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0">
+                     <children>
+                        <ImageView fitHeight="65.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                           <image>
+                              <Image url="@../images/paperHand.jpg" />
+                           </image>
+                        </ImageView>
+                        <Label text="PaperHands">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label text="#">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0">
+                     <children>
+                        <ImageView fitHeight="65.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                           <image>
+                              <Image url="@../images/bagHolder.jpg" />
+                           </image>
+                        </ImageView>
+                        <Label text="Bagholders:">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label text="#">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0">
+                     <children>
+                        <ImageView fitHeight="58.0" fitWidth="98.0" pickOnBounds="true" preserveRatio="true">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                           <image>
+                              <Image url="@../images/apes%20army.jpg" />
+                           </image>
+                        </ImageView>
+                        <Label text="Total: ">
+                           <HBox.margin>
+                              <Insets left="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label text="K">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
          </children>
-      </VBox>
+      </HBox>
    </center>
    <bottom>
       <HBox alignment="CENTER_RIGHT" prefHeight="48.0" prefWidth="600.0" BorderPane.alignment="CENTER_RIGHT">

@@ -30,7 +30,7 @@ public class Agent implements AgentAPI {
 
 	@Autowired
 	Sinks.Many<Pair<DemandTypeEnum, Demand>> demandSink;
-	
+
 	@Autowired
 	SimulatedTradingMarket market;
 
@@ -40,25 +40,30 @@ public class Agent implements AgentAPI {
 		demandSink.asFlux().subscribe(c -> {
 
 			// TODO - Listen to demands / Observe() / bascially training the Neural Nets
-			
+
 		});
-		
-		this.market.listen().subscribe(i->{
-			
+
+		this.market.listen().subscribe(i -> {
+
 			// invoke select()??? TODO Need to add some sort of policy
-			
+
 			this.act();
-			
+
 		});
-		
+
 	}
-	
-	public void act() {
-		
-		// guess number 
+
+	protected void act() {
+
+		// guess number
 	}
-	
-	
+
+	protected void select() {
+	}
+
+	protected void observe() {
+	}
+
 	public Agent() {
 	}
 
