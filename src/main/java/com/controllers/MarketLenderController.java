@@ -6,24 +6,16 @@ import org.springframework.stereotype.Component;
 import com.SpringFXManager;
 import com.models.demands.MarketAndLenders;
 
-import jakarta.annotation.PostConstruct;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
+import jakarta.annotation.PostConstruct; 
+import javafx.fxml.FXML; 
 import javafx.scene.control.TextField;
 
 @Component
 public class MarketLenderController {
 
 	@FXML
-	TextField symbolName, stockPrice, volumeBox, insiderBox, institutionBox, marginBox;
-
-	@FXML
-	Label floatingLabel;
-
+	TextField symbolName, stockPrice, volumeBox, insiderBox, institutionBox, floatingBox, marginBox;
+ 
 	@Autowired
 	MarketAndLenders marketLender;
 
@@ -36,7 +28,7 @@ public class MarketLenderController {
 		this.volumeBox.setText(String.valueOf(marketLender.getVolume()));
 		this.insiderBox.setText(String.valueOf(marketLender.getInsiderShare()));
 		this.institutionBox.setText(String.valueOf(marketLender.getInstitutionShare()));
-		this.floatingLabel.setText(String.valueOf(marketLender.getFloatingShare()));
+		this.floatingBox.setText(String.valueOf(marketLender.getFloatingShare()));
 		this.marginBox.setText(String.valueOf(marketLender.getMarginCallPercent()));
 	}
 
@@ -49,7 +41,7 @@ public class MarketLenderController {
 	public void saveBtnClicked() {
 
 		this.marketLender.setStockName(symbolName.getText());
-		this.marketLender.setInitalPrice(Double.valueOf(stockPrice.getText()));
+		this.marketLender.setPrice(Double.valueOf(stockPrice.getText()));
 
 		double insiderShares = Double.valueOf(this.insiderBox.getText());
 		double institutionShare = Double.valueOf(this.institutionBox.getText());
@@ -59,6 +51,7 @@ public class MarketLenderController {
 		this.marketLender.updateChart(insiderShares, institutionShare, floatingShares);
 		this.marketLender.setMarginCallPercent(Double.valueOf(marginBox.getText()));
 
+		SpringFXManager.getInstance().getSubStage().close();
 	}
 
 	@FXML

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="403.0" prefWidth="525.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.MarketLenderController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="376.0" prefWidth="447.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.MarketLenderController">
    <left>
       <VBox alignment="TOP_CENTER" prefHeight="356.0" prefWidth="112.0">
          <children>
@@ -117,11 +117,11 @@
                         <Insets top="15.0" />
                      </VBox.margin>
                   </TextField>
-                  <Label fx:id="floatingLabel" text="Label">
+                  <TextField fx:id="floatingBox" editable="false" maxWidth="100.0">
                      <VBox.margin>
                         <Insets top="15.0" />
                      </VBox.margin>
-                  </Label>
+                  </TextField>
                   <TextField fx:id="marginBox" maxWidth="100.0">
                      <VBox.margin>
                         <Insets top="15.0" />

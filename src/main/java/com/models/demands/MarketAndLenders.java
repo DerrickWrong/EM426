@@ -1,28 +1,19 @@
 package com.models.demands;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
-import javafx.util.Pair;
-import reactor.core.publisher.Sinks;
-import reactor.core.publisher.Sinks.Many;
 
 @Component
 public class MarketAndLenders {
 
 	// TODO - Need to fix this to support multi-stock
-	private String stockName;
-	private double initalPrice = 0.0;
-	private double volume = 0.0;
+	private String stockName = "GME";
+	private double initalPrice = 22.95;
+	private double volume = 446.51 * 1000000;
 
 	private double marginCallPercent; // at what % rise will trigger margin call
 
@@ -32,14 +23,9 @@ public class MarketAndLenders {
 		return stockDistribution;
 	}
 
-	private PieChart.Data insider = new PieChart.Data("Insider", 0);
-	private PieChart.Data institution = new PieChart.Data("Institute", 0);
-	private PieChart.Data floating = new PieChart.Data("Float", 0);
-
-	// TODO - Remove Stream Make a broker class and tap into the broker
-	Many<Pair<UUID, StockOrder>> tradingStream = Sinks.many().multicast().directBestEffort();
-	private final List<Stock> stockBank = new ArrayList<>();
-	private final Queue<StockOrder> tradingOrder = new LinkedList<>();
+	private PieChart.Data insider = new PieChart.Data("Insider", 8.49);
+	private PieChart.Data institution = new PieChart.Data("Institute", 32.87);
+	private PieChart.Data floating = new PieChart.Data("Float", 58.64);
 
 	@PostConstruct
 	public void init() {
@@ -86,7 +72,7 @@ public class MarketAndLenders {
 		return initalPrice;
 	}
 
-	public void setInitalPrice(double initalPrice) {
+	public void setPrice(double initalPrice) {
 		this.initalPrice = initalPrice;
 	}
 

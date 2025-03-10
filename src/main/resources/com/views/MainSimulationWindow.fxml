@@ -111,7 +111,7 @@
                   <Insets right="10.0" />
                </HBox.margin>
             </Slider>
-            <Label text="Day: " />
+            <Label text="Epoch:" />
             <Label fx:id="dayLabel" text="XXX">
                <padding>
                   <Insets right="10.0" />
@@ -120,12 +120,7 @@
                   <Insets right="20.0" />
                </HBox.margin>
             </Label>
-            <Button mnemonicParsing="false" text="Step">
-               <HBox.margin>
-                  <Insets right="10.0" />
-               </HBox.margin>
-            </Button>
-            <Button mnemonicParsing="false" text="Simulate">
+            <Button fx:id="simulatedBtn" mnemonicParsing="false" onAction="#onSimulateClicked" text="Simulate">
                <HBox.margin>
                   <Insets />
                </HBox.margin>
@@ -136,20 +131,13 @@
    <center>
       <VBox alignment="TOP_CENTER" prefHeight="490.0" prefWidth="521.0" BorderPane.alignment="CENTER">
          <children>
-            <Label text="Simulation" />
-            <StackedAreaChart fx:id="hedgieVsApesPlot" prefHeight="400.0" prefWidth="581.0" title="Hedgies Vs Retails">
+            <StackedAreaChart fx:id="hedgieVsApesPlot" title="Apes vs Hedgies">
               <xAxis>
-                <NumberAxis side="BOTTOM" />
+                <NumberAxis label="Epoch" side="BOTTOM" />
               </xAxis>
               <yAxis>
-                <NumberAxis side="LEFT" />
+                <NumberAxis label="Share Volume (Mil)" side="LEFT" />
               </yAxis>
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-               <padding>
-                  <Insets right="10.0" />
-               </padding>
             </StackedAreaChart>
          </children>
       </VBox>
