@@ -54,7 +54,7 @@ public class HedgeFund extends Agent implements AgentActable {
 
 		}).subscribe(processedOrder -> {
 			
-			double cost = processedOrder.getBidPrice() * processedOrder.getNumSharePer1000() * 1000;
+			double cost = processedOrder.getBidPrice() * processedOrder.getNumSharePerMil() * 1000;
 			
 			// update the balances
 			this.currentBalance = (this.balanaceInMil * 1000);

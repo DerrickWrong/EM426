@@ -10,17 +10,17 @@ public class StockOrder {
 
 	private final double bidPrice;
 	private boolean OrderProcessed = false; // flag toggled by Stock Broker class
-	private final double numSharePer1000;
+	private final double numSharePerMil;
 	private final UUID orginator;
 	private final type orderType;
 	private final long timeRequested;
 
-	public StockOrder(UUID originator, type orderType, double bidPrice, double volumePer1000, long simTimeRequested) {
+	public StockOrder(UUID originator, type orderType, double bidPrice, double volPerMil, long simTimeRequested) {
 
 		this.orginator = originator;
 		this.orderType = orderType;
 		this.bidPrice = bidPrice;
-		this.numSharePer1000 = volumePer1000;
+		this.numSharePerMil = volPerMil;
 		this.timeRequested = simTimeRequested;
 	}
 
@@ -40,8 +40,8 @@ public class StockOrder {
 		return OrderProcessed;
 	}
 
-	public double getNumSharePer1000() {
-		return numSharePer1000;
+	public double getNumSharePerMil() {
+		return numSharePerMil;
 	}
 
 	public UUID getOrginator() {

@@ -8,14 +8,15 @@ import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
 import com.models.StockBroker;
+import com.models.demands.HedgeFund;
 import com.models.demands.MarketAndLenders;
 
 import jakarta.annotation.PostConstruct;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
@@ -34,19 +35,25 @@ public class MainSimWindowController {
 	Label dayLabel;
 
 	@FXML
-	StackedAreaChart<Long, Double> hedgieVsApesPlot;
+	AreaChart hedgieVsApesPlot;
 
 	@FXML
 	PieChart pieChart;
+
+	@FXML
+	LineChart<Long, Double> stockPricePlot;
 
 	@FXML
 	Slider timelineSlider;
 
 	@Autowired
 	MarketAndLenders marketLender;
-	
+
 	@Autowired
 	StockBroker broker;
+
+	@Autowired
+	HedgeFund hedgie;
 
 	@FXML
 	Button simulatedBtn;
@@ -55,13 +62,11 @@ public class MainSimWindowController {
 	@Qualifier("fxScheduler")
 	Scheduler fxScheduler;
 
-	
-
 	boolean simulationStarted = false;
 
-	XYChart.Series<Long, Double> supplySeries = new XYChart.Series<>();
-	XYChart.Series<Long, Double> demandSeries = new XYChart.Series<>();
-	XYChart.Series<Long, Double> agentSeries = new XYChart.Series<>();
+	XYChart.Series supplySeries = new XYChart.Series();
+	XYChart.Series demandSeries = new XYChart.Series();
+	XYChart.Series agentSeries = new XYChart.Series();
 
 	@FXML
 	public void initialize() {
@@ -69,33 +74,31 @@ public class MainSimWindowController {
 		// setup pie chart
 		this.pieChart.setData(marketLender.getStockDistribution());
 		this.pieChart.setTitle("Share Distribution");
-		
-		supplySeries.setName("Market(Supply)"); 
+
+		supplySeries.setName("Market(Supply)");
 		demandSeries.setName("Hedgies(Demand)");
 		agentSeries.setName("Apes(Agents)");
-		
-		hedgieVsApesPlot.getData().addAll(supplySeries);
-		
+
+		this.hedgieVsApesPlot.getData().addAll(supplySeries, demandSeries);
 	}
 
 	@PostConstruct
 	public void init() {
 
-		//this.supplySeries.getData().add(new XYChart.Data<Integer, Double>(0, 10d));
-		// supplySeries.getData().add(new XYChart.Data<Integer, Double>(1, 10d));
-		// supplySeries.getData().add(new XYChart.Data<Integer, Double>(2, 9d));
-
 		// listen to the simulation
 		this.broker.listen2TradingClock().publishOn(fxScheduler).subscribe(tick -> {
 
-			this.dayLabel.setText(String.valueOf(tick));
+			String timestamp = String.valueOf(tick);
+			this.dayLabel.setText(timestamp);
 
-			double floatVol = this.marketLender.getFloatingShare() / 100 * this.marketLender.getVolume() / 1000000;
-			
-			
-			
+			double floatVol = (this.marketLender.getFloatingShare() / 100) * this.marketLender.getVolume() / 1E6;
+			double hedgedVol = (this.hedgie.getBorrow2Short() / 100) * (this.marketLender.getInstitutionShare() / 100)
+					* this.marketLender.getVolume() / 1E6;
+
 			// TODO Add all three (make sure they are symmetric)
-			this.supplySeries.getData().add(new Data<Long, Double>(tick, floatVol));
+			this.supplySeries.getData().add(new Data(timestamp, floatVol));
+
+			this.demandSeries.getData().add(new Data(timestamp, hedgedVol));
 
 			// System.out.println("Tick: " + tick + " float volume: " + floatVol);
 
@@ -147,7 +150,7 @@ public class MainSimWindowController {
 		this.broker.toggleBroker();
 
 		if (this.simulationStarted) {
-			this.simulatedBtn.setText("Stop");
+			this.simulatedBtn.setText("Pause");
 		} else {
 			this.simulatedBtn.setText("Simulate");
 		}

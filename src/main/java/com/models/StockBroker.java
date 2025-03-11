@@ -44,19 +44,15 @@ public class StockBroker {
 
 				// borrow from institutions
 				double ins_shares_mil = (this.marketBoard.getInstitutionShare() / 100) * (this.marketBoard.getVolume() / 1E6);
-				double borrowRatio = (order.getNumSharePer1000() / 1E6) / ins_shares_mil;
-
-				//double new_ins_sharesRatio = (ins_shares_mil - shares2BorrowInMil) * 1000000
-				//		/ this.marketBoard.getVolume();
-
-				// update float shares
-				double float_shares_mil = (this.marketBoard.getFloatingShare() / 100) * this.marketBoard.getVolume();
-				double new_float_shares_mil = order.getNumSharePer1000() + float_shares_mil;
-				double new_float_ratio = new_float_shares_mil / this.marketBoard.getVolume();
-
+				double borrowRatio = (order.getNumSharePerMil() / 1E6) / ins_shares_mil / 100;
+				
+				double newShortPercent = this.marketBoard.getInstitutionShare() * borrowRatio;
+				
+				double new_instu_percent = this.marketBoard.getInstitutionShare() - newShortPercent;
+				double new_float_percent = this.marketBoard.getFloatingShare() + newShortPercent;
+				
 				// update the volume
-				// this.marketBoard.updateChart(this.marketBoard.getInsiderShare(),
-				// new_ins_sharesRatio, new_float_ratio);
+				this.marketBoard.updateChart(this.marketBoard.getInsiderShare(),new_instu_percent, new_float_percent);
 
 				// update the price
 				this.marketBoard.setPrice(order.getBidPrice());
