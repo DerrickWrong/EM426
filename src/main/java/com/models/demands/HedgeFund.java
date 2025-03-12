@@ -3,6 +3,7 @@ package com.models.demands;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.MIT.agents.Agent;
@@ -10,6 +11,8 @@ import com.MIT.agents.AgentActable;
 import com.models.StockBroker;
 
 import jakarta.annotation.PostConstruct;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 @Component
 public class HedgeFund extends Agent implements AgentActable {
@@ -32,7 +35,12 @@ public class HedgeFund extends Agent implements AgentActable {
 	MarketAndLenders marketLender;
 
 	@Autowired
-	StockBroker broker;
+	@Qualifier("tradingClock")
+	Flux<Long> tradingClockFlux;
+
+	@Autowired
+	@Qualifier("stockOrderStream")
+	Sinks.Many<StockOrder> stockOrderStream;
 
 	AtomicLong dateTracker = new AtomicLong();
 
@@ -40,28 +48,13 @@ public class HedgeFund extends Agent implements AgentActable {
 	public void init() {
 
 		// listen to trading clock
-		this.broker.listen2TradingClock().subscribe(d -> {
+		tradingClockFlux.subscribe(d -> {
 
-			this.dateTracker.set(d); 
+			this.dateTracker.set(d);
 			this.select();
 			this.observe();
 			this.act();
 		});
-
-		this.broker.listen2ProcessedOrder().filter(d -> {
-
-			return d.getOrginator() == this.getId();
-
-		}).subscribe(processedOrder -> {
-			
-			double cost = processedOrder.getBidPrice() * processedOrder.getNumSharePerMil() * 1000;
-			
-			// update the balances
-			this.currentBalance = (this.balanaceInMil * 1000);
-			
-
-		});
-
 	}
 
 	@Override
@@ -76,12 +69,13 @@ public class HedgeFund extends Agent implements AgentActable {
 		if (this.currentState == State.IDLE) {
 
 			Double bidPrice = this.marketLender.getInitalPrice() * (100 - this.decay2Sell) / 100;
-			Double vol = (this.borrow2Short / 100) * this.marketLender.getInstitutionShare() * this.marketLender.getVolume();
+			Double vol = (this.borrow2Short / 100) * this.marketLender.getInstitutionShare()
+					* this.marketLender.getVolume();
 
 			StockOrder order = new StockOrder(this.getId(), StockOrder.type.SHORT, bidPrice, vol,
 					this.dateTracker.get());
 
-			this.broker.submitOrder(order);
+			stockOrderStream.tryEmitNext(order);
 
 			// set to next state
 			this.currentState = State.SELLNWAIT;

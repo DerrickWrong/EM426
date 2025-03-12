@@ -2,21 +2,16 @@
 package com.MIT.agents;
 
 import javafx.beans.property.*;
-import javafx.collections.*;
-import javafx.util.Pair;
-import reactor.core.publisher.Sinks;
+import javafx.collections.*; 
 
 import java.util.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
+ 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.MIT.api.AgentAPI;
 import com.MIT.api.AgentMode;
-import com.MIT.api.DemandAPI;
-import com.models.SimulatedTradingMarket;
-import com.models.interfaces.DemandTypeEnum;
+import com.MIT.api.DemandAPI;  
 
 import jakarta.annotation.PostConstruct;
 
@@ -27,30 +22,10 @@ public class Agent implements AgentAPI {
 	private UUID myID = UUID.randomUUID();
 	private String name;
 	private int score;
-
-	@Autowired
-	Sinks.Many<Pair<DemandTypeEnum, Demand>> demandSink;
-
-	@Autowired
-	SimulatedTradingMarket market;
-
+ 
+ 
 	@PostConstruct
 	void setUp() {
-
-		demandSink.asFlux().subscribe(c -> {
-
-			// TODO - Listen to demands / Observe() / bascially training the Neural Nets
-
-		});
-
-		this.market.listen().subscribe(i -> {
-
-			// invoke select()??? TODO Need to add some sort of policy
-
-			this.act();
-
-		});
-
 	}
 
 	protected void act() {

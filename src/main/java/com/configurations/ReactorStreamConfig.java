@@ -1,41 +1,54 @@
 package com.configurations;
 
 import java.time.Duration;
-
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+ 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Configuration; 
 
-import com.MIT.agents.Demand;
-import com.models.interfaces.DemandTypeEnum;
-
-import javafx.util.Pair;
+import com.models.demands.StockOrder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
-import reactor.core.publisher.Sinks.Many;
 
 @Configuration
 public class ReactorStreamConfig {
 
-	@Bean
-	Sinks.Many<Pair<DemandTypeEnum, String>> demandMessageSink() {
-		Many<Pair<DemandTypeEnum, String>> sink = Sinks.many().multicast().directBestEffort();
-		return sink;
-	}
+	// periodicity of the simulation clock
+	private Duration simPeriodicity = Duration.ofSeconds(1);
+
+	private final AtomicLong counter = new AtomicLong(0L);
+	AtomicBoolean tradeClockFlag = new AtomicBoolean(false);
 
 	@Bean
-	Sinks.Many<Pair<DemandTypeEnum, Demand>> demandSink() {
-		Many<Pair<DemandTypeEnum, Demand>> sink = Sinks.many().multicast().directBestEffort();
-		return sink;
+	Flux<Long> tradingClock() {
+
+		// create a trading clock from a cold flux
+		Sinks.Many<Long> clockSink = Sinks.many().multicast().directBestEffort();
+
+		// Trading Clock
+		Flux.interval(simPeriodicity).filter(f -> tradeClockFlag.get()).subscribe(tick -> {
+			clockSink.tryEmitNext(counter.getAndIncrement());
+		});
+
+		return clockSink.asFlux();
 	}
 
+	public void toggleSimulationClock() {
+		boolean flag = this.tradeClockFlag.get();
+		this.tradeClockFlag.set(!flag);
+	}
+
+	// This stream is used to pass stock order (requesting)
 	@Bean
-	Sinks.Many<Pair<String, Float>> guessSink() {
+	Sinks.Many<StockOrder> stockOrderStream() {
 		return Sinks.many().multicast().directBestEffort();
 	}
 
+	// This is the listening stream of the stock order
 	@Bean
-	Flux<Pair<String, Float>> guessStream() {
-		return this.guessSink().asFlux();
+	Flux<StockOrder> stockOrderFlux() {
+		return this.stockOrderStream().asFlux();
 	}
-	  
+
 }
