@@ -8,11 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
 import com.configurations.ReactorStreamConfig;
+import com.configurations.StockConfigurator; 
 import com.models.StockBroker;
 import com.models.demands.HedgeFund;
-import com.models.demands.MarketAndLenders;
-
-import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct; 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -25,8 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Flux; 
 import reactor.core.scheduler.Scheduler;
 
 @Component
@@ -36,16 +34,7 @@ public class MainSimWindowController {
 	Label dayLabel;
 
 	@FXML
-	AreaChart hedgieVsApesPlot;
-
-	@FXML
-	PieChart pieChart;
-
-	@FXML
 	LineChart<Long, Double> stockPricePlot;
-
-	@Autowired
-	MarketAndLenders marketLender;
 
 	@Autowired
 	StockBroker broker;
@@ -63,24 +52,34 @@ public class MainSimWindowController {
 	@Autowired
 	@Qualifier("tradingClock")
 	Flux<Long> tradingClockFlux;
-	 
+
 	@Autowired
 	ReactorStreamConfig reactorConfig;
 
 	boolean simulationStarted = false;
 
+	// XYChart
+	@FXML
+	AreaChart hedgieVsApesPlot;
 	XYChart.Series supplySeries = new XYChart.Series<>();
 	XYChart.Series demandSeries = new XYChart.Series<>();
 	XYChart.Series agentSeries = new XYChart.Series<>();
-
 	XYChart.Series<Long, Double> priceSeries = new XYChart.Series<>();
-
+	
+	// PieChart
+	@FXML
+	PieChart pieChart; 
+	
+	@Autowired
+	StockConfigurator stockConfig;
+	
 	@FXML
 	public void initialize() {
 
 		// setup pie chart
-		this.pieChart.setData(marketLender.getStockDistribution());
+		this.pieChart.setData(stockConfig.getStockHoldingDistribution());
 		this.pieChart.setTitle("Share Distribution");
+		
 
 		supplySeries.setName("Market(Supply)");
 		demandSeries.setName("Hedgies(Demand)");
@@ -101,14 +100,10 @@ public class MainSimWindowController {
 			String timestamp = String.valueOf(tick);
 			this.dayLabel.setText(timestamp);
 
-			double floatVol = (this.marketLender.getFloatingShare() / 100) * this.marketLender.getVolume() / 1E6;
-			double hedgedVol = (this.hedgie.getBorrow2Short() / 100) * (this.marketLender.getInstitutionShare() / 100)
-					* this.marketLender.getVolume() / 1E6;
-
 			// Update Volume Graph
-			this.supplySeries.getData().add(new Data(timestamp, floatVol));
-			this.demandSeries.getData().add(new Data(timestamp, hedgedVol));
-			this.agentSeries.getData().add(new Data(timestamp, 50 * Math.random()));
+			this.supplySeries.getData().add(new Data(timestamp, Math.random()));
+			this.demandSeries.getData().add(new Data(timestamp, Math.random()));
+			this.agentSeries.getData().add(new Data(timestamp, Math.random()));
 
 			// update Price Graph
 			this.priceSeries.getData().add(new Data(timestamp, Math.random()));
@@ -161,10 +156,10 @@ public class MainSimWindowController {
 			this.simulatedBtn.setText("Simulate");
 		}
 	}
-	
+
 	@FXML
 	public void onStepClicked() {
-		
+
 		reactorConfig.stepToggleClock();
 	}
 

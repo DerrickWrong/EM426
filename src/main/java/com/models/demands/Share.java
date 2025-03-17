@@ -1,17 +1,18 @@
 package com.models.demands;
  
-import com.models.demands.Stock.Category;
+import com.configurations.StockConfigurator;
+import com.configurations.StockConfigurator.Category;
 
 import em426.agents.Agent;
 
 public class Share {
 
-	final Stock stock;
+	final StockConfigurator stock;
 	Double price, quantity;
 	Agent owner;
 	Category cat;
 
-	public Share(Stock stock) {
+	public Share(StockConfigurator stock) {
 		this.stock = stock;
 	}
 
@@ -47,7 +48,7 @@ public class Share {
 		this.cat = cat;
 	}
 
-	public Stock getStock() {
+	public StockConfigurator getStock() {
 		return stock;
 	}
 

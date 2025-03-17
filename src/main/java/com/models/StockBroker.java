@@ -3,8 +3,7 @@ package com.models;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import com.models.demands.MarketAndLenders;
+ 
 import com.models.demands.StockOrder;
 
 import jakarta.annotation.PostConstruct;
@@ -25,10 +24,7 @@ public class StockBroker {
 	@Autowired
 	@Qualifier("tradingClock")
 	Flux<Long> tradingClockFlux;	 
-
-	@Autowired
-	MarketAndLenders marketBoard;
-
+ 
 	@PostConstruct
 	void init() {
 

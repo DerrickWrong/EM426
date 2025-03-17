@@ -27,9 +27,7 @@ public class HedgeFund extends Agent {
 	private double triggerCover = 10;
 	private double decay2Sell = 5;
 	private double cashoutAt = 10; // stock dropped to 10% of its purchase value
-
-	@Autowired
-	MarketAndLenders marketLender;
+ 
 
 	@Autowired
 	@Qualifier("tradingClock")

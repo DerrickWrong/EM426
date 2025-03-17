@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.models.demands.Stock;
 import com.models.demands.StockOrder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -60,12 +59,12 @@ public class ReactorStreamConfig {
 	}
 
 	@Bean
-	Sinks.Many<Stock> stockStream() {
+	Sinks.Many<StockConfigurator> stockStream() {
 		return Sinks.many().multicast().directBestEffort();
 	}
 
 	@Bean
-	Flux<Stock> stockFlux() {
+	Flux<StockConfigurator> stockFlux() {
 		return this.stockStream().asFlux();
 	}
 

@@ -4,8 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
-import com.models.demands.MarketAndLenders;
-import com.models.demands.Stock;
+import com.configurations.StockConfigurator;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
@@ -15,12 +14,10 @@ import javafx.util.converter.NumberStringConverter;
 public class MarketLenderController {
 
 	@FXML
-	TextField symbolName, stockPrice, volumeBox, insiderBox, institutionBox, floatingBox, marginBox;
+	TextField symbolName, stockPrice, volumeBox, insiderBox, institutionBox;
 
 	@Autowired
-	MarketAndLenders marketLender;
-
-	private Stock stockOfInterest = new Stock();
+	StockConfigurator stockOfInterest;
 
 	@FXML
 	public void initialize() {
@@ -28,27 +25,15 @@ public class MarketLenderController {
 
 		this.stockPrice.textProperty().bindBidirectional(this.stockOfInterest.getCurrentPrice(),
 				new NumberStringConverter());
-		
+
 		this.volumeBox.textProperty().bindBidirectional(this.stockOfInterest.getCurrVolume(),
 				new NumberStringConverter());
 
-	}
-
-	@FXML
-	public void saveBtnClicked() {
-
-		this.marketLender.setStockName(symbolName.getText());
-		this.marketLender.setPrice(Double.valueOf(stockPrice.getText()));
-
-		double insiderShares = Double.valueOf(this.insiderBox.getText());
-		double institutionShare = Double.valueOf(this.institutionBox.getText());
-
-		double floatingShares = 100.0 - (insiderShares + institutionShare);
-
-		this.marketLender.updateChart(insiderShares, institutionShare, floatingShares);
-		this.marketLender.setMarginCallPercent(Double.valueOf(marginBox.getText()));
-
-		SpringFXManager.getInstance().getSubStage().close();
+		this.insiderBox.textProperty().bindBidirectional(this.stockOfInterest.getInsiderProperty(),
+				new NumberStringConverter());
+		
+		this.institutionBox.textProperty().bindBidirectional(this.stockOfInterest.getInstProperty(),
+				new NumberStringConverter());
 	}
 
 	@FXML
