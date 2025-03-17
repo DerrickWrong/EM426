@@ -1,8 +1,6 @@
 package com.models.demands;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.PriorityQueue;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -28,8 +26,7 @@ public class Stock {
 	private PieChart.Data floatingRatio = new PieChart.Data(Category.FLOAT.toString(), 0);
 
 	// Floating Share Priority Queue
-	PriorityQueue<Share> floatingShareQueue; 
-	List<Share> instituteShareList, insiderShareList;
+	private PriorityQueue<Share> floatingShareQueue;
 
 	public Stock() {
 		this.stockHoldingDistribution.addAll(insiderRatio, institutionRatio, floatingRatio);
@@ -41,36 +38,20 @@ public class Stock {
 				return Double.compare(o1.getPrice(), o2.getPrice());
 			}
 		});
-		
-		this.instituteShareList = new ArrayList<>();
-		this.insiderShareList = new ArrayList<>();
-		
 	}
 
-	public void addInsiderShare(Share s) {
-		
-		double oldVal = insiderRatio.getPieValue(); 
-		oldVal += s.getQuantity();
-		
-		
-		
-	}
-
-	public void addInstituteShare(Share s) {
- 
+	public void updateInsiderAndInstitutionRatios(double insider, double institute) {
+		this.insiderRatio.setPieValue(insider);
+		this.institutionRatio.setPieValue(institute);
 	}
 
 	public void addFloatingShare(Share s) {
 
-		this.currVolume.add(s.getQuantity());
 		this.floatingShareQueue.add(s);
 		Share cheap = this.floatingShareQueue.peek();
 		this.currentPrice.set(cheap.getPrice());
 	}
 
-	public void updatePieChart() {
-
-	}
 
 	public StringProperty getSymbol() {
 		return this.symbol;
