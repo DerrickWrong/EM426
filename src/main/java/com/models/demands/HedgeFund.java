@@ -6,16 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.MIT.agents.Agent;
-import com.MIT.agents.AgentActable;
-import com.models.StockBroker;
-
+import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 @Component
-public class HedgeFund extends Agent implements AgentActable {
+public class HedgeFund extends Agent {
 
 	public enum State {
 		IDLE, SELLNWAIT, BUY2COVER, BANKRUPT;
@@ -51,41 +48,8 @@ public class HedgeFund extends Agent implements AgentActable {
 		tradingClockFlux.subscribe(d -> {
 
 			this.dateTracker.set(d);
-			this.select();
-			this.observe();
-			this.act();
+		
 		});
-	}
-
-	@Override
-	public void act() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void select() {
-		// TODO Auto-generated method stub
-		if (this.currentState == State.IDLE) {
-
-			Double bidPrice = this.marketLender.getInitalPrice() * (100 - this.decay2Sell) / 100;
-			Double vol = (this.borrow2Short / 100) * this.marketLender.getInstitutionShare()
-					* this.marketLender.getVolume();
-
-			StockOrder order = new StockOrder(this.getId(), StockOrder.type.SHORT, bidPrice, vol,
-					this.dateTracker.get());
-
-			stockOrderStream.tryEmitNext(order);
-
-			// set to next state
-			this.currentState = State.SELLNWAIT;
-		}
-	}
-
-	@Override
-	public void observe() {
-		// TODO Auto-generated method stub
-
 	}
 
 	public double getBalanaceInMil() {

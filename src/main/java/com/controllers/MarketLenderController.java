@@ -5,35 +5,32 @@ import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
 import com.models.demands.MarketAndLenders;
+import com.models.demands.Stock;
 
-import jakarta.annotation.PostConstruct; 
-import javafx.fxml.FXML; 
+import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.util.converter.NumberStringConverter;
 
 @Component
 public class MarketLenderController {
 
 	@FXML
 	TextField symbolName, stockPrice, volumeBox, insiderBox, institutionBox, floatingBox, marginBox;
- 
+
 	@Autowired
 	MarketAndLenders marketLender;
 
+	private Stock stockOfInterest = new Stock();
+
 	@FXML
 	public void initialize() {
+		this.symbolName.textProperty().bindBidirectional(this.stockOfInterest.getSymbol());
 
-		// pre-populate the content
-		this.symbolName.setText(marketLender.getStockName());
-		this.stockPrice.setText(String.valueOf(marketLender.getInitalPrice()));
-		this.volumeBox.setText(String.valueOf(marketLender.getVolume()));
-		this.insiderBox.setText(String.valueOf(marketLender.getInsiderShare()));
-		this.institutionBox.setText(String.valueOf(marketLender.getInstitutionShare()));
-		this.floatingBox.setText(String.valueOf(marketLender.getFloatingShare()));
-		this.marginBox.setText(String.valueOf(marketLender.getMarginCallPercent()));
-	}
-
-	@PostConstruct
-	public void init() {
+		this.stockPrice.textProperty().bindBidirectional(this.stockOfInterest.getCurrentPrice(),
+				new NumberStringConverter());
+		
+		this.volumeBox.textProperty().bindBidirectional(this.stockOfInterest.getCurrVolume(),
+				new NumberStringConverter());
 
 	}
 

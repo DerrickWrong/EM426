@@ -13,7 +13,7 @@ public class MarketAndLenders {
 	// TODO - Need to fix this to support multi-stock
 	private String stockName = "GME";
 	private double initalPrice = 22.95;
-	private double volume = 446.51 * 1000000;
+	private double volume = 446.51 * 1E6;
 
 	private double marginCallPercent; // at what % rise will trigger margin call
 

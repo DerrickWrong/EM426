@@ -26,6 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 
 @Component
@@ -53,7 +54,7 @@ public class MainSimWindowController {
 	HedgeFund hedgie;
 
 	@FXML
-	Button simulatedBtn;
+	Button simulatedBtn, stepButton;
 
 	@Autowired
 	@Qualifier("fxScheduler")
@@ -62,7 +63,7 @@ public class MainSimWindowController {
 	@Autowired
 	@Qualifier("tradingClock")
 	Flux<Long> tradingClockFlux;
-
+	 
 	@Autowired
 	ReactorStreamConfig reactorConfig;
 
@@ -104,12 +105,12 @@ public class MainSimWindowController {
 			double hedgedVol = (this.hedgie.getBorrow2Short() / 100) * (this.marketLender.getInstitutionShare() / 100)
 					* this.marketLender.getVolume() / 1E6;
 
-			// TODO Add all three (make sure they are symmetric)
+			// Update Volume Graph
 			this.supplySeries.getData().add(new Data(timestamp, floatVol));
 			this.demandSeries.getData().add(new Data(timestamp, hedgedVol));
-			this.agentSeries.getData().add(new Data(timestamp, Math.random()));
+			this.agentSeries.getData().add(new Data(timestamp, 50 * Math.random()));
 
-			// System.out.println("Tick: " + tick + " float volume: " + floatVol);
+			// update Price Graph
 			this.priceSeries.getData().add(new Data(timestamp, Math.random()));
 		});
 
@@ -159,7 +160,12 @@ public class MainSimWindowController {
 		} else {
 			this.simulatedBtn.setText("Simulate");
 		}
-
+	}
+	
+	@FXML
+	public void onStepClicked() {
+		
+		reactorConfig.stepToggleClock();
 	}
 
 }

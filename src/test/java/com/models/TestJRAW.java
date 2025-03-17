@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource; 
-
-import com.models.demands.News;
+ 
 
 import net.dean.jraw.RedditClient;
 import net.dean.jraw.http.OkHttpNetworkAdapter;
@@ -68,7 +67,7 @@ class TestJRAW {
         String postURL = post.getUrl();
         Integer comments = post.getCommentCount();
         
-        News news = new News(text, post.getId(), post.getUrl(), post.getCommentCount());
+        //News news = new News(text, post.getId(), post.getUrl(), post.getCommentCount());
         
         RootCommentNode comm = reddit.submission(post.getId()).comments();
         int totalComm = comm.getReplies().size();

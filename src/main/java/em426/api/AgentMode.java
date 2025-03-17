@@ -1,0 +1,14 @@
+package em426.api;
+
+public enum AgentMode {
+	INACTIVE, 
+	OBSERVING, 
+	SELECTING, 
+	ACTING,
+	COMPLETING, 
+	WAITING,
+	TERMINATING,
+	PAUSED,
+	MOVING,
+	TIMELIMITED
+}

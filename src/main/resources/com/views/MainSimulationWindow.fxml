@@ -96,11 +96,11 @@
             <Insets />
          </BorderPane.margin>
          <children>
-            <Label text="Step:">
+            <Label prefWidth="50.0" text="Step:">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin></Label>
-            <Label fx:id="dayLabel" text="XXX">
+            <Label fx:id="dayLabel" prefWidth="100.0" text="XXX">
                <padding>
                   <Insets right="10.0" />
                </padding>
@@ -108,7 +108,12 @@
                   <Insets right="20.0" />
                </HBox.margin>
             </Label>
-            <Button fx:id="simulatedBtn" mnemonicParsing="false" onAction="#onSimulateClicked" text="Simulate">
+            <Button fx:id="stepButton" mnemonicParsing="false" onAction="#onStepClicked" prefWidth="100.0" text="Step">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="simulatedBtn" mnemonicParsing="false" onAction="#onSimulateClicked" prefWidth="100.0" text="Simulate">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>
