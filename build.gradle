@@ -35,6 +35,11 @@ dependencies{
     // https://mvnrepository.com/artifact/com.faendir.jraw/JRAW
 	implementation 'com.faendir.jraw:JRAW:1.2.0'
 
+	// https://mvnrepository.com/artifact/com.google.guava/guava
+	implementation 'com.google.guava:guava:33.4.0-jre'
+	
+	// https://mvnrepository.com/artifact/com.github.pnavais/state-machine
+	implementation 'com.github.pnavais:state-machine:1.2.0'
 	
 }
 

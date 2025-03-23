@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
-import com.configurations.StockConfigurator;
+import com.configurations.StockExchangeConfigurator;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
@@ -17,7 +17,7 @@ public class MarketLenderController {
 	TextField symbolName, stockPrice, volumeBox, insiderBox, institutionBox;
 
 	@Autowired
-	StockConfigurator stockOfInterest;
+	StockExchangeConfigurator stockOfInterest;
 
 	@FXML
 	public void initialize() {

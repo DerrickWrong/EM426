@@ -1,6 +1,7 @@
 package com.controllers;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -8,10 +9,14 @@ import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
 import com.configurations.ReactorStreamConfig;
-import com.configurations.StockConfigurator; 
-import com.models.StockBroker;
-import com.models.demands.HedgeFund;
-import jakarta.annotation.PostConstruct; 
+import com.configurations.StockExchangeConfigurator;
+import com.google.common.util.concurrent.AtomicDouble;
+import com.models.Agents.HedgeFund.Hedgie;
+import com.models.Agents.StockBroker.StockBroker;
+import com.models.demands.StockOrder;
+
+import em426.api.ActState;
+import jakarta.annotation.PostConstruct;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -24,7 +29,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import reactor.core.publisher.Flux; 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 
 @Component
@@ -40,7 +46,7 @@ public class MainSimWindowController {
 	StockBroker broker;
 
 	@Autowired
-	HedgeFund hedgie;
+	Hedgie hedgie;
 
 	@FXML
 	Button simulatedBtn, stepButton;
@@ -54,6 +60,10 @@ public class MainSimWindowController {
 	Flux<Long> tradingClockFlux;
 
 	@Autowired
+	@Qualifier("stockOrderStream")
+	Sinks.Many<StockOrder> orderSink;
+
+	@Autowired
 	ReactorStreamConfig reactorConfig;
 
 	boolean simulationStarted = false;
@@ -65,21 +75,20 @@ public class MainSimWindowController {
 	XYChart.Series demandSeries = new XYChart.Series<>();
 	XYChart.Series agentSeries = new XYChart.Series<>();
 	XYChart.Series<Long, Double> priceSeries = new XYChart.Series<>();
-	
+
 	// PieChart
 	@FXML
-	PieChart pieChart; 
-	
+	PieChart pieChart;
+
 	@Autowired
-	StockConfigurator stockConfig;
-	
+	StockExchangeConfigurator stockConfig;
+
 	@FXML
 	public void initialize() {
 
 		// setup pie chart
 		this.pieChart.setData(stockConfig.getStockHoldingDistribution());
 		this.pieChart.setTitle("Share Distribution");
-		
 
 		supplySeries.setName("Market(Supply)");
 		demandSeries.setName("Hedgies(Demand)");
@@ -87,12 +96,25 @@ public class MainSimWindowController {
 
 		this.hedgieVsApesPlot.getData().addAll(supplySeries, demandSeries, agentSeries);
 
-		this.priceSeries.setName("Price");
 		this.stockPricePlot.getData().addAll(this.priceSeries);
+		this.stockPricePlot.legendVisibleProperty().set(false);
 	}
+
+	AtomicDouble stockBoardPrice = new AtomicDouble(0.0);
 
 	@PostConstruct
 	public void init() {
+
+		this.orderSink.asFlux().filter(o -> {
+
+			return o.getOrderStatus() == ActState.COMPLETE;
+
+		}).subscribe(order -> {
+
+			// update with the latest price
+			this.stockBoardPrice.set(order.getBidPrice());
+
+		});
 
 		// listen to the simulation
 		tradingClockFlux.publishOn(fxScheduler).subscribe(tick -> {
@@ -106,7 +128,7 @@ public class MainSimWindowController {
 			this.agentSeries.getData().add(new Data(timestamp, Math.random()));
 
 			// update Price Graph
-			this.priceSeries.getData().add(new Data(timestamp, Math.random()));
+			this.priceSeries.getData().add(new Data(timestamp, this.stockBoardPrice.get()));
 		});
 
 	}
@@ -161,6 +183,19 @@ public class MainSimWindowController {
 	public void onStepClicked() {
 
 		reactorConfig.stepToggleClock();
+	}
+
+	double price = 22;
+
+	@FXML
+	public void pushDemandClicked() {
+
+		// test stock demand
+		UUID u = UUID.randomUUID();
+		StockOrder shortOrder = new StockOrder(u, StockOrder.type.SELL, price, 100000000, 1);
+		this.orderSink.tryEmitNext(shortOrder);
+		price = price * 0.8;
+
 	}
 
 }

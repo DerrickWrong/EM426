@@ -6,6 +6,6 @@ package em426.api;
  *
  */
 public enum ActState {
-	PENDING, START , PARTIAL, COMPLETE, COMMITTED
+	PENDING, START , PARTIAL, COMPLETE, COMMITTED, INCOMPLETE
 	//TODO build out full enum text, id etc
 }

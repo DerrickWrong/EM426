@@ -2,31 +2,39 @@ package com.models.demands;
 
 import java.util.UUID;
 
+import em426.api.ActState;
+
 public class StockOrder {
 
 	public enum type {
 		BUY, SELL, SHORT, COVER
 	}
 
-	private final double bidPrice;
-	private boolean OrderProcessed = false; // flag toggled by Stock Broker class
-	private final double numOfShares;
+	private double bidPrice; 
+	private double numOfShares; 
 	private final UUID orginator;
 	private final type orderType;
 	private final long timeRequested;
+	private ActState orderStatus;
 
-	public StockOrder(UUID originator, type orderType, double bidPrice, double volPerMil, long simTimeRequested) {
+	public StockOrder(UUID originator, type orderType, double bidPrice, double numShare, long simTimeRequested) {
 
 		this.orginator = originator;
 		this.orderType = orderType;
 		this.bidPrice = bidPrice;
-		this.numOfShares = volPerMil;
+		this.numOfShares = numShare;
 		this.timeRequested = simTimeRequested;
+		this.orderStatus = ActState.START; 
 	}
 
-	public void setTrue2ProcessedOrder() {
-		this.OrderProcessed = true;
+	public void changeStatus(ActState s) {
+		this.orderStatus = s;
 	}
+
+	public ActState getStatus() {
+		return this.orderStatus;
+	}
+ 
 
 	public long getTimeRequested() {
 		return timeRequested;
@@ -34,13 +42,9 @@ public class StockOrder {
 
 	public double getBidPrice() {
 		return bidPrice;
-	}
+	} 
 
-	public boolean isOrderProcessed() {
-		return OrderProcessed;
-	}
-
-	public double getNumSharePerMil() {
+	public double getNumShare() {
 		return numOfShares;
 	}
 
@@ -51,5 +55,20 @@ public class StockOrder {
 	public type getOrderType() {
 		return orderType;
 	}
+	
+	public double getNumOfShares() {
+		return numOfShares;
+	}
+
+	public ActState getOrderStatus() {
+		return orderStatus;
+	}
+	
+	public void setBidPrice(double bidPrice) {
+		this.bidPrice = bidPrice;
+	}
+	
+ 
+ 
 
 }

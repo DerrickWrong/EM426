@@ -1,18 +1,18 @@
 package com.models.demands;
  
-import com.configurations.StockConfigurator;
-import com.configurations.StockConfigurator.Category;
+import java.util.UUID;
 
-import em426.agents.Agent;
+import com.configurations.StockExchangeConfigurator; 
+ 
 
+// This is the supply?
 public class Share {
 
-	final StockConfigurator stock;
+	final StockExchangeConfigurator stock;
 	Double price, quantity;
-	Agent owner;
-	Category cat;
+	UUID owner; 
 
-	public Share(StockConfigurator stock) {
+	public Share(StockExchangeConfigurator stock) {
 		this.stock = stock;
 	}
 
@@ -32,23 +32,15 @@ public class Share {
 		this.quantity = quantity;
 	}
 
-	public Agent getOwner() {
+	public UUID getOwner() {
 		return owner;
 	}
 
-	public void setOwner(Agent owner) {
+	public void setOwner(UUID owner) {
 		this.owner = owner;
 	}
-
-	public Category getCat() {
-		return cat;
-	}
-
-	public void setCat(Category cat) {
-		this.cat = cat;
-	}
-
-	public StockConfigurator getStock() {
+ 
+	public StockExchangeConfigurator getStock() {
 		return stock;
 	}
 

@@ -59,12 +59,12 @@ public class ReactorStreamConfig {
 	}
 
 	@Bean
-	Sinks.Many<StockConfigurator> stockStream() {
+	Sinks.Many<StockExchangeConfigurator> stockStream() {
 		return Sinks.many().multicast().directBestEffort();
 	}
 
 	@Bean
-	Flux<StockConfigurator> stockFlux() {
+	Flux<StockExchangeConfigurator> stockFlux() {
 		return this.stockStream().asFlux();
 	}
 

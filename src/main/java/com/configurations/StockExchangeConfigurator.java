@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.models.demands.Share;
+import com.models.demands.StockOrder;
 
+import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -20,9 +22,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
 
+// In the future, this class will be @Prototype to support multiple stocks
 @Configuration
 @PropertySource("classpath:stock.properties")
-public class StockConfigurator {
+public class StockExchangeConfigurator {
 
 	@Value("${stockName}")
 	private String stockName;
@@ -64,7 +67,6 @@ public class StockConfigurator {
 		this.symbol.setValue(stockName);
 		this.currentPrice.setValue(this.stockPrice);
 		this.currVolume.setValue(this.stockVolume);
-		
 
 		this.stockHoldingDistribution.addAll(insiderRatio, institutionRatio, floatingRatio);
 
@@ -95,14 +97,88 @@ public class StockConfigurator {
 
 		this.insiderProperty.setValue(insiderR);
 		this.instProperty.setValue(instituteR);
-		this.floatingRatio.setPieValue(100.0 - (insiderR + instituteR));		
+		this.floatingRatio.setPieValue(100.0 - (insiderR + instituteR));
 	}
 
-	public void addFloatingShare(Share s) {
+	// All stock trading happens here*
+	public StockOrder processStockOrder(StockOrder order) {
 
-		this.floatingShareQueue.add(s);
-		Share cheap = this.floatingShareQueue.peek();
-		this.currentPrice.set(cheap.getPrice());
+		if (order.getOrderType() == StockOrder.type.BUY || order.getOrderType() == StockOrder.type.COVER) {
+
+			// buy or cover - reduce the floating shares (This is where supply meets demand)
+
+			// check if there is any floating queue at or below this price
+			while (!this.floatingShareQueue.isEmpty()) {
+
+				Share currShare = this.floatingShareQueue.poll();
+
+				if (currShare.getPrice() <= order.getBidPrice()) {
+
+					// only when the bidding price higher than or equal to the current price will be
+					// processed
+					double purchasingNumOfShare = order.getNumOfShares();
+					
+					if (currShare.getQuantity() < purchasingNumOfShare) {
+
+						// partially executed b/c not enough share
+						order.setBidPrice(currShare.getPrice()); 
+						
+						order.changeStatus(ActState.PARTIAL);
+						
+						// TODO - BUGGGG Need to figure out how to move to next iteration and execute the remaining order.
+						continue;
+					} else {
+						// fully executed
+						double newCurrShareNum = currShare.getQuantity() - purchasingNumOfShare;
+						currShare.setQuantity(newCurrShareNum);
+						this.floatingShareQueue.add(currShare);
+						order.setBidPrice(currShare.getPrice());
+						order.changeStatus(ActState.COMPLETE);
+					}
+					
+					// update the pie chart if the order is fully/partial executed
+					double float2Reduce = purchasingNumOfShare / this.currVolume.get();
+					double newFloRatio = this.floatingRatio.getPieValue() - float2Reduce;
+					this.floatingRatio.setPieValue(newFloRatio);
+					break;
+
+				} else {
+
+					// bidding price too low
+					this.floatingShareQueue.add(currShare); // put it back to the pQueue
+					order.changeStatus(ActState.INCOMPLETE);
+					break;
+				}
+
+			} // end of while loop
+
+		} else {
+			// sell or short - increase the floating shares (This is where demand gets
+			// created!)
+
+			if (order.getBidPrice() < this.currentPrice.doubleValue()) {
+				this.currentPrice.setValue(order.getBidPrice());
+			}
+
+			// update the piechart
+			// This is where the magic happens (The hedgie can borrow more than the
+			// institutional investors have).
+			double intRatio2Reduce = order.getNumShare() / this.currVolume.get() * 100.0;
+			double newInsRatio = this.institutionRatio.getPieValue() - intRatio2Reduce;
+			double newFloRatio = this.floatingRatio.getPieValue() + intRatio2Reduce;
+			this.institutionRatio.setPieValue(newInsRatio);
+			this.floatingRatio.setPieValue(newFloRatio);
+
+			// create the shares
+			Share shortSellShares = new Share(this);
+			shortSellShares.setPrice(order.getBidPrice());
+			shortSellShares.setOwner(order.getOrginator());
+			shortSellShares.setQuantity(order.getNumShare());
+			this.floatingShareQueue.add(shortSellShares); // flood the market with shares
+			order.changeStatus(ActState.COMPLETE);
+		}
+
+		return order;
 	}
 
 	public StringProperty getSymbol() {

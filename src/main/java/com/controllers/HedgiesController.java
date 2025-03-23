@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
-import com.models.demands.HedgeFund;
+import com.models.Agents.HedgeFund.Hedgie;
 
 import jakarta.annotation.PostConstruct;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.util.converter.NumberStringConverter;
 
 @Component
 public class HedgiesController {
@@ -17,35 +18,20 @@ public class HedgiesController {
 	TextField startingBalance, currentBalance, percent2Short, sellBelowPrice, decayPercent, cashout;
 
 	@Autowired
-	private HedgeFund hedgie;
-
-	@PostConstruct
-	public void init() {
-		// listen to the market news
-	}
+	private Hedgie hedgie;
+ 
 
 	@FXML
-	public void initialize() {
+	void initialize() {
 
-		this.startingBalance.setText(String.valueOf(hedgie.getBalanaceInMil()));
-		this.currentBalance.setText(String.valueOf(hedgie.getCurrentBalance()));
-		this.percent2Short.setText(String.valueOf(hedgie.getBorrow2Short()));
-		this.sellBelowPrice.setText(String.valueOf(hedgie.getTriggerCover()));
-		this.decayPercent.setText(String.valueOf(hedgie.getDecay2Sell()));
-		this.cashout.setText(String.valueOf(hedgie.getCashoutAt()));
-	}
-
-	@FXML
-	public void saveBtn() {
-
-		hedgie.setBalanaceInMil(Double.valueOf(startingBalance.getText()));
-
-		hedgie.setBorrow2Short(Double.valueOf(percent2Short.getText()));
-		hedgie.setTriggerCover(Double.valueOf(sellBelowPrice.getText()));
-		hedgie.setDecay2Sell(Double.valueOf(decayPercent.getText()));
-		hedgie.setCashoutAt(Double.valueOf(cashout.getText()));
-		
-		SpringFXManager.getInstance().getSubStage().close();
+		this.startingBalance.textProperty().bindBidirectional(this.hedgie.getBalance(), new NumberStringConverter());
+		this.currentBalance.textProperty().bindBidirectional(this.hedgie.getCurrBalance(), new NumberStringConverter());
+		this.percent2Short.textProperty().bindBidirectional(this.hedgie.getBorrow2ShortRatio(),
+				new NumberStringConverter());
+		this.sellBelowPrice.textProperty().bindBidirectional(this.hedgie.getTrigger2Cover(),
+				new NumberStringConverter());
+		this.decayPercent.textProperty().bindBidirectional(this.hedgie.getGetMarginCall(), new NumberStringConverter());
+		this.cashout.textProperty().bindBidirectional(this.hedgie.getCashoutProfitAt(), new NumberStringConverter());
 	}
 
 	@FXML

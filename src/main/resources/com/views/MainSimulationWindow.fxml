@@ -96,6 +96,11 @@
             <Insets />
          </BorderPane.margin>
          <children>
+            <Button mnemonicParsing="false" onAction="#pushDemandClicked" prefWidth="100.0" text="Push Demand">
+               <HBox.margin>
+                  <Insets right="50.0" />
+               </HBox.margin>
+            </Button>
             <Label prefWidth="50.0" text="Step:">
                <HBox.margin>
                   <Insets right="10.0" />
