@@ -11,6 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
+import com.models.demands.StockOrder.type;
 
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
@@ -189,13 +190,36 @@ public class StockExchangeConfigurator {
 
 			} // end of while loop
 
-		} else {
-			// sell or short - increase the floating shares (This is where demand gets
-			// created!)
- 
-		 
+		} 
+		
+		
+		// TODO - put this in a testable function
+		if(order.getOrderType() == type.SHORT ) {
+			
+			// This is where the magic happens :) 
+			Share s = new Share(this);
+			s.setOwner(order.getOrignatorUUID());
+			s.setPrice(order.getBidPrice());
+			s.setQuantity(order.getNumOfShares());
+			this.floatingShareQueue.add(s);
+			
+			// update current price
+			this.currentPrice.set(order.getBidPrice());
+			
+			// update volume distribution
+			double new_si = 100 * order.getNumOfShares() / this.getCurrVolume().get();
+			instProperty.set(instProperty.get() - new_si);
+			shortProperty.set(shortProperty.get() + new_si);
+			
+			// update the status
+			order.changeStatus(ActState.COMPLETE); 
+			
+			StockOrder processedOrder = StockOrder.copyConstructor(order);
+			processedOrder.changeStatus(ActState.COMMITTED);
+			order = processedOrder;
+			
 		}
-
+		
 		return order;
 	}
 

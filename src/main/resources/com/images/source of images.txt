@@ -1,4 +1,16 @@
-track StockOrders (demands)
+
+base scenario - 
+
+Hedgie vs Apes (stock only)
+
+
+Next step - 
+
+Hedgie vs Apes (with options)
+
+Hedgie vs Apes & Institution (stocks + options)
 
 
 
+You could have a bunch of agents and stock orders. Then, each stock exchange could
+act as individual simulator to process these demands. 

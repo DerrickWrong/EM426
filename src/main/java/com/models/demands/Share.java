@@ -1,6 +1,5 @@
 package com.models.demands;
- 
-import java.util.UUID;
+  
 
 import com.configurations.StockExchangeConfigurator; 
  
@@ -10,7 +9,7 @@ public class Share {
 
 	final StockExchangeConfigurator stock;
 	Double price, quantity;
-	UUID owner; 
+	String owner; 
 
 	public Share(StockExchangeConfigurator stock) {
 		this.stock = stock;
@@ -32,11 +31,11 @@ public class Share {
 		this.quantity = quantity;
 	}
 
-	public UUID getOwner() {
+	public String getOwner() {
 		return owner;
 	}
 
-	public void setOwner(UUID owner) {
+	public void setOwner(String owner) {
 		this.owner = owner;
 	}
  

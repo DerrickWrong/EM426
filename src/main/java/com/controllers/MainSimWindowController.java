@@ -13,6 +13,7 @@ import com.configurations.StockExchangeConfigurator;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.models.Agents.HedgeFund.Hedgie;
 import com.models.Agents.StockBroker.StockBroker;
+import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 
 import em426.api.ActState;
@@ -38,7 +39,7 @@ import reactor.core.scheduler.Scheduler;
 public class MainSimWindowController {
 
 	@FXML
-	Label dayLabel;
+	Label dayLabel, currStockPriceLabel;
 
 	@FXML
 	LineChart<Long, Double> stockPricePlot;
@@ -55,10 +56,7 @@ public class MainSimWindowController {
 	@Autowired
 	@Qualifier("fxScheduler")
 	Scheduler fxScheduler;
-
-	@Autowired
-	Flux<Long> tradingClockFlux;
-
+  
 	@Autowired
 	@Qualifier("stockOrderStream")
 	Sinks.Many<StockOrder> orderSink;
@@ -99,38 +97,36 @@ public class MainSimWindowController {
 		this.stockPricePlot.getData().addAll(this.priceSeries);
 		this.stockPricePlot.legendVisibleProperty().set(false);
 	}
+  
+	@Autowired
+	Flux<ShareInfo> shareInfoFlux;
 
-	AtomicDouble stockBoardPrice = new AtomicDouble(0.0);
+	Long dateCounter = 0L;
 
 	@PostConstruct
 	public void init() {
 
-		this.orderSink.asFlux().filter(o -> {
-
-			return o.getActState() == ActState.COMPLETE;
-
-		}).subscribe(order -> {
-
-			// update with the latest price
-			this.stockBoardPrice.set(order.getBidPrice());
-
-		});
-
-		// listen to the simulation
-		tradingClockFlux.publishOn(fxScheduler).subscribe(tick -> {
-
-			String timestamp = String.valueOf(tick);
+		// update the price board
+		this.shareInfoFlux.publishOn(fxScheduler).subscribe(info -> {
+  
+			String timestamp = String.valueOf(dateCounter);
 			this.dayLabel.setText(timestamp);
 
 			// Update Volume Graph
-			this.supplySeries.getData().add(new Data(timestamp, Math.random()));
-			this.demandSeries.getData().add(new Data(timestamp, Math.random()));
-			this.agentSeries.getData().add(new Data(timestamp, Math.random()));
-
+			this.supplySeries.getData().add(new Data(timestamp, info.getFloatingShares()));
+			this.demandSeries.getData().add(new Data(timestamp, info.getShortedShares()));
+			this.agentSeries.getData().add(new Data(timestamp, Math.random())); // how fast is people buying
+			
 			// update Price Graph
-			this.priceSeries.getData().add(new Data(timestamp, this.stockBoardPrice.get()));
-		});
+			this.priceSeries.getData().add(new Data(timestamp, info.getCurrentPrice()));
+			
+			String stockPriceTag = String.format("%.2f", info.getCurrentPrice());
+			this.currStockPriceLabel.setText("Current Price @ $" + stockPriceTag);
 
+			dateCounter++;
+
+		});
+ 
 	}
 
 	@FXML
@@ -207,13 +203,13 @@ public class MainSimWindowController {
 
 	@FXML
 	public void clickViewDemands() throws IOException {
-  
+
 		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/StockOrderWindow.fxml");
 		BorderPane bp = loader.load();
 		Stage newStage = SpringFXManager.getInstance().getSubStage();
 		newStage.setTitle("Transactions - Stock Orders");
 		newStage.setScene(new Scene(bp));
 		newStage.show();
-		
+
 	}
 }

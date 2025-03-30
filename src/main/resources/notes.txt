@@ -1,0 +1,26 @@
+Stock buy/sell behavior can be explained by Keyesian Beauty Contest. It is 
+also a zero sum game. The big players are the hedgies and mutual funds. 
+
+
+base scenario - 
+
+Hedgie vs Apes (stock only)
+
+
+Next step - 
+
+Hedgie vs Apes (with options)
+
+Hedgie vs Apes & Institutions (stocks + options)
+
+
+Features 
+- Make a feature to track money flow. It has to go somewhere! (Thesis?)
+- Switch to game engine for better display or agent support.
+- Support multiple hedgies
+- Stream real stock data
+
+
+You could have a bunch of agents and stock orders. Then, each stock exchange could
+act as individual simulator to process these demands. (TODO - build a diagram to 
+illustrate the relationships) 

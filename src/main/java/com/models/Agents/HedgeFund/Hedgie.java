@@ -1,5 +1,7 @@
 package com.models.Agents.HedgeFund;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 
 import em426.agents.Agent;
+import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -24,6 +27,8 @@ public class Hedgie extends Agent {
 	private double originalPrinciple = 7.5E9; // 7 billion dollar
 	private double shortBidPercent = 0.95;
 	private double marginReqPercent = 0.5;
+	private int numberOfDump = 10; // default is 10 (1 is to short everythign at once)
+	private int counter = numberOfDump;
 
 	private DoubleProperty balance = new SimpleDoubleProperty(originalPrinciple);
 	private DoubleProperty currBalance = new SimpleDoubleProperty(0);
@@ -39,34 +44,58 @@ public class Hedgie extends Agent {
 	Flux<ShareInfo> shareInfoFlux;
 
 	@Autowired
+	Flux<StockOrder> processedOrderFlux;
+
+	@Autowired
 	@Qualifier("HedgieStateMachine")
 	StateMachine stateMachine;
 
 	@PostConstruct
 	public void init() {
 
-		this.shareInfoFlux.subscribe(s -> {
+		double fund = this.originalPrinciple / this.numberOfDump;
 
-			if ((balance.get() == this.originalPrinciple) && stateMachine.getCurrent() == HedgieState.IDLE) {
+		this.shareInfoFlux.delayElements(Duration.ofSeconds(2)).subscribe(s -> {
 
-				// kick off the simulation by sending shorting order
-				double sellingPrice = shortBidPercent * s.getCurrentPrice();
-				double share2Short = Math.round(originalPrinciple / (marginReqPercent * s.getCurrentPrice()));
-				balance.set(originalPrinciple - share2Short * s.getCurrentPrice());
-				StockOrder order = new StockOrder(this.getId(), type.SHORT, sellingPrice, share2Short);
-				this.orderSink.tryEmitNext(order);
+			if (stateMachine.getCurrent() == HedgieState.IDLE) {
 
-				System.out.println("Hedgie: selling " + share2Short + " which is "
-						+ (100.0 * share2Short / s.getCurrVolume()) + " % of all shares @ $" + sellingPrice + ".");
-
-				// move to BNS state
-				stateMachine.send(Messages.EMPTY);
+				this.shortingStock(fund, s);
 			}
-
-			System.out.println("Hedgie in state " + stateMachine.getCurrent().getName());
 
 		});
 
+		// Processed Orders
+		this.processedOrderFlux.filter(f -> {
+
+			return (f.getUUID() == this.getId()) && (f.getActState() == ActState.COMMITTED);
+
+		}).subscribe(po -> {
+
+			this.counter = this.counter - 1;
+			
+			if (this.counter > 0) {
+				stateMachine.send(HedgieState.IDLEMSG);
+			}
+		});
+
+	}
+
+	private void shortingStock(double fund, ShareInfo s) {
+
+		// kick off the simulation by sending shorting order
+		double sellingPrice = shortBidPercent * s.getCurrentPrice();
+		double share2Short = Math.round(fund / (marginReqPercent * s.getCurrentPrice()));
+		balance.set(fund - share2Short * s.getCurrentPrice());
+		StockOrder order = new StockOrder(this.getId(), type.SHORT, sellingPrice, share2Short);
+
+		this.orderSink.tryEmitNext(order);
+		this.balance.set(this.balance.get() - fund);
+
+		System.out.println("Hedgie: selling " + share2Short + " which is " + (100.0 * share2Short / s.getCurrVolume())
+				+ " % of all shares @ $" + sellingPrice + ".");
+
+		// move to BNS state
+		stateMachine.send(Messages.EMPTY);
 	}
 
 	public DoubleProperty getBalance() {

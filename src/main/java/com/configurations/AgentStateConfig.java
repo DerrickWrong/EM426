@@ -48,6 +48,7 @@ public class AgentStateConfig {
 		public static State SHORTMORE = new State("Hedgie borrow more to short");
 		public static State BANKRUPT = new State("Hedgie unable to cover position");
 		
+		public static String IDLEMSG = "back to idle";
 		public static String SMMESSAGE = "Short more";
 		public static String CMMESSAGE = "Cover Now";
 		public static String GMMESSAGE = "Game Over";
@@ -59,6 +60,7 @@ public class AgentStateConfig {
 		return StateMachine.newBuilder()
 				.from(HedgieState.IDLE).to(HedgieState.BNS).on(Messages.EMPTY)
 				.from(HedgieState.BNS).to(HedgieState.WAITING).on(Messages.EMPTY)
+				.from(HedgieState.BNS).to(HedgieState.IDLE).on(HedgieState.IDLEMSG)
 				.from(HedgieState.WAITING).to(HedgieState.COVER).on(HedgieState.CMMESSAGE)
 				.from(HedgieState.WAITING).to(HedgieState.SHORTMORE).on(HedgieState.SMMESSAGE)
 				.from(HedgieState.WAITING).to(HedgieState.COVER).on(HedgieState.CMMESSAGE)

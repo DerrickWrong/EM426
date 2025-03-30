@@ -37,14 +37,15 @@ public class StockBroker {
 		this.stockOrderStream.filter(order -> {
 		
 			// only accept unprocessed orders
-			return order.getActState() == ActState.PENDING;
+			return order.getActState() == ActState.START;
 		
 		}).subscribe(order -> {
 
 			this.ordersQueue.add(order);
 		});
 
-		this.tradingClockFlux.subscribe(t -> {
+		// buffer delay processing by 5 seconds
+		this.tradingClockFlux.buffer(5).subscribe(t -> {
 
 			// this is where stock broker execute its work
 			for (int i = 0; i < this.ordersQueue.size(); i++) {
