@@ -15,8 +15,16 @@ public class ShareInfo implements DemandAPI{
 	private double currentPrice, currVolume;
 	private String symbol;
 	
-	private double insiderShares, instituShares, shortedShares, floatingShares;
+	private double insiderShares, instituShares, shortedShares, floatingShares, apeShares;
 	
+	public double getApeShares() {
+		return apeShares;
+	}
+
+	public void setApeShares(double apeShares) {
+		this.apeShares = apeShares;
+	}
+
 	public ShareInfo(String symbol, double price, double vol) {
 		this.symbol = symbol;
 		this.currentPrice = price;

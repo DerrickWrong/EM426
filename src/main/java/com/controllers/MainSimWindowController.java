@@ -1,8 +1,6 @@
 package com.controllers;
 
 import java.io.IOException;
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -10,13 +8,10 @@ import org.springframework.stereotype.Component;
 import com.SpringFXManager;
 import com.configurations.ReactorStreamConfig;
 import com.configurations.StockExchangeConfigurator;
-import com.google.common.util.concurrent.AtomicDouble;
 import com.models.Agents.HedgeFund.Hedgie;
 import com.models.Agents.StockBroker.StockBroker;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
-
-import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +24,6 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -56,7 +50,7 @@ public class MainSimWindowController {
 	@Autowired
 	@Qualifier("fxScheduler")
 	Scheduler fxScheduler;
-  
+
 	@Autowired
 	@Qualifier("stockOrderStream")
 	Sinks.Many<StockOrder> orderSink;
@@ -97,7 +91,7 @@ public class MainSimWindowController {
 		this.stockPricePlot.getData().addAll(this.priceSeries);
 		this.stockPricePlot.legendVisibleProperty().set(false);
 	}
-  
+
 	@Autowired
 	Flux<ShareInfo> shareInfoFlux;
 
@@ -108,25 +102,25 @@ public class MainSimWindowController {
 
 		// update the price board
 		this.shareInfoFlux.publishOn(fxScheduler).subscribe(info -> {
-  
+
 			String timestamp = String.valueOf(dateCounter);
 			this.dayLabel.setText(timestamp);
 
 			// Update Volume Graph
 			this.supplySeries.getData().add(new Data(timestamp, info.getFloatingShares()));
 			this.demandSeries.getData().add(new Data(timestamp, info.getShortedShares()));
-			this.agentSeries.getData().add(new Data(timestamp, Math.random())); // how fast is people buying
-			
+			this.agentSeries.getData().add(new Data(timestamp, info.getApeShares())); // how fast is people buying
+
 			// update Price Graph
 			this.priceSeries.getData().add(new Data(timestamp, info.getCurrentPrice()));
-			
+
 			String stockPriceTag = String.format("%.2f", info.getCurrentPrice());
 			this.currStockPriceLabel.setText("Current Price @ $" + stockPriceTag);
 
 			dateCounter++;
 
 		});
- 
+
 	}
 
 	@FXML

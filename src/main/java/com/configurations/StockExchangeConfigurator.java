@@ -67,6 +67,7 @@ public class StockExchangeConfigurator {
 	private final DoubleProperty insiderProperty = new SimpleDoubleProperty(0.0);
 	private final DoubleProperty instProperty = new SimpleDoubleProperty(0.0);
 	private final DoubleProperty shortProperty = new SimpleDoubleProperty(0.0);
+	private final DoubleProperty apesProperty = new SimpleDoubleProperty(0.0);
 
 	private final ObservableList<PieChart.Data> stockHoldingDistribution = FXCollections.observableArrayList();
 	private PieChart.Data insiderRatio = new PieChart.Data(Category.INSIDER.toString().toLowerCase(), 0);
@@ -92,7 +93,9 @@ public class StockExchangeConfigurator {
 			info.setCurrPrice(this.currentPrice.get());
 			info.setInsiderShares(this.insiderProperty.get());
 			info.setInstituShares(this.instProperty.get());
-			info.setShortedShares(this.shortProperty.get()); 
+			info.setShortedShares(this.shortProperty.get());
+			info.setFloatingShares(100 - (this.insiderProperty.get() + this.instProperty.get()));
+			info.setApeShares(this.apesProperty.get());
 			this.shareInfoStream.tryEmitNext(info);
 
 		}); 
@@ -143,7 +146,7 @@ public class StockExchangeConfigurator {
 	// All stock trading happens here*
 	public StockOrder processStockOrder(StockOrder order) {
 
-		if (order.getOrderType() == StockOrder.type.BUY || order.getOrderType() == StockOrder.type.COVER) {
+		if (order.getOrderType() == StockOrder.type.BUY) {
 
 			// buy or cover - reduce the floating shares (This is where supply meets demand)
 
@@ -171,11 +174,14 @@ public class StockExchangeConfigurator {
 						double newCurrShareNum = currShare.getQuantity() - purchasingNumOfShare;
 						currShare.setQuantity(newCurrShareNum);
 						this.floatingShareQueue.add(currShare); 
-						order.changeStatus(ActState.COMPLETE);
+						StockOrder processedOrder = StockOrder.copyConstructor(order, "StockExchange");
+						processedOrder.changeStatus(ActState.COMMITTED);
+						order = processedOrder;
 					}
 
 					// update the pie chart if the order is fully/partial executed
-					double float2Reduce = purchasingNumOfShare / this.currVolume.get();
+					double float2Reduce = 100 * purchasingNumOfShare / this.currVolume.get();
+					this.apesProperty.set(this.apesProperty.get() + float2Reduce);
 					double newFloRatio = this.floatingRatio.getPieValue() - float2Reduce;
 					this.floatingRatio.setPieValue(newFloRatio);
 					break;
@@ -214,7 +220,7 @@ public class StockExchangeConfigurator {
 			// update the status
 			order.changeStatus(ActState.COMPLETE); 
 			
-			StockOrder processedOrder = StockOrder.copyConstructor(order);
+			StockOrder processedOrder = StockOrder.copyConstructor(order, "StockExchange");
 			processedOrder.changeStatus(ActState.COMMITTED);
 			order = processedOrder;
 			
@@ -245,6 +251,11 @@ public class StockExchangeConfigurator {
 
 	public DoubleProperty getInstProperty() {
 		return instProperty;
+	}
+	
+	public final Share peekStockShare() {
+		
+		return this.floatingShareQueue.peek();
 	}
 
 }

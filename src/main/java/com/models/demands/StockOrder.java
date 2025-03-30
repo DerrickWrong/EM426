@@ -18,10 +18,10 @@ public class StockOrder {
 	private String status;
 	private final UUID orginator;
 
-	public StockOrder(UUID originator, type orderType, double bidPrice, double numShare) {
+	public StockOrder(UUID originator, type orderType, double bidPrice, double numShare, String att) {
 		
 		this.orginator = originator;
-		this.orignatorUUID = "Hedgie_" + originator.toString();
+		this.orignatorUUID = att + "_" + originator.toString();
 
 		this.bidPrice = bidPrice;
 		this.numOfShares = numShare;
@@ -34,9 +34,9 @@ public class StockOrder {
 
 	}
 	
-	public static StockOrder copyConstructor(StockOrder order) {
+	public static StockOrder copyConstructor(StockOrder order, String att) {
 		
-		return new StockOrder(order.getUUID(), order.getOrderType(), order.getBidPrice(), order.getNumOfShares());
+		return new StockOrder(order.getUUID(), order.getOrderType(), order.getBidPrice(), order.getNumOfShares(), att);
 		
 	}
 	

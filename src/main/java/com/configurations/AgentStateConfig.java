@@ -33,6 +33,7 @@ public class AgentStateConfig {
 		// See Ape States Diagram for more information
 		return StateMachine.newBuilder()
 				.from(ApeState.IDLEAPE).to(ApeState.OBSERVE).on(Messages.EMPTY)
+				.from(ApeState.OBSERVE).to(ApeState.BUY).on(ApeState.BUYMOREMESSAGE)
 				.from(ApeState.BUY).to(ApeState.HOLD).on(Messages.EMPTY)
 				.from(ApeState.HOLD).to(ApeState.SELL).on(ApeState.SELLMESSAGE)
 				.from(ApeState.HOLD).to(ApeState.BUY).on(ApeState.BUYMOREMESSAGE).build();	

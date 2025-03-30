@@ -1,40 +1,119 @@
 package com.models.Agents;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.configurations.AgentStateConfig.ApeState; 
 import com.github.pnavais.machine.StateMachine;
-import com.models.MarkovModel;
+import com.github.pnavais.machine.api.message.Messages;
+import com.models.MarkovModel; 
+import com.models.demands.ShareInfo;
+import com.models.demands.StockOrder;
+import com.models.demands.StockOrder.type;
 
 import em426.agents.Agent;
+import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 @Component
 @Scope("prototype")
-public class Ape extends Agent{
- 
-	private DoubleProperty balance = new SimpleDoubleProperty(2000);
-	
+public class Ape extends Agent {
+
+	private final double initialBalance = 2000 * 100000; // scale it to 100k apes per agent
+	private double salary4Invest = 1000 * 100000; 
+	private long payDay = 5; // every biweekly
+	private DoubleProperty buyBidPercent = new SimpleDoubleProperty(5); // default 5% higher than the sell price
+
+	private DoubleProperty balance = new SimpleDoubleProperty(initialBalance);
+
 	@Autowired
-	@Qualifier("ApeState")
+	@Qualifier("ApeStateMachine")
 	private StateMachine apeState;
-	
+
 	@Autowired
 	MarkovModel model;
+
+	@Autowired
+	Flux<ShareInfo> shareInfoFlux;
+  
+	@Autowired
+	Sinks.Many<StockOrder> orderSink;
 	
+	@Autowired
+	Flux<StockOrder> processedOrderFlux;
+
 	@PostConstruct
 	void init() {
+
+		apeState.send(Messages.EMPTY); // move to observe state
 		
-		// listen and watch for stock volume change (additional float shares from Hedgie)
+		this.processedOrderFlux.filter(o->{
+			
+			return (o.getOrderType() == type.SHORT && o.getOrderState() == ActState.COMMITTED);
+			
+		}).subscribe(o->{
+			
+			// change the state to buy move due to seeing the demand (short)!
+			apeState.send(ApeState.BUYMOREMESSAGE); // move to buy state
+			
+		});
 		
-		
-		
-		
-		
+		this.processedOrderFlux.filter(o->{
+			
+			return o.getUUID() == this.getId() && o.getOrderState() == ActState.COMMITTED;
+			
+		}).subscribe(o->{
+			
+			this.balance.set(0); // clean out the balance
+			apeState.send(Messages.EMPTY);// move to hold state
+		});
+		 
+
+		// listen and watch for stock volume change (additional float shares from
+		// Hedgie)
+		shareInfoFlux.sample(Duration.ofSeconds(payDay)).subscribe(shareInfo -> {
+ 
+
+			// getting paid
+			this.balance.set(this.balance.get() + this.salary4Invest);
+
+			if (apeState.getCurrent() == ApeState.BUY) {
+ 
+				double buyPrice = shareInfo.getCurrentPrice(); // this should be a bid price 
+				double numShare = this.balance.get() / buyPrice;
+				
+				
+				StockOrder order = new StockOrder(this.getId(), type.BUY, buyPrice, numShare, "Ape");
+				this.orderSink.tryEmitNext(order);
+
+				System.out.println("Ape buying " + numShare + " @ $" + buyPrice + " UUID - " + this.getId());
+			}
+
+			if (apeState.getCurrent() == ApeState.HOLD) {
+
+				if (this.balance.get() >= initialBalance) {
+					System.out.println("Ape Buy more " + this.getId());
+					apeState.send(ApeState.BUYMOREMESSAGE); // go back to buy state
+				}
+			}
+
+		});
 	}
-	
+
+	public DoubleProperty getBalance() {
+		return balance;
+	}
+
+	public DoubleProperty getBuyBidPercent() {
+		return buyBidPercent;
+	}
+
 }

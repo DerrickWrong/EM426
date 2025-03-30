@@ -4,7 +4,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import jakarta.annotation.PreDestroy;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class SpringFXManager {
