@@ -8,6 +8,8 @@ import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.api.message.Messages;
 import com.github.pnavais.machine.model.State;
 
+// This class is for defining the states and transitions for all the agents.
+
 @Configuration
 public class AgentStateConfig {
 
@@ -26,7 +28,7 @@ public class AgentStateConfig {
 
 	@Bean 
 	@Scope("prototype")
-	StateMachine ApeState() {
+	StateMachine ApeStateMachine() {
 		
 		// See Ape States Diagram for more information
 		return StateMachine.newBuilder()
@@ -47,20 +49,20 @@ public class AgentStateConfig {
 		public static State BANKRUPT = new State("Hedgie unable to cover position");
 		
 		public static String SMMESSAGE = "Short more";
-		public static String CMMESSAGE = "Cash out for profit";
+		public static String CMMESSAGE = "Cover Now";
 		public static String GMMESSAGE = "Game Over";
 	}
 	
 	@Bean
-	@Scope("prototype")
-	StateMachine HedgieState(){
+	StateMachine HedgieStateMachine(){
 		// See Hedgies State Diagram for more information
 		return StateMachine.newBuilder()
 				.from(HedgieState.IDLE).to(HedgieState.BNS).on(Messages.EMPTY)
 				.from(HedgieState.BNS).to(HedgieState.WAITING).on(Messages.EMPTY)
 				.from(HedgieState.WAITING).to(HedgieState.COVER).on(HedgieState.CMMESSAGE)
 				.from(HedgieState.WAITING).to(HedgieState.SHORTMORE).on(HedgieState.SMMESSAGE)
-				.from(HedgieState.WAITING).to(HedgieState.BANKRUPT).on(HedgieState.GMMESSAGE).build();
+				.from(HedgieState.WAITING).to(HedgieState.COVER).on(HedgieState.CMMESSAGE)
+				.from(HedgieState.COVER).to(HedgieState.BANKRUPT).on(HedgieState.GMMESSAGE).build();
 	}
 	
 	// Broker State
@@ -75,7 +77,7 @@ public class AgentStateConfig {
 	}
 	
 	@Bean
-	StateMachine BrokerState() {
+	StateMachine BrokerStateMachine() {
 		// See Broker State Diagram for more information
 		return StateMachine.newBuilder()
 				.from(BrokerState.IDLE).to(BrokerState.PROCESSING).on(Messages.EMPTY)
@@ -97,7 +99,7 @@ public class AgentStateConfig {
 	
 	@Bean
 	@Scope("prototype")
-	StateMachine InstitutionalState() {
+	StateMachine InstitutionalStateMachine() {
 		
 		// See Institutional Investor diagram for more information
 		return StateMachine.newBuilder()

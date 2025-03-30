@@ -20,9 +20,8 @@ class StockOrderTest {
 				
 				return Integer.compare(o1, o2);
 			}
-		});
-		
-		
+		});		
 	}
+ 
 
 }

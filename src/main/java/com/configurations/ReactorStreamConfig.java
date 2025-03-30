@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -17,33 +18,33 @@ public class ReactorStreamConfig {
 	// periodicity of the simulation clock
 	private Duration simPeriodicity = Duration.ofSeconds(1);
 
-	private final AtomicLong counter = new AtomicLong(0L);
-	AtomicBoolean tradeClockFlag = new AtomicBoolean(false);
+	private final AtomicLong simClockCounter = new AtomicLong(0L);
+	AtomicBoolean simClockToggleFlag = new AtomicBoolean(false);
 
-	private Sinks.Many<Long> centralClock = Sinks.many().multicast().directBestEffort();
+	private Sinks.Many<Long> simulationClockStream = Sinks.many().multicast().directBestEffort();
 	
 	public void stepToggleClock() {
 		// Turn off the tradeClockFlag
-		tradeClockFlag.set(false);
-		centralClock.tryEmitNext(counter.getAndIncrement());
+		simClockToggleFlag.set(false);
+		simulationClockStream.tryEmitNext(simClockCounter.getAndIncrement());
 	}
 	
 	@Bean
-	Flux<Long> tradingClock() {
+	Flux<Long> simulationClock() {
 
-		// create a trading clock from a cold flux
+		// create a Simulation clock from a cold flux
 
 		// Trading Clock using fixed Flux
-		Flux.interval(simPeriodicity).filter(f -> tradeClockFlag.get()).subscribe(tick -> {
-			centralClock.tryEmitNext(counter.getAndIncrement());
+		Flux.interval(simPeriodicity).filter(f -> simClockToggleFlag.get()).subscribe(tick -> {
+			simulationClockStream.tryEmitNext(simClockCounter.getAndIncrement());
 		});
 		
-		return centralClock.asFlux();
+		return simulationClockStream.asFlux();
 	}
 
 	public void toggleSimulationClock() {
-		boolean flag = this.tradeClockFlag.get();
-		this.tradeClockFlag.set(!flag);
+		boolean flag = this.simClockToggleFlag.get();
+		this.simClockToggleFlag.set(!flag);
 	}
 
 	// This stream is used to pass stock order (requesting)
@@ -57,15 +58,15 @@ public class ReactorStreamConfig {
 	Flux<StockOrder> stockOrderFlux() {
 		return this.stockOrderStream().asFlux();
 	}
-
+	
 	@Bean
-	Sinks.Many<StockExchangeConfigurator> stockStream() {
+	Sinks.Many<ShareInfo> shareInfoStream(){
 		return Sinks.many().multicast().directBestEffort();
 	}
-
+	
 	@Bean
-	Flux<StockExchangeConfigurator> stockFlux() {
-		return this.stockStream().asFlux();
+	Flux<ShareInfo> shareInfoFlux(){
+		return this.shareInfoStream().asFlux();
 	}
 
 }

@@ -10,65 +10,68 @@ public class StockOrder {
 		BUY, SELL, SHORT, COVER
 	}
 
-	private double bidPrice; 
-	private double numOfShares; 
-	private final UUID orginator;
-	private final type orderType;
-	private final long timeRequested;
-	private ActState orderStatus;
+	private final type ot;
+	private ActState orderState;
 
-	public StockOrder(UUID originator, type orderType, double bidPrice, double numShare, long simTimeRequested) {
+	private final double bidPrice, numOfShares;
+	private final String orignatorUUID, type;
+	private String status;
 
-		this.orginator = originator;
-		this.orderType = orderType;
+	public StockOrder(UUID originator, type orderType, double bidPrice, double numShare) {
+
+		this.orignatorUUID = "Hedgie_" + originator.toString();
+
 		this.bidPrice = bidPrice;
 		this.numOfShares = numShare;
-		this.timeRequested = simTimeRequested;
-		this.orderStatus = ActState.START; 
-	}
 
+		this.type = orderType.toString();
+
+		this.ot = orderType;
+		this.status = ActState.START.toString();
+		this.orderState = ActState.START;
+
+	}
+	
 	public void changeStatus(ActState s) {
-		this.orderStatus = s;
-	}
-
-	public ActState getStatus() {
-		return this.orderStatus;
-	}
- 
-
-	public long getTimeRequested() {
-		return timeRequested;
-	}
-
-	public double getBidPrice() {
-		return bidPrice;
-	} 
-
-	public double getNumShare() {
-		return numOfShares;
-	}
-
-	public UUID getOrginator() {
-		return orginator;
+		this.orderState = s;
+		this.status = s.toString();
 	}
 
 	public type getOrderType() {
-		return orderType;
+		return this.ot;
 	}
 	
+	public ActState getActState() {
+		return this.orderState;
+	}
+
+	public ActState getOrderState() {
+		return orderState;
+	}
+
+
+	public double getBidPrice() {
+		return bidPrice;
+	}
+
+
 	public double getNumOfShares() {
 		return numOfShares;
 	}
 
-	public ActState getOrderStatus() {
-		return orderStatus;
+
+	public String getOrignatorUUID() {
+		return orignatorUUID;
 	}
-	
-	public void setBidPrice(double bidPrice) {
-		this.bidPrice = bidPrice;
+
+
+	public String getType() {
+		return type;
 	}
-	
- 
- 
+
+
+	public String getStatus() {
+		return status;
+	}
 
 }

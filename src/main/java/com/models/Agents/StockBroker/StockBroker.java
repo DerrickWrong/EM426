@@ -4,7 +4,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.configurations.StockExchangeConfigurator;
@@ -19,18 +18,15 @@ import reactor.core.publisher.Sinks;
 public class StockBroker {
 
 	@Autowired
-	@Qualifier("stockOrderFlux")
 	Flux<StockOrder> stockOrderStream;
 
 	@Autowired
-	@Qualifier("tradingClock")
 	Flux<Long> tradingClockFlux;
 
 	@Autowired
 	StockExchangeConfigurator stonk;
 
 	@Autowired
-	@Qualifier("stockOrderStream")
 	Sinks.Many<StockOrder> completedOrderStream;
 	
 	Queue<StockOrder> ordersQueue = new ConcurrentLinkedQueue<>();
@@ -41,7 +37,7 @@ public class StockBroker {
 		this.stockOrderStream.filter(order -> {
 		
 			// only accept unprocessed orders
-			return order.getStatus() == ActState.PENDING;
+			return order.getActState() == ActState.PENDING;
 		
 		}).subscribe(order -> {
 

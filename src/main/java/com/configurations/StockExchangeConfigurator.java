@@ -3,11 +3,13 @@ package com.configurations;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.models.demands.Share;
+import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 
 import em426.api.ActState;
@@ -21,6 +23,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 // In the future, this class will be @Prototype to support multiple stocks
 @Configuration
@@ -42,8 +46,17 @@ public class StockExchangeConfigurator {
 	@Value("${insititueRatio}")
 	private double instituteR;
 
+	@Value("${shortedRatio}")
+	private double shortedRatio;
+
+	@Autowired
+	private Sinks.Many<ShareInfo> shareInfoStream;
+
+	@Autowired
+	private Flux<Long> simulationClock;
+
 	public enum Category {
-		INSIDER, INSTITUTE, FLOAT;
+		INSIDER, INSTITUTE, FLOAT, SHORTED;
 	}
 
 	private final DoubleProperty currentPrice = new SimpleDoubleProperty(0.0);
@@ -52,10 +65,12 @@ public class StockExchangeConfigurator {
 
 	private final DoubleProperty insiderProperty = new SimpleDoubleProperty(0.0);
 	private final DoubleProperty instProperty = new SimpleDoubleProperty(0.0);
+	private final DoubleProperty shortProperty = new SimpleDoubleProperty(0.0);
 
 	private final ObservableList<PieChart.Data> stockHoldingDistribution = FXCollections.observableArrayList();
 	private PieChart.Data insiderRatio = new PieChart.Data(Category.INSIDER.toString().toLowerCase(), 0);
 	private PieChart.Data institutionRatio = new PieChart.Data(Category.INSTITUTE.toString().toLowerCase(), 0);
+	private PieChart.Data shortedInterestRatio = new PieChart.Data(Category.SHORTED.toString().toLowerCase(), 0);
 	private PieChart.Data floatingRatio = new PieChart.Data(Category.FLOAT.toString().toLowerCase(), 0);
 
 	// Floating Share Priority Queue
@@ -67,6 +82,19 @@ public class StockExchangeConfigurator {
 		this.symbol.setValue(stockName);
 		this.currentPrice.setValue(this.stockPrice);
 		this.currVolume.setValue(this.stockVolume);
+		
+		ShareInfo info = new ShareInfo(this.symbol.get(), this.currentPrice.get(), this.currVolume.get());
+
+		// emit stock price
+		this.simulationClock.subscribe(t -> {
+
+			info.setCurrPrice(this.currentPrice.get());
+			info.setInsiderShares(this.insiderProperty.get());
+			info.setInstituShares(this.instProperty.get());
+			info.setShortedShares(this.shortProperty.get()); 
+			this.shareInfoStream.tryEmitNext(info);
+
+		}); 
 
 		this.stockHoldingDistribution.addAll(insiderRatio, institutionRatio, floatingRatio);
 
@@ -95,9 +123,20 @@ public class StockExchangeConfigurator {
 			}
 		});
 
+		this.shortProperty.addListener(new ChangeListener<Number>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				shortedInterestRatio.setPieValue(newValue.doubleValue());
+
+			}
+
+		});
+
 		this.insiderProperty.setValue(insiderR);
 		this.instProperty.setValue(instituteR);
-		this.floatingRatio.setPieValue(100.0 - (insiderR + instituteR));
+		this.shortProperty.setValue(shortedRatio);
+		this.floatingRatio.setPieValue(100.0 - (insiderR + instituteR + shortedRatio));
 	}
 
 	// All stock trading happens here*
@@ -117,25 +156,23 @@ public class StockExchangeConfigurator {
 					// only when the bidding price higher than or equal to the current price will be
 					// processed
 					double purchasingNumOfShare = order.getNumOfShares();
-					
+
 					if (currShare.getQuantity() < purchasingNumOfShare) {
 
-						// partially executed b/c not enough share
-						order.setBidPrice(currShare.getPrice()); 
-						
+						// partially executed b/c not enough share  
 						order.changeStatus(ActState.PARTIAL);
-						
-						// TODO - BUGGGG Need to figure out how to move to next iteration and execute the remaining order.
+
+						// TODO - BUGGGG Need to figure out how to move to next iteration and execute
+						// the remaining order.
 						continue;
 					} else {
 						// fully executed
 						double newCurrShareNum = currShare.getQuantity() - purchasingNumOfShare;
 						currShare.setQuantity(newCurrShareNum);
-						this.floatingShareQueue.add(currShare);
-						order.setBidPrice(currShare.getPrice());
+						this.floatingShareQueue.add(currShare); 
 						order.changeStatus(ActState.COMPLETE);
 					}
-					
+
 					// update the pie chart if the order is fully/partial executed
 					double float2Reduce = purchasingNumOfShare / this.currVolume.get();
 					double newFloRatio = this.floatingRatio.getPieValue() - float2Reduce;
@@ -155,27 +192,8 @@ public class StockExchangeConfigurator {
 		} else {
 			// sell or short - increase the floating shares (This is where demand gets
 			// created!)
-
-			if (order.getBidPrice() < this.currentPrice.doubleValue()) {
-				this.currentPrice.setValue(order.getBidPrice());
-			}
-
-			// update the piechart
-			// This is where the magic happens (The hedgie can borrow more than the
-			// institutional investors have).
-			double intRatio2Reduce = order.getNumShare() / this.currVolume.get() * 100.0;
-			double newInsRatio = this.institutionRatio.getPieValue() - intRatio2Reduce;
-			double newFloRatio = this.floatingRatio.getPieValue() + intRatio2Reduce;
-			this.institutionRatio.setPieValue(newInsRatio);
-			this.floatingRatio.setPieValue(newFloRatio);
-
-			// create the shares
-			Share shortSellShares = new Share(this);
-			shortSellShares.setPrice(order.getBidPrice());
-			shortSellShares.setOwner(order.getOrginator());
-			shortSellShares.setQuantity(order.getNumShare());
-			this.floatingShareQueue.add(shortSellShares); // flood the market with shares
-			order.changeStatus(ActState.COMPLETE);
+ 
+		 
 		}
 
 		return order;

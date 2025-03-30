@@ -29,9 +29,9 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Simulate">
             <items>
-              <MenuItem mnemonicParsing="false" text="Start" />
-                  <MenuItem mnemonicParsing="false" text="Pause" />
-                  <MenuItem mnemonicParsing="false" text="Stop" />
+              <MenuItem mnemonicParsing="false" onAction="#startSimulationClicked" text="Start" />
+                  <MenuItem mnemonicParsing="false" onAction="#onPauseClicked" text="Pause" />
+                  <MenuItem mnemonicParsing="false" onAction="#clickViewDemands" text="View Demands " />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
@@ -96,11 +96,6 @@
             <Insets />
          </BorderPane.margin>
          <children>
-            <Button mnemonicParsing="false" onAction="#pushDemandClicked" prefWidth="100.0" text="Push Demand">
-               <HBox.margin>
-                  <Insets right="50.0" />
-               </HBox.margin>
-            </Button>
             <Label prefWidth="50.0" text="Step:">
                <HBox.margin>
                   <Insets right="10.0" />

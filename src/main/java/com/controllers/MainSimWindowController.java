@@ -28,6 +28,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -56,7 +57,6 @@ public class MainSimWindowController {
 	Scheduler fxScheduler;
 
 	@Autowired
-	@Qualifier("tradingClock")
 	Flux<Long> tradingClockFlux;
 
 	@Autowired
@@ -107,7 +107,7 @@ public class MainSimWindowController {
 
 		this.orderSink.asFlux().filter(o -> {
 
-			return o.getOrderStatus() == ActState.COMPLETE;
+			return o.getActState() == ActState.COMPLETE;
 
 		}).subscribe(order -> {
 
@@ -180,22 +180,40 @@ public class MainSimWindowController {
 	}
 
 	@FXML
+	public void startSimulationClicked() {
+
+		this.simulationStarted = true;
+
+		this.reactorConfig.toggleSimulationClock();
+
+		this.simulatedBtn.setText("Pause");
+	}
+
+	@FXML
+	public void onPauseClicked() {
+
+		this.simulationStarted = false;
+
+		this.reactorConfig.toggleSimulationClock();
+
+		this.simulatedBtn.setText("Simulate");
+	}
+
+	@FXML
 	public void onStepClicked() {
 
 		reactorConfig.stepToggleClock();
 	}
 
-	double price = 22;
-
 	@FXML
-	public void pushDemandClicked() {
-
-		// test stock demand
-		UUID u = UUID.randomUUID();
-		StockOrder shortOrder = new StockOrder(u, StockOrder.type.SELL, price, 100000000, 1);
-		this.orderSink.tryEmitNext(shortOrder);
-		price = price * 0.8;
-
+	public void clickViewDemands() throws IOException {
+  
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/StockOrderWindow.fxml");
+		BorderPane bp = loader.load();
+		Stage newStage = SpringFXManager.getInstance().getSubStage();
+		newStage.setTitle("Transactions - Stock Orders");
+		newStage.setScene(new Scene(bp));
+		newStage.show();
+		
 	}
-
 }

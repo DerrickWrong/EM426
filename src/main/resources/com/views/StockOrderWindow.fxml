@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.StockOrderController">
+   <center>
+      <VBox alignment="CENTER" prefHeight="387.0" prefWidth="580.0">
+         <children>
+            <Label prefHeight="40.0" prefWidth="174.0" text="Stock Orders (Demands)">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Label>
+            <TableView fx:id="orderDemandTable" prefHeight="323.0" prefWidth="508.0">
+              <columns>
+                <TableColumn fx:id="orderTypeCol" prefWidth="111.5" text="Order Type" />
+                <TableColumn fx:id="uuidCol" prefWidth="122.0" text="Originator (UUID)" />
+                  <TableColumn fx:id="bidPriceCol" prefWidth="111.5" text="Bid Price ($)" />
+                  <TableColumn fx:id="volumeCol" minWidth="0.0" prefWidth="133.5" text="Volume (# of Shares)" />
+                  <TableColumn fx:id="statusCol" prefWidth="86.0" text="Status" />
+              </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

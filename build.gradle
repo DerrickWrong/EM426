@@ -41,7 +41,12 @@ dependencies{
 	// https://mvnrepository.com/artifact/com.github.pnavais/state-machine
 	implementation 'com.github.pnavais:state-machine:1.2.0'
 	
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-math4-core
+	implementation 'org.apache.commons:commons-math4-core:4.0-beta1'
+	  
+	
 }
+
 
 test {
     // Enable JUnit 5 (Gradle 4.6+).
