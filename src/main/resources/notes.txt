@@ -1,6 +1,7 @@
 Stock buy/sell behavior can be explained by Keyesian Beauty Contest. It is 
 also a zero sum game. The big players are the hedgies and mutual funds. 
 
+define the simulator - (audience? hedgie? ape?)
 
 base scenario - 
 
@@ -24,3 +25,7 @@ Features
 You could have a bunch of agents and stock orders. Then, each stock exchange could
 act as individual simulator to process these demands. (TODO - build a diagram to 
 illustrate the relationships) 
+
+(per Bryan's recommendations)
+decouple information between stock and agent
+heterogenous behaviors of the agent (retail, hedgie and mutual funds)

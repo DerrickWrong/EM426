@@ -36,7 +36,8 @@ public class AgentStateConfig {
 				.from(ApeState.OBSERVE).to(ApeState.BUY).on(ApeState.BUYMOREMESSAGE)
 				.from(ApeState.BUY).to(ApeState.HOLD).on(Messages.EMPTY)
 				.from(ApeState.HOLD).to(ApeState.SELL).on(ApeState.SELLMESSAGE)
-				.from(ApeState.HOLD).to(ApeState.BUY).on(ApeState.BUYMOREMESSAGE).build();	
+				.from(ApeState.HOLD).to(ApeState.BUY).on(ApeState.BUYMOREMESSAGE)
+				.from(ApeState.SELL).to(ApeState.BUY).on(ApeState.BUYMOREMESSAGE).build();	
 	}
 	
 	// Hedgie(s?) States
@@ -101,7 +102,6 @@ public class AgentStateConfig {
 	}
 	
 	@Bean
-	@Scope("prototype")
 	StateMachine InstitutionalStateMachine() {
 		
 		// See Institutional Investor diagram for more information
@@ -112,6 +112,39 @@ public class AgentStateConfig {
 				.from(IInvestorState.BUY).to(IInvestorState.IDLE).on(Messages.EMPTY).build();
 	}
 	
+	public static class MarketState{
+		
+		public static State IDLE = new State("Market IDLE");
+		public static State SELL1P = new State("Market selling 1%");
+		public static State SELL5P = new State("Market selling 5%");
+		public static State SELL10P = new State("Market selling 10%");
+		public static State BUY1P = new State("Market buying 1%");
+		public static State BUY5P = new State("Market buying 5%");
+		public static State BUY10P = new State("Market buying 10%");
+		
+		public static String BACK2IDLE = "IDLE";
+		public static String SELLNOW = "Sell";
+		public static String BUYNOW = "Buy";
+		public static String NEXTSTATE = "NEXT";
+	}
+	
+	@Bean
+	StateMachine MarketStateMachine() {
+		return StateMachine.newBuilder()
+				.from(MarketState.IDLE).to(MarketState.SELL1P).on(MarketState.SELLNOW)
+				.from(MarketState.SELL1P).to(MarketState.SELL5P).on(MarketState.NEXTSTATE)
+				.from(MarketState.SELL5P).to(MarketState.SELL10P).on(MarketState.NEXTSTATE)
+				.from(MarketState.SELL10P).to(MarketState.IDLE).on(MarketState.BACK2IDLE)
+				.from(MarketState.SELL5P).to(MarketState.IDLE).on(MarketState.BACK2IDLE)
+				.from(MarketState.SELL1P).to(MarketState.IDLE).on(MarketState.BACK2IDLE)
+				.from(MarketState.IDLE).to(MarketState.BUY1P).on(MarketState.BUYNOW)
+				.from(MarketState.BUY1P).to(MarketState.BUY5P).on(MarketState.NEXTSTATE)
+				.from(MarketState.BUY5P).to(MarketState.BUY10P).on(MarketState.NEXTSTATE)
+				.from(MarketState.BUY10P).to(MarketState.IDLE).on(MarketState.BACK2IDLE)
+				.from(MarketState.BUY5P).to(MarketState.IDLE).on(MarketState.BACK2IDLE)
+				.from(MarketState.BUY1P).to(MarketState.IDLE).on(MarketState.BACK2IDLE).build();
+	}
+
 	// Listing Company State
 
 }

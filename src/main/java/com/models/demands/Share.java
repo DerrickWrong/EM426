@@ -1,20 +1,38 @@
 package com.models.demands;
   
 
-import com.configurations.StockExchangeConfigurator; 
- 
+import java.util.UUID;
 
-// This is the supply?
+import com.configurations.StockExchangeConfigurator;
+
+import em426.api.SupplyState; 
+ 
+ 
 public class Share {
 
-	final StockExchangeConfigurator stock;
+	StockExchangeConfigurator stock;
 	Double price, quantity;
-	String owner; 
-
+	UUID owner; 
+	SupplyState state;
+ 
 	public Share(StockExchangeConfigurator stock) {
 		this.stock = stock;
 	}
+	
+	public Share(UUID owner, double price, double quantity) {
+		this.owner = owner;
+		this.price = price;
+		this.quantity = quantity;
+		this.state = SupplyState.ACTIVE;
+	}
+	
+	public SupplyState getState() {
+		return state;
+	}
 
+	public void setState(SupplyState state) {
+		this.state = state;
+	}
 	public Double getPrice() {
 		return price;
 	}
@@ -31,11 +49,11 @@ public class Share {
 		this.quantity = quantity;
 	}
 
-	public String getOwner() {
+	public UUID getOwner() {
 		return owner;
 	}
 
-	public void setOwner(String owner) {
+	public void setOwner(UUID owner) {
 		this.owner = owner;
 	}
  

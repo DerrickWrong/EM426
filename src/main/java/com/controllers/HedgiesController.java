@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
-import com.models.Agents.HedgeFund.Hedgie;
+import com.models.Agents.Hedgie;
 
 import jakarta.annotation.PostConstruct;
 import javafx.fxml.FXML;

@@ -1,4 +1,4 @@
-package com.models.Agents.HedgeFund;
+package com.models.Agents;
 
 import java.time.Duration;
 
@@ -13,6 +13,7 @@ import com.github.pnavais.machine.api.message.Messages;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
+import com.utils.HelperFn;
 
 import em426.agents.Agent;
 import em426.api.ActState;
@@ -29,16 +30,16 @@ public class Hedgie extends Agent {
 	private double shortBidPercent = 0.95;
 	private double marginReqPercent = 0.5;
 	private int numberOfDump = 10; // default is 10 (1 is to short everythign at once)
-	private int counter = numberOfDump;
-	
+
 	private double currSellingPrice;
+	private double borrowedShares;
 
 	private DoubleProperty balance = new SimpleDoubleProperty(originalPrinciple);
 	private DoubleProperty currBalance = new SimpleDoubleProperty(0);
 	private DoubleProperty borrow2ShortRatio = new SimpleDoubleProperty(50); // % to borrow from institutional investors
 	private DoubleProperty trigger2Cover = new SimpleDoubleProperty(50); // need to sell more or pay a higher premium
-	private DoubleProperty getMarginCall = new SimpleDoubleProperty(80); // % of loss to trigger margin call
-	private DoubleProperty cashoutProfitAt = new SimpleDoubleProperty(30); // % of profit to trigger a cashout
+	private DoubleProperty getMarginCall = new SimpleDoubleProperty(-0.5); // % of loss to trigger margin call
+	private DoubleProperty cashoutProfitAt = new SimpleDoubleProperty(0.3); // % of profit to trigger a cashout
 
 	@Autowired
 	Sinks.Many<StockOrder> orderSink;
@@ -52,7 +53,7 @@ public class Hedgie extends Agent {
 	@Autowired
 	@Qualifier("HedgieStateMachine")
 	StateMachine stateMachine;
-	
+
 	@Autowired
 	StockExchangeConfigurator stockExchange;
 
@@ -60,13 +61,30 @@ public class Hedgie extends Agent {
 	public void init() {
 
 		double fund = this.originalPrinciple / this.numberOfDump;
+		
+		stateMachine.send(Messages.EMPTY);
 
 		this.shareInfoFlux.sample(Duration.ofSeconds(10)).subscribe(s -> {
 
-			if (stateMachine.getCurrent() == HedgieState.IDLE) {
+			if (stateMachine.getCurrent() == HedgieState.BNS) {
 
 				this.shortingStock(fund, s);
 			}
+		
+			double der = HelperFn.getDerivative(this.currSellingPrice, s.getCurrentPrice(), 1);
+			double stat = (der / this.currSellingPrice);
+			 
+			if(stat > 0 && stat >= cashoutProfitAt.get()) {
+				// cover position
+				this.coverPosition(fund, s);
+				System.out.println("Hedgie cash out and bye");
+			}
+			
+			if(stat < 0 && stat < getMarginCall.get()) {
+				
+				System.out.println("Hedgie got margin call. uh oh");
+			}
+			
 
 		});
 
@@ -77,15 +95,13 @@ public class Hedgie extends Agent {
 
 		}).subscribe(po -> {
 
-			if(this.stockExchange.peekStockShare().getPrice() == this.currSellingPrice) {
+			if (this.stockExchange.peekStockShare().getPrice() < this.currSellingPrice) {
+				
 				return; // can't short more stock until supply has been consumed
 			}
-			 
-			this.counter = this.counter - 1;
-			
-			if (this.counter > 0) {
-				stateMachine.send(HedgieState.IDLEMSG);
-			}
+
+			stateMachine.send(HedgieState.IDLEMSG);
+
 		});
 
 	}
@@ -106,6 +122,10 @@ public class Hedgie extends Agent {
 
 		// move to BNS state
 		stateMachine.send(Messages.EMPTY);
+	}
+	
+	private void coverPosition(double fund, ShareInfo s) {
+		
 	}
 
 	public DoubleProperty getBalance() {

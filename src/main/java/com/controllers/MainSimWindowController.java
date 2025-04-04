@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import com.SpringFXManager;
 import com.configurations.ReactorStreamConfig;
 import com.configurations.StockExchangeConfigurator;
-import com.models.Agents.HedgeFund.Hedgie;
-import com.models.Agents.StockBroker.StockBroker;
+import com.models.Agents.Hedgie;
+import com.models.Agents.StockBroker;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import jakarta.annotation.PostConstruct;
@@ -85,7 +85,7 @@ public class MainSimWindowController {
 		supplySeries.setName("Market(Supply)");
 		demandSeries.setName("Hedgies(Demand)");
 		agentSeries.setName("Apes(Agents)");
-
+		
 		this.hedgieVsApesPlot.getData().addAll(supplySeries, demandSeries, agentSeries);
 
 		this.stockPricePlot.getData().addAll(this.priceSeries);
