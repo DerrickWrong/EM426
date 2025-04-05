@@ -22,7 +22,7 @@ public class StockOrder {
 
 	private final long orderRequestedAtTime;
 
-	private long sellOrderExpirationTime = 160L; // 5 days listing with 160 ticks per 15 min for sell order
+	private long orderExpirationTime = 160L; // 5 days listing with 160 ticks per 15 min for sell order
 
 	public final static StockOrder INVALID = new StockOrder(null, null, 0.0, 0, null, 0L);
 
@@ -96,11 +96,11 @@ public class StockOrder {
 	}
 
 	public long getSellOrderExpirationTime() {
-		return sellOrderExpirationTime;
+		return orderExpirationTime;
 	}
 
 	public void setSellOrderExpirationTime(long sellOrderExpirationTime) {
-		this.sellOrderExpirationTime = sellOrderExpirationTime;
+		this.orderExpirationTime = sellOrderExpirationTime;
 	}
 
 }

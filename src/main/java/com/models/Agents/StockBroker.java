@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.configurations.StockExchangeConfigurator;
+import com.models.StockExchange;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 
@@ -35,7 +35,7 @@ public class StockBroker extends Agent {
 	Flux<Long> tradingClockFlux;
 
 	@Autowired
-	StockExchangeConfigurator stonk;
+	StockExchange wallStreet;
 
 	@Autowired
 	@Qualifier("completedOrder")
@@ -108,10 +108,10 @@ public class StockBroker extends Agent {
 				StockOrder ord = this.ordersQueue.poll();
 
 				// meet the demand
-				ord = stonk.processStockOrder(ord);
+				//ord = stonk.processStockOrder(ord);
 
 				// notify the buyer/seller
-				completedOrderStream.tryEmitNext(ord);
+				//completedOrderStream.tryEmitNext(ord);
 			}
 
 		});

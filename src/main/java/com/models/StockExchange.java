@@ -1,13 +1,12 @@
 package com.models;
 
-import java.time.Duration;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.models.demands.Share;
 import com.models.demands.StockOrder;
+import com.models.demands.StockOrder.type;
 
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
@@ -17,12 +16,13 @@ import reactor.core.publisher.Sinks;
 @Component
 public class StockExchange {
 
-	private Long delayForBuyOrder = 5L; // to be changed
-
 	private final ListingStock stockListing = new ListingStock();
 
 	Sinks.Many<Pair<Long, StockOrder>> internalBuySink = Sinks.many().multicast().directBestEffort();
-
+	
+	@Autowired
+	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink;
+	
 	@Autowired
 	@Qualifier("completedOrder")
 	Sinks.Many<StockOrder> completedOrderSink;
@@ -30,11 +30,35 @@ public class StockExchange {
 	@PostConstruct
 	void init() {
 
-		this.internalBuySink.asFlux().delayElements(Duration.ofSeconds(this.delayForBuyOrder)).subscribe(p -> {
-
+		// buy & cover orders only 
+		this.internalBuySink.asFlux().filter(p->{
+			
+			StockOrder order = p.getValue();
+			
+			return order.getOrderType() == type.BUY || order.getOrderType() == type.COVER;
+			
+		}).subscribe(p -> {
+			
+			// check expiration date TODO
+			//long timestamp = p.getKey();
+			
 			this.processImmediateBuyOrder(p.getKey(), p.getValue());
 
 		});
+		
+		// process sell or short orders
+		this.sellOrShortOrderSink.asFlux().filter(p->{
+			
+			StockOrder order = p.getValue();
+			
+			return order.getOrderType() == type.SELL || order.getOrderType() == type.SHORT;
+			
+		}).subscribe(p->{
+			
+			this.stockListing.registerShareAndSellOrder(p.getKey(), p.getValue());
+			
+		});
+		
 
 	}
 
@@ -44,7 +68,7 @@ public class StockExchange {
 
 			StockOrder currSellOrder = this.stockListing.sellOrderQueue.peek();
 			Share currSellingShares = this.stockListing.sellingSharesQueue.peek();
-
+			
 			// compute the updates
 			Share buyerShare = this.stockListing.computeBuyersShares(currSellOrder, BuyerOrder);
 			Share sellerShare = this.stockListing.computeSellerShares(currSellOrder, BuyerOrder, currSellingShares);
@@ -89,6 +113,10 @@ public class StockExchange {
 	// method to process short, cover and sell orders
 	public void registerSellorShortOrder(Share shares, StockOrder sellOrder) {
 		this.stockListing.registerShareAndSellOrder(shares, sellOrder);
+	}
+	
+	public ListingStock getStockListing() {
+		return stockListing;
 	}
 
 }

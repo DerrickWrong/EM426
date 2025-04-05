@@ -33,6 +33,7 @@
               <MenuItem mnemonicParsing="false" onAction="#startSimulationClicked" text="Start" />
                   <MenuItem mnemonicParsing="false" onAction="#onPauseClicked" text="Pause" />
                   <MenuItem mnemonicParsing="false" onAction="#clickViewDemands" text="View Demands " />
+                  <MenuItem mnemonicParsing="false" onAction="#clickConfig" text="Change Config" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">

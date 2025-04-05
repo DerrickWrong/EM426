@@ -55,6 +55,12 @@ public class ListingStock {
 		}
 	}
 	 
+	public void checkExpirations(Long currTimestamp) {
+		
+		//TODO write code to verify the content is still valid
+		
+		
+	}
 
 	// Helper function to create buyer shares
 	public Share computeBuyersShares(StockOrder sellerOrder, StockOrder buyersOrder) {

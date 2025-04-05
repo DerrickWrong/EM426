@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import com.configurations.AgentStateConfig.MarketState;
-import com.configurations.StockExchangeConfigurator;
+import com.configurations.AgentStateConfig.MarketState; 
 import com.github.pnavais.machine.StateMachine;
-import com.github.pnavais.machine.model.State; 
+import com.github.pnavais.machine.model.State;
+import com.models.StockExchange;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
@@ -49,7 +49,7 @@ public class Market extends Agent {
 	StateMachine MarketStateMachine;
 
 	@Autowired
-	StockExchangeConfigurator stockExchange;
+	StockExchange wallStreet;
 
 	@Autowired
 	Flux<ShareInfo> shareInfoFlux;

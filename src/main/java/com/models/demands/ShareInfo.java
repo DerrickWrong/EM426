@@ -13,9 +13,22 @@ import javafx.beans.property.StringProperty;
 public class ShareInfo implements DemandAPI{
 	
 	private double currentPrice, currVolume;
-	private String symbol;
 	
 	private double insiderShares, instituShares, shortedShares, floatingShares, apeShares;
+	
+	private final long timestamp;
+ 
+	public ShareInfo(double price, double vol, long timestamp) {
+
+		this.currentPrice = price;
+		this.currVolume = vol;
+		this.timestamp = timestamp;
+	}
+	
+	public long getTimestamp() {
+		return timestamp;
+	}
+
 	
 	public double getApeShares() {
 		return apeShares;
@@ -23,12 +36,6 @@ public class ShareInfo implements DemandAPI{
 
 	public void setApeShares(double apeShares) {
 		this.apeShares = apeShares;
-	}
-
-	public ShareInfo(String symbol, double price, double vol) {
-		this.symbol = symbol;
-		this.currentPrice = price;
-		this.currVolume = vol;
 	}
 
 	public void setCurrPrice(double price) {
@@ -75,10 +82,6 @@ public class ShareInfo implements DemandAPI{
 		return currVolume;
 	}
 
-	public String getSymbol() {
-		return symbol;
-	}
-
 	@Override
 	public UUID getId() {
 		// TODO Auto-generated method stub
@@ -100,7 +103,7 @@ public class ShareInfo implements DemandAPI{
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return this.symbol;
+		return "";
 	}
 
 	@Override

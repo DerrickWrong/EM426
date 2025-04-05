@@ -7,13 +7,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.configurations.AgentStateConfig.HedgieState;
-import com.configurations.StockExchangeConfigurator;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.api.message.Messages;
+import com.models.StockExchange;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.HelperFn;
+import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;
 import em426.api.ActState;
@@ -57,36 +58,35 @@ public class Hedgie extends Agent {
 	StateMachine stateMachine;
 
 	@Autowired
-	StockExchangeConfigurator stockExchange;
+	StockExchange stockExchange;
 
 	@PostConstruct
 	public void init() {
 
 		double fund = this.originalPrinciple / this.numberOfDump;
-		
+
 		stateMachine.send(Messages.EMPTY);
 
-		this.shareInfoFlux.sample(Duration.ofSeconds(10)).subscribe(s -> {
+		this.shareInfoFlux.subscribe(s -> {
 
 			if (stateMachine.getCurrent() == HedgieState.BNS) {
 
 				this.shortingStock(fund, s);
 			}
-		
+
 			double der = HelperFn.getDerivative(this.currSellingPrice, s.getCurrentPrice(), 1);
 			double stat = (der / this.currSellingPrice);
-			 
-			if(stat > 0 && stat >= cashoutProfitAt.get()) {
+
+			if (stat > 0 && stat >= cashoutProfitAt.get()) {
 				// cover position
 				this.coverPosition(fund, s);
 				System.out.println("Hedgie cash out and bye");
 			}
-			
-			if(stat < 0 && stat < getMarginCall.get()) {
-				
+
+			if (stat < 0 && stat < getMarginCall.get()) {
+
 				System.out.println("Hedgie got margin call. uh oh");
 			}
-			
 
 		});
 
@@ -97,8 +97,9 @@ public class Hedgie extends Agent {
 
 		}).subscribe(po -> {
 
-			if (this.stockExchange.peekStockShare().getPrice() < this.currSellingPrice) {
-				
+			StockOrder currOrder = this.stockExchange.getStockListing().sellOrderQueue.peek();
+
+			if (currOrder.getUUID() == this.getId()) {
 				return; // can't short more stock until supply has been consumed
 			}
 
@@ -112,11 +113,13 @@ public class Hedgie extends Agent {
 
 		// kick off the simulation by sending shorting order
 		currSellingPrice = shortBidPercent * s.getCurrentPrice();
-		double share2Short = Math.round(fund / (marginReqPercent * s.getCurrentPrice()));
+		int share2Short = (int) Math.round(fund / (marginReqPercent * s.getCurrentPrice()));
 		balance.set(fund - share2Short * s.getCurrentPrice());
-		//StockOrder order = new StockOrder(this.getId(), type.SHORT, currSellingPrice, share2Short, "Hedgie");
 
-		//this.orderSink.tryEmitNext(order);
+		StockOrder order = new StockOrder(this.getId(), type.SHORT, currSellingPrice, share2Short,
+				SimAgentTypeEnum.Hedgie, s.getTimestamp());
+
+		// this.orderSink.tryEmitNext(order);
 		this.balance.set(this.balance.get() - fund);
 
 		System.out.println("Hedgie: selling " + share2Short + " which is " + (100.0 * share2Short / s.getCurrVolume())
@@ -125,9 +128,9 @@ public class Hedgie extends Agent {
 		// move to BNS state
 		stateMachine.send(Messages.EMPTY);
 	}
-	
+
 	private void coverPosition(double fund, ShareInfo s) {
-		
+
 	}
 
 	public DoubleProperty getBalance() {

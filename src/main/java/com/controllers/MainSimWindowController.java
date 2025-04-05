@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
-import com.configurations.ReactorStreamConfig;
-import com.configurations.StockExchangeConfigurator;
+import com.configurations.ReactorStreamConfig; 
 import com.models.Agents.Hedgie;
 import com.models.Agents.StockBroker;
 import com.models.demands.ShareInfo;
@@ -24,6 +23,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -72,14 +72,13 @@ public class MainSimWindowController {
 	@FXML
 	PieChart pieChart;
 
-	@Autowired
-	StockExchangeConfigurator stockConfig;
+ 
 
 	@FXML
 	public void initialize() {
 
 		// setup pie chart
-		this.pieChart.setData(stockConfig.getStockHoldingDistribution());
+		//this.pieChart.setData(stockConfig.getStockHoldingDistribution());
 		this.pieChart.setTitle("Share Distribution");
 
 		supplySeries.setName("Market(Supply)");
@@ -204,6 +203,18 @@ public class MainSimWindowController {
 		newStage.setTitle("Transactions - Stock Orders");
 		newStage.setScene(new Scene(bp));
 		newStage.show();
-
 	}
+	
+	@FXML
+	public void clickConfig() throws IOException {
+		
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/ConfigurationWindow.fxml");
+		Pane p = loader.load();
+		Stage ns = SpringFXManager.getInstance().getSubStage();
+		ns.setTitle("Configuration");
+		ns.setScene(new Scene(p));
+		ns.show();
+		
+	}
+	
 }

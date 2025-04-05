@@ -7,8 +7,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
+
+import javafx.util.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -77,6 +80,11 @@ public class ReactorStreamConfig {
 	@Bean
 	Flux<ShareInfo> shareInfoFlux() {
 		return this.shareInfoStream().asFlux();
+	}
+	
+	@Bean
+	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink(){
+		return Sinks.many().multicast().directBestEffort();
 	}
 
 }
