@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.configurations.StockExchangeConfigurator;
@@ -27,6 +28,7 @@ public class StockBroker extends Agent {
 	SimpleIntegerProperty buyOrderDelay = new SimpleIntegerProperty(1);
 
 	@Autowired
+	@Qualifier("stockOpenOrderFlux")
 	Flux<StockOrder> stockOrderStream;
 
 	@Autowired
@@ -36,6 +38,7 @@ public class StockBroker extends Agent {
 	StockExchangeConfigurator stonk;
 
 	@Autowired
+	@Qualifier("completedOrder")
 	Sinks.Many<StockOrder> completedOrderStream;
 
 	Queue<StockOrder> ordersQueue = new ConcurrentLinkedQueue<>();

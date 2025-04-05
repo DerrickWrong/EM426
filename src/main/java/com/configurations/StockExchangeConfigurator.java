@@ -148,20 +148,6 @@ public class StockExchangeConfigurator extends Agent {
 		this.shortProperty.setValue(shortedRatio);
 		this.floatingRatio.setPieValue(100.0 - (insiderR + instituteR + shortedRatio));
 
-		// initialize with shorted shares
-		Share shortShares = new Share(this);
-		shortShares.setPrice(this.currentPrice.get());
-		shortShares.setQuantity(this.currVolume.get() * (this.shortedInterestRatio.getPieValue() / 100.0));
-		shortShares.setOwner(this.getId());
-		this.floatingShareQueue.add(shortShares);
-
-		// initialize floating shares
-		Share initShare = new Share(this);
-		initShare.setPrice(this.currentPrice.get());
-		initShare.setQuantity(this.currVolume.get() * (this.floatingRatio.getPieValue() / 100.0));
-		initShare.setOwner(this.getId());
-		this.floatingShareQueue.add(initShare);
-
 	}
 
 	// All stock trading happens here*
@@ -184,11 +170,11 @@ public class StockExchangeConfigurator extends Agent {
 
 					if (currShare.getQuantity() < purchasingNumOfShare) {
 
-						StockOrder newOrder = new StockOrder(order.getUUID(), order.getOrderType(),
-								currShare.getQuantity(), order.getBidPrice(), "StockExchange");
-						order = newOrder;
+						//StockOrder newOrder = new StockOrder(order.getUUID(), order.getOrderType(),
+						//		currShare.getQuantity(), order.getBidPrice(), "StockExchange");
+						//order = newOrder;
 						// partially executed b/c not enough share
-						order.changeStatus(ActState.PARTIAL);
+						//order.changeStatus(ActState.PARTIAL);
 						this.floatingShareQueue.poll(); // remove
 						// TODO - BUGGGG Need to figure out how to move to next iteration and execute
 						// the remaining order.
@@ -197,11 +183,11 @@ public class StockExchangeConfigurator extends Agent {
 
 					// fully executed
 					double newCurrShareNum = currShare.getQuantity() - purchasingNumOfShare;
-					currShare.setQuantity(newCurrShareNum);
+			 /*
 					StockOrder processedOrder = StockOrder.copyConstructor(order, "StockExchange");
 					processedOrder.changeStatus(ActState.COMMITTED);
 					order = processedOrder;
-
+*/
 					// update the pie chart if the order is fully/partial executed
 					double float2Reduce = 100 * purchasingNumOfShare / this.currVolume.get();
 					this.apesProperty.set(this.apesProperty.get() + float2Reduce);
@@ -214,7 +200,7 @@ public class StockExchangeConfigurator extends Agent {
 
 					// bidding price too low
 					// put it back to the pQueue
-					order.changeStatus(ActState.INCOMPLETE);
+					//order.changeStatus(ActState.INCOMPLETE);
 					break;
 				}
 
@@ -222,48 +208,6 @@ public class StockExchangeConfigurator extends Agent {
 
 		}
 
-		// TODO - put this in a testable function
-		if (order.getOrderType() == type.SHORT) {
-
-			// This is where the magic happens :)
-			Share s = new Share(this);
-			// s.setOwner(UUID.fromString(order.getOrignatorUUID()));
-			s.setPrice(order.getBidPrice());
-			s.setQuantity(order.getNumOfShares());
-			this.floatingShareQueue.add(s);
-
-			// update current price
-			this.currentPrice.set(order.getBidPrice());
-
-			// update volume distribution
-			double new_si = 100 * order.getNumOfShares() / this.getCurrVolume().get();
-			instProperty.set(instProperty.get() - new_si);
-			shortProperty.set(shortProperty.get() + new_si);
-
-			// update the status
-			order.changeStatus(ActState.COMPLETE);
-
-			StockOrder processedOrder = StockOrder.copyConstructor(order, "StockExchange");
-			processedOrder.changeStatus(ActState.COMMITTED);
-			order = processedOrder;
-
-		}
-
-		if (order.getOrderType() == type.SELL) {
-
-			// This is where the magic happens :)
-			Share s = new Share(this);
-			// s.setOwner(UUID.fromString(order.getOrignatorUUID()));
-			s.setPrice(order.getBidPrice());
-			s.setQuantity(order.getNumOfShares());
-			this.floatingShareQueue.add(s);
-
-			// update volume
-			double new_float = 100 * order.getNumOfShares() / this.getCurrVolume().get();
-			double newFloRatio = this.floatingRatio.getPieValue() - new_float;
-			this.floatingRatio.setPieValue(newFloRatio);
-			
-		}
 
 		return order;
 	}

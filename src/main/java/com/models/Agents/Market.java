@@ -9,8 +9,7 @@ import org.springframework.stereotype.Component;
 import com.configurations.AgentStateConfig.MarketState;
 import com.configurations.StockExchangeConfigurator;
 import com.github.pnavais.machine.StateMachine;
-import com.github.pnavais.machine.model.State;
-import com.models.demands.Share;
+import com.github.pnavais.machine.model.State; 
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
@@ -62,11 +61,8 @@ public class Market extends Agent {
 	void init() {
 
 		this.stockHolding = this.stockVolume * (this.floatingRatio / 100);
-
-		Share s = new Share(this.getId(), this.initialHoldingPrice, this.stockHolding);
-
-		this.stockExchange.addShare(s);
-
+ 
+ 
 		this.shareInfoFlux.buffer(this.numTicksToObserve).subscribe(shareInfo -> {
 
 			double latestPrice = shareInfo.get(numTicksToObserve - 1).getCurrentPrice();
@@ -87,8 +83,8 @@ public class Market extends Agent {
 
 				double numShares = this.computeSharesToProcess();
 				double price = this.buyAbovePricePercentage * latestPrice;
-				StockOrder order = new StockOrder(this.getId(), type.BUY, price, numShares, "Market");
-				this.stockOrderStream.tryEmitNext(order);
+				//StockOrder order = new StockOrder(this.getId(), type.BUY, price, numShares, "Market");
+				//this.stockOrderStream.tryEmitNext(order);
 				
 				System.out.println("Market buying " + numShares + " @ $" + price);
 			}
@@ -107,8 +103,8 @@ public class Market extends Agent {
 
 				double numShares = this.computeSharesToProcess();
 				double price = this.sellBelowPricePercentage * latestPrice;
-				StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, "Market");
-				this.stockOrderStream.tryEmitNext(order);
+				//StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, "Market");
+				//this.stockOrderStream.tryEmitNext(order);
 				
 				System.out.println("Market selling " + numShares + " @ $" + price);
 			}

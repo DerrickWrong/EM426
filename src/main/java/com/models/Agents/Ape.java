@@ -98,8 +98,8 @@ public class Ape extends Agent {
 				double buyPrice = shareInfo.getCurrentPrice() * buyBidPercent.get(); // this should be a bid price
 				double numShare = this.balance.get() / buyPrice;
 
-				StockOrder order = new StockOrder(this.getId(), type.BUY, buyPrice, numShare, "Ape");
-				this.orderSink.tryEmitNext(order);
+				//StockOrder order = new StockOrder(this.getId(), type.BUY, buyPrice, numShare, "Ape");
+				//this.orderSink.tryEmitNext(order);
 
 				System.out.println("Ape buying " + numShare + " @ $" + buyPrice + " UUID - " + this.getId());
 			}
@@ -117,8 +117,8 @@ public class Ape extends Agent {
 				double sellPrice = shareInfo.getCurrentPrice() * (1.0 - (buyBidPercent.get() / 100));
 				double numShare = this.holdingshares;
 				
-				StockOrder order = new StockOrder(this.getId(), type.SELL, sellPrice, numShare, "Ape");
-				this.orderSink.tryEmitNext(order);
+				//StockOrder order = new StockOrder(this.getId(), type.SELL, sellPrice, numShare, "Ape");
+				//this.orderSink.tryEmitNext(order);
 
 				System.out.println("Ape selling " + numShare + " @ $" + sellPrice + " UUID - " + this.getId());
 			}

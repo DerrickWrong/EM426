@@ -24,9 +24,6 @@ public class StockOrderController {
 	@FXML
 	TableColumn<StockOrder, String> orderTypeCol, uuidCol, bidPriceCol, volumeCol, statusCol;
 
-	@Autowired
-	Flux<StockOrder> stockOrderFlux;
-
 	private final ObservableList<StockOrder> data = FXCollections.observableArrayList();
 	
 	@FXML
@@ -46,12 +43,6 @@ public class StockOrderController {
 	@PostConstruct
 	void init() {
 		 
-		// map the data structure to tableview for display
-		this.stockOrderFlux.publishOn(FxScheduler.fxThread()).subscribe(order -> {
-			
-			this.data.add(order);
-			
-		});
 	}
 	
 	

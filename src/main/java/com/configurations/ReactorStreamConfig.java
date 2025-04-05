@@ -22,13 +22,13 @@ public class ReactorStreamConfig {
 	AtomicBoolean simClockToggleFlag = new AtomicBoolean(false);
 
 	private Sinks.Many<Long> simulationClockStream = Sinks.many().multicast().directBestEffort();
-	
+
 	public void stepToggleClock() {
 		// Turn off the tradeClockFlag
 		simClockToggleFlag.set(false);
 		simulationClockStream.tryEmitNext(simClockCounter.getAndIncrement());
 	}
-	
+
 	@Bean
 	Flux<Long> simulationClock() {
 
@@ -38,7 +38,7 @@ public class ReactorStreamConfig {
 		Flux.interval(simPeriodicity).filter(f -> simClockToggleFlag.get()).subscribe(tick -> {
 			simulationClockStream.tryEmitNext(simClockCounter.getAndIncrement());
 		});
-		
+
 		return simulationClockStream.asFlux();
 	}
 
@@ -55,17 +55,27 @@ public class ReactorStreamConfig {
 
 	// This is the listening stream of the stock order
 	@Bean
-	Flux<StockOrder> stockOrderFlux() {
+	Flux<StockOrder> stockOpenOrderFlux() {
 		return this.stockOrderStream().asFlux();
 	}
-	
+
 	@Bean
-	Sinks.Many<ShareInfo> shareInfoStream(){
+	Sinks.Many<StockOrder> completedOrder() {
 		return Sinks.many().multicast().directBestEffort();
 	}
 	
 	@Bean
-	Flux<ShareInfo> shareInfoFlux(){
+	Flux<StockOrder> completedOrderFlux(){
+		return this.completedOrder().asFlux();
+	}
+	
+	@Bean
+	Sinks.Many<ShareInfo> shareInfoStream() {
+		return Sinks.many().multicast().directBestEffort();
+	}
+
+	@Bean
+	Flux<ShareInfo> shareInfoFlux() {
 		return this.shareInfoStream().asFlux();
 	}
 

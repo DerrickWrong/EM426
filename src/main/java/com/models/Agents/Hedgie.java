@@ -42,12 +42,14 @@ public class Hedgie extends Agent {
 	private DoubleProperty cashoutProfitAt = new SimpleDoubleProperty(0.3); // % of profit to trigger a cashout
 
 	@Autowired
+	@Qualifier("stockOrderStream")
 	Sinks.Many<StockOrder> orderSink;
 
 	@Autowired
 	Flux<ShareInfo> shareInfoFlux;
 
 	@Autowired
+	@Qualifier("completedOrderFlux")
 	Flux<StockOrder> processedOrderFlux;
 
 	@Autowired
@@ -112,9 +114,9 @@ public class Hedgie extends Agent {
 		currSellingPrice = shortBidPercent * s.getCurrentPrice();
 		double share2Short = Math.round(fund / (marginReqPercent * s.getCurrentPrice()));
 		balance.set(fund - share2Short * s.getCurrentPrice());
-		StockOrder order = new StockOrder(this.getId(), type.SHORT, currSellingPrice, share2Short, "Hedgie");
+		//StockOrder order = new StockOrder(this.getId(), type.SHORT, currSellingPrice, share2Short, "Hedgie");
 
-		this.orderSink.tryEmitNext(order);
+		//this.orderSink.tryEmitNext(order);
 		this.balance.set(this.balance.get() - fund);
 
 		System.out.println("Hedgie: selling " + share2Short + " which is " + (100.0 * share2Short / s.getCurrVolume())

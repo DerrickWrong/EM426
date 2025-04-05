@@ -1,24 +1,23 @@
-package com.models.Agents;
+package com.models;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import em426.agents.Agent;
-
 @Component
+@PropertySource("classpath:app.properties")
 @PropertySource("classpath:stock.properties")
-public class StockExchange extends Agent {
-
+public class WorldSimulator {
+	
 	@Value("${stockName}")
 	private String stockName;
 
 	@Value("${stockPrice}")
-	private double stockInitPrice;
+	private double stockPrice;
 
 	@Value("${stockVolume}")
-	private double stockTotalVolume;
-	
+	private double stockVolume;
+
 	@Value("${insiderRatio}")
 	private double insiderR;
 
@@ -33,4 +32,5 @@ public class StockExchange extends Agent {
 	
 	
 	
+
 }

@@ -1,10 +1,10 @@
 package com.models.Agents;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Component
-@Scope("prototype")
-public class MutualFund {
+import em426.agents.Agent;
 
+@Component
+public class MutualFund extends Agent {
+	
 }
