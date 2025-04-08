@@ -1,6 +1,6 @@
 package com.models.Agents;
 
-import java.time.Duration;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,6 +10,7 @@ import com.configurations.AgentStateConfig.HedgieState;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.api.message.Messages;
 import com.models.StockExchange;
+import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
@@ -21,6 +22,7 @@ import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.util.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -59,7 +61,10 @@ public class Hedgie extends Agent {
 
 	@Autowired
 	StockExchange stockExchange;
-
+	
+	@Autowired
+	Flux<Pair<UUID, Share>> marginCallFlux;
+	
 	@PostConstruct
 	public void init() {
 
@@ -71,7 +76,7 @@ public class Hedgie extends Agent {
 
 			if (stateMachine.getCurrent() == HedgieState.BNS) {
 
-				this.shortingStock(fund, s);
+				//this.shortingStock(fund, s);
 			}
 
 			double der = HelperFn.getDerivative(this.currSellingPrice, s.getCurrentPrice(), 1);
@@ -80,12 +85,6 @@ public class Hedgie extends Agent {
 			if (stat > 0 && stat >= cashoutProfitAt.get()) {
 				// cover position
 				this.coverPosition(fund, s);
-				System.out.println("Hedgie cash out and bye");
-			}
-
-			if (stat < 0 && stat < getMarginCall.get()) {
-
-				System.out.println("Hedgie got margin call. uh oh");
 			}
 
 		});
@@ -106,6 +105,15 @@ public class Hedgie extends Agent {
 			stateMachine.send(HedgieState.IDLEMSG);
 
 		});
+		
+		// signal for getting margin call
+		this.marginCallFlux.subscribe(call->{
+			
+			// this is when the hedgie had to buy back all the stocks
+			System.out.println("Hedgie getting Margin call!!!");
+			
+		});
+		
 
 	}
 
@@ -118,8 +126,8 @@ public class Hedgie extends Agent {
 
 		StockOrder order = new StockOrder(this.getId(), type.SHORT, currSellingPrice, share2Short,
 				SimAgentTypeEnum.Hedgie, s.getTimestamp());
-
-		// this.orderSink.tryEmitNext(order);
+		
+		this.orderSink.tryEmitNext(order);
 		this.balance.set(this.balance.get() - fund);
 
 		System.out.println("Hedgie: selling " + share2Short + " which is " + (100.0 * share2Short / s.getCurrVolume())

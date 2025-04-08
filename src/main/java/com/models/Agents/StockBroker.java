@@ -1,16 +1,13 @@
 package com.models.Agents;
 
-import java.time.Duration;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.time.Duration; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.models.StockExchange;
+import com.models.demands.Share;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 
@@ -25,7 +22,7 @@ import reactor.core.publisher.Sinks;
 public class StockBroker extends Agent {
 
 	// processing delay for all buy orders
-	SimpleIntegerProperty buyOrderDelay = new SimpleIntegerProperty(1);
+	SimpleIntegerProperty buyOrderDelay = new SimpleIntegerProperty(2);
 
 	@Autowired
 	@Qualifier("stockOpenOrderFlux")
@@ -40,42 +37,15 @@ public class StockBroker extends Agent {
 	@Autowired
 	@Qualifier("completedOrder")
 	Sinks.Many<StockOrder> completedOrderStream;
-
-	Queue<StockOrder> ordersQueue = new ConcurrentLinkedQueue<>();
-
-	private PriorityQueue<StockOrder> sellOrderQueue, buyOrderQueue;
+	
+	@Autowired
+	Lender lender;
 
 	@PostConstruct
 	void init() {
 
-		// create the two queues
-		this.sellOrderQueue = new PriorityQueue<StockOrder>(new Comparator<StockOrder>() {
-
-			@Override
-			public int compare(StockOrder o1, StockOrder o2) {
-				return Double.compare(o1.getBidPrice(), o2.getBidPrice());
-			}
-		});
-
-		this.buyOrderQueue = new PriorityQueue<StockOrder>(new Comparator<StockOrder>() {
-
-			@Override
-			public int compare(StockOrder o1, StockOrder o2) {
-				return Double.compare(o1.getBidPrice(), o2.getBidPrice());
-			}
-		});
 
 		// listen to stock orders
-		this.stockOrderStream.filter(order -> {
-
-			// only accept unprocessed orders
-			return order.getActState() == ActState.START;
-
-		}).subscribe(order -> {
-
-			this.ordersQueue.add(order);
-		});
-
 		// listen for all traditional sell orders
 		this.stockOrderStream.filter(order -> {
 			
@@ -83,7 +53,15 @@ public class StockBroker extends Agent {
 		
 		}).subscribe(order -> {
 			
-			this.sellOrderQueue.add(order);
+			// look up the share owned by the seller
+			Share sellShares = this.wallStreet.getStockListing().sharesRegistry.get(order.getUUID());
+			
+			if(sellShares == null) {
+				System.out.println("Can't find any shares");
+				return;
+			}
+			
+			this.wallStreet.registerSellorShortOrder(sellShares, order);
 			
 		});
 
@@ -93,41 +71,22 @@ public class StockBroker extends Agent {
 			return order.getActState() == ActState.START && order.getOrderType() == type.BUY;
 
 		}).delayElements(Duration.ofSeconds(this.buyOrderDelay.get())).subscribe(order -> {
-
-			this.buyOrderQueue.add(order);
-
+			
+			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
+			
 		});
-
-		// buffer delay processing by 5 seconds
-		this.tradingClockFlux.buffer(this.buyOrderDelay.get()).subscribe(t -> {
-
-			// this is where stock broker execute its work
-			for (int i = 0; i < this.ordersQueue.size(); i++) {
-
-				// fetch the order
-				StockOrder ord = this.ordersQueue.poll();
-
-				// meet the demand
-				//ord = stonk.processStockOrder(ord);
-
-				// notify the buyer/seller
-				//completedOrderStream.tryEmitNext(ord);
-			}
-
+		
+		this.stockOrderStream.filter(order->{
+			
+			return order.getActState() == ActState.START && order.getOrderType() == type.SHORT;
+		
+		}).subscribe(order->{
+			
+			this.lender.borrowStock(order);
 		});
-	}
+		
+		
 
-	public void processShortOrder(StockOrder order) {
-		// no delay process immediately
-		this.sellOrderQueue.add(order);
 	}
-
-	public void processCoverOrder(StockOrder order) {
-		// no delay process immediately
-		this.buyOrderQueue.add(order);
-	}
-
-	public SimpleIntegerProperty getBuyOrderDelay() {
-		return buyOrderDelay;
-	}
+	
 }

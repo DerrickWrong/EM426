@@ -21,7 +21,7 @@ public class StockExchange {
 	Sinks.Many<Pair<Long, StockOrder>> internalBuySink = Sinks.many().multicast().directBestEffort();
 	
 	@Autowired
-	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink;
+	Sinks.Many<Pair<Share, StockOrder>> ShortOrderSink;
 	
 	@Autowired
 	@Qualifier("completedOrder")
@@ -47,19 +47,18 @@ public class StockExchange {
 		});
 		
 		// process sell or short orders
-		this.sellOrShortOrderSink.asFlux().filter(p->{
+		this.ShortOrderSink.asFlux().filter(p->{
 			
 			StockOrder order = p.getValue();
 			
-			return order.getOrderType() == type.SELL || order.getOrderType() == type.SHORT;
+			return order.getOrderType() == type.SHORT;
 			
 		}).subscribe(p->{
 			
 			this.stockListing.registerShareAndSellOrder(p.getKey(), p.getValue());
 			
 		});
-		
-
+		 
 	}
 
 	// This method is only called by external when using Cover order
@@ -85,6 +84,10 @@ public class StockExchange {
 
 				if (buyerNO.getActState() == ActState.COMPLETE) {
 					this.stockListing.sellingSharesQueue.poll(); // remove from the queue
+					this.stockListing.sellOrderQueue.poll();
+					this.stockListing.sharesRegistry.remove(sellerNO.getUUID());
+					
+					// re-register the selling stocks
 					this.stockListing.registerShareAndSellOrder(sellerShare, sellerNO);
 					break; // break the while loop and done
 				}

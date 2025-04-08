@@ -20,19 +20,9 @@ public class ListingStock {
 	public final ConcurrentHashMap<UUID, Share> sharesRegistry = new ConcurrentHashMap<>();
 
 	// Floating Share Priority Queue
-	public final PriorityQueue<Share> sellingSharesQueue = new PriorityQueue<Share>(new Comparator<Share>() {
-		@Override
-		public int compare(Share o1, Share o2) {
-			return Double.compare(o1.getPrice(), o2.getPrice());
-		}
-	});
+	public final PriorityQueue<Share> sellingSharesQueue = new PriorityQueue<Share>(Comparator.comparingDouble(o->o.getPrice()));
 
-	public final PriorityQueue<StockOrder> sellOrderQueue = new PriorityQueue<StockOrder>(new Comparator<StockOrder>() {
-		@Override
-		public int compare(StockOrder o1, StockOrder o2) {
-			return Double.compare(o1.getBidPrice(), o2.getBidPrice());
-		}
-	});
+	public final PriorityQueue<StockOrder> sellOrderQueue = new PriorityQueue<StockOrder>(Comparator.comparingDouble(o->o.getBidPrice()));
 
 	public void registerShareAndSellOrder(Share s, StockOrder sellOrder) {
 		

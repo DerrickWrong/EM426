@@ -14,6 +14,7 @@ import com.models.MarkovModel;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
+import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;
 import em426.api.ActState;
@@ -45,17 +46,19 @@ public class Ape extends Agent {
 	Flux<ShareInfo> shareInfoFlux;
 
 	@Autowired
-	Sinks.Many<StockOrder> orderSink;
+	@Qualifier("stockOrderStream")
+	Sinks.Many<StockOrder> stockOrderStream;
 
 	@Autowired
-	Flux<StockOrder> processedOrderFlux;
+	@Qualifier("completedOrderFlux")
+	Flux<StockOrder> completedOrderFlux;
 
 	@PostConstruct
 	void init() {
 
 		apeState.send(Messages.EMPTY); // move to observe state
 
-		this.processedOrderFlux.filter(o -> {
+		this.completedOrderFlux.filter(o -> {
 
 			return (o.getOrderType() == type.SHORT && o.getOrderState() == ActState.COMMITTED);
 
@@ -66,7 +69,7 @@ public class Ape extends Agent {
 
 		});
 
-		this.processedOrderFlux.filter(o -> {
+		this.completedOrderFlux.filter(o -> {
 
 			return o.getUUID() == this.getId() && o.getOrderState() == ActState.COMMITTED;
 
@@ -96,10 +99,10 @@ public class Ape extends Agent {
 			if (apeState.getCurrent() == ApeState.BUY) {
 
 				double buyPrice = shareInfo.getCurrentPrice() * buyBidPercent.get(); // this should be a bid price
-				double numShare = this.balance.get() / buyPrice;
+				int numShare = (int) (this.balance.get() / buyPrice);
 
-				//StockOrder order = new StockOrder(this.getId(), type.BUY, buyPrice, numShare, "Ape");
-				//this.orderSink.tryEmitNext(order);
+				StockOrder order = new StockOrder(this.getId(), type.BUY, buyPrice, numShare, SimAgentTypeEnum.Retail, shareInfo.getTimestamp());
+				this.stockOrderStream.tryEmitNext(order);
 
 				System.out.println("Ape buying " + numShare + " @ $" + buyPrice + " UUID - " + this.getId());
 			}
@@ -115,10 +118,10 @@ public class Ape extends Agent {
 			if (apeState.getCurrent() == ApeState.SELL && this.holdingshares > 0) {
 				
 				double sellPrice = shareInfo.getCurrentPrice() * (1.0 - (buyBidPercent.get() / 100));
-				double numShare = this.holdingshares;
+				int numShare = (int) this.holdingshares;
 				
-				//StockOrder order = new StockOrder(this.getId(), type.SELL, sellPrice, numShare, "Ape");
-				//this.orderSink.tryEmitNext(order);
+				StockOrder order = new StockOrder(this.getId(), type.SELL, sellPrice, numShare, SimAgentTypeEnum.Retail, shareInfo.getTimestamp());
+				this.stockOrderStream.tryEmitNext(order);
 
 				System.out.println("Ape selling " + numShare + " @ $" + sellPrice + " UUID - " + this.getId());
 			}

@@ -14,6 +14,7 @@ import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.HelperFn;
+import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
@@ -101,9 +102,9 @@ public class Market extends Agent {
 					this.MarketStateMachine.send(MarketState.NEXTSTATE);
 				}
 
-				double numShares = this.computeSharesToProcess();
+				int numShares = (int) this.computeSharesToProcess();
 				double price = this.sellBelowPricePercentage * latestPrice;
-				//StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, "Market");
+				//StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, SimAgentTypeEnum.Market);
 				//this.stockOrderStream.tryEmitNext(order);
 				
 				System.out.println("Market selling " + numShares + " @ $" + price);

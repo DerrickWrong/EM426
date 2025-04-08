@@ -6,13 +6,15 @@ import com.utils.SimAgentTypeEnum;
 
 import em426.api.SupplyState;
 
-public class Share {
+public class Share  {
 
 	final Double purchasedPrice;
 	final int quantity;
 	final UUID owner;
 	SupplyState state;
 	final SimAgentTypeEnum type;
+
+
 
 	public final static Share EMPTY = new Share();
 
@@ -68,6 +70,10 @@ public class Share {
 
 	public UUID getOwner() {
 		return owner;
+	}
+	
+	public SimAgentTypeEnum getType() {
+		return type;
 	}
 
 }

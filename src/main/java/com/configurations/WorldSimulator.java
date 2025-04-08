@@ -1,12 +1,11 @@
-package com.models;
+package com.configurations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import com.models.Agents.Company;
+import com.models.StockExchange;
 import com.models.Agents.Hedgie;
 import com.models.Agents.Market;
 import com.models.demands.Share;
@@ -64,8 +63,6 @@ public class WorldSimulator {
 
 		this.simulationClock.subscribe(t -> {
 
-			System.out.println("Simulation time t = " + t);
-
 			if (!onceFlag) {
 				this.setupSim(); // run once
 				onceFlag = true;
@@ -77,10 +74,12 @@ public class WorldSimulator {
 
 	void setupSim() {
 
+		// TODO put this in a factory and kick it out at the simulate command
+
 		int companyShares = (int) ((this.insiderR / 100.0) * this.stockVolume);
 		int mutualFundsShares = (int) ((this.instituteR / 100.0) * this.stockVolume);
 		int shortInterestShares = (int) ((this.shortedRatio / 100.0) * this.stockVolume);
-		int marketNumShares = (int) ((100 - (this.insiderR + this.instituteR) / 100.0) * this.stockVolume);
+		int marketNumShares = (int) ((1.0 - ((this.insiderR + this.instituteR) / 100.0)) * this.stockVolume);
 
 		// register
 		Share marketShares = new Share(market.getId(), this.stockPrice, marketNumShares, SimAgentTypeEnum.Market);

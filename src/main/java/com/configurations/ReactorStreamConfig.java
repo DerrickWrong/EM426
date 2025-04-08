@@ -1,8 +1,10 @@
 package com.configurations;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,7 +51,7 @@ public class ReactorStreamConfig {
 		boolean flag = this.simClockToggleFlag.get();
 		this.simClockToggleFlag.set(!flag);
 	}
-
+	
 	// This stream is used to pass stock order (requesting)
 	@Bean
 	Sinks.Many<StockOrder> stockOrderStream() {
@@ -66,12 +68,12 @@ public class ReactorStreamConfig {
 	Sinks.Many<StockOrder> completedOrder() {
 		return Sinks.many().multicast().directBestEffort();
 	}
-	
+
 	@Bean
-	Flux<StockOrder> completedOrderFlux(){
+	Flux<StockOrder> completedOrderFlux() {
 		return this.completedOrder().asFlux();
 	}
-	
+
 	@Bean
 	Sinks.Many<ShareInfo> shareInfoStream() {
 		return Sinks.many().multicast().directBestEffort();
@@ -81,10 +83,20 @@ public class ReactorStreamConfig {
 	Flux<ShareInfo> shareInfoFlux() {
 		return this.shareInfoStream().asFlux();
 	}
-	
+
 	@Bean
-	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink(){
+	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink() {
 		return Sinks.many().multicast().directBestEffort();
+	}
+
+	@Bean
+	Sinks.Many<Pair<UUID, Share>> marginCallSink() {
+		return Sinks.many().multicast().directBestEffort();
+	}
+
+	@Bean
+	Flux<Pair<UUID, Share>> marginCallFlux() {
+		return this.marginCallSink().asFlux();
 	}
 
 }
