@@ -76,7 +76,7 @@ public class Hedgie extends Agent {
 
 			if (stateMachine.getCurrent() == HedgieState.BNS) {
 
-				//this.shortingStock(fund, s);
+				this.shortingStock(fund, s);
 			}
 
 			double der = HelperFn.getDerivative(this.currSellingPrice, s.getCurrentPrice(), 1);

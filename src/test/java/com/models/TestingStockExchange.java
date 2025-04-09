@@ -14,6 +14,7 @@ import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.SimAgentTypeEnum;
 
+import em426.api.ActState;
 import javafx.application.Platform;
 
 @SpringBootTest
@@ -30,7 +31,7 @@ class TestingStockExchange {
 	}
 
 	@Test
-	void test() {
+	void testBuyingShort() {
 
 		// add some sell orders
 		UUID testUUID = UUID.randomUUID();
@@ -38,17 +39,35 @@ class TestingStockExchange {
 		int volume = 100;
 		Share shortedShares = new Share(testUUID, stockPrice, volume, SimAgentTypeEnum.Hedgie);
 		StockOrder shortOrder = new StockOrder(testUUID, type.SHORT, stockPrice, volume, SimAgentTypeEnum.Hedgie, 0L);
-		
+
 		this.exchange.registerSellorShortOrder(shortedShares, shortOrder);
+
+		// buy order
+		StockOrder buyOrder = new StockOrder(UUID.randomUUID(), type.BUY, 11, 49, SimAgentTypeEnum.Retail, 1L);
+		this.exchange.processImmediateBuyOrder(2L, buyOrder);
+
+		int sharesLeft = this.exchange.getStockListing().sellingSharesQueue.peek().getQuantity();
+		assertEquals(51, sharesLeft);
+
+	}
+
+	@Test
+	void testSellingOwnStock() {
+		
+		UUID Market = UUID.randomUUID();
+		Share marketShares = new Share(Market, 10, 100, SimAgentTypeEnum.Market);
+		this.exchange.getStockListing().registerShares2Pool(marketShares);
+		
+		StockOrder sellOrder = new StockOrder(Market, type.SELL, 11, 50, SimAgentTypeEnum.Market, 1L);
+		this.exchange.submitSellOrder(sellOrder);
 		
 		// buy order
 		StockOrder buyOrder = new StockOrder(UUID.randomUUID(), type.BUY, 11, 49, SimAgentTypeEnum.Retail, 1L);
 		this.exchange.processImmediateBuyOrder(2L, buyOrder);
 		
 		int sharesLeft = this.exchange.getStockListing().sellingSharesQueue.peek().getQuantity();
-		assertEquals(51, sharesLeft);
-		
- 
+		assertEquals(1, sharesLeft);
+
 	}
 
 }

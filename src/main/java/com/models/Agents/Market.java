@@ -66,7 +66,8 @@ public class Market extends Agent {
  
 		this.shareInfoFlux.buffer(this.numTicksToObserve).subscribe(shareInfo -> {
 
-			double latestPrice = shareInfo.get(numTicksToObserve - 1).getCurrentPrice();
+			ShareInfo latest = shareInfo.get(numTicksToObserve - 1);
+			double latestPrice = latest.getCurrentPrice();
 			double der = HelperFn.getDerivative(this.initialHoldingPrice, latestPrice, 1);
 
 			double percent = (der / this.initialHoldingPrice) * 100.0;
@@ -82,10 +83,11 @@ public class Market extends Agent {
 					this.MarketStateMachine.send(MarketState.NEXTSTATE);
 				}
 
-				double numShares = this.computeSharesToProcess();
+				
+				int numShares = (int) this.computeSharesToProcess();
 				double price = this.buyAbovePricePercentage * latestPrice;
-				//StockOrder order = new StockOrder(this.getId(), type.BUY, price, numShares, "Market");
-				//this.stockOrderStream.tryEmitNext(order);
+				StockOrder order = new StockOrder(this.getId(), type.BUY, price, numShares, SimAgentTypeEnum.Market, latest.getTimestamp());
+				this.stockOrderStream.tryEmitNext(order);
 				
 				System.out.println("Market buying " + numShares + " @ $" + price);
 			}
@@ -104,8 +106,8 @@ public class Market extends Agent {
 
 				int numShares = (int) this.computeSharesToProcess();
 				double price = this.sellBelowPricePercentage * latestPrice;
-				//StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, SimAgentTypeEnum.Market);
-				//this.stockOrderStream.tryEmitNext(order);
+				StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, SimAgentTypeEnum.Market, latest.getTimestamp());
+				this.stockOrderStream.tryEmitNext(order);
 				
 				System.out.println("Market selling " + numShares + " @ $" + price);
 			}
@@ -123,16 +125,16 @@ public class Market extends Agent {
 		State currState = this.MarketStateMachine.getCurrent();
 
 		if (currState == MarketState.SELL1P || currState == MarketState.BUY1P) {
-			shares = this.stockHolding * 0.01;
+			shares = this.stockHolding * 0.005;
 		}
 
 		if (currState == MarketState.SELL5P || currState == MarketState.BUY5P) {
 
-			shares = this.stockHolding * 0.05;
+			shares = this.stockHolding * 0.01;
 		}
 
 		if (currState == MarketState.SELL10P || currState == MarketState.BUY10P) {
-			shares = this.stockHolding * 0.1;
+			shares = this.stockHolding * 0.02;
 		}
 
 		return shares;

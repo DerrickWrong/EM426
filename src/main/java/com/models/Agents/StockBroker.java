@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.models.StockExchange;
-import com.models.demands.Share;
+import com.models.StockExchange; 
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 
@@ -54,14 +53,7 @@ public class StockBroker extends Agent {
 		}).subscribe(order -> {
 			
 			// look up the share owned by the seller
-			Share sellShares = this.wallStreet.getStockListing().sharesRegistry.get(order.getUUID());
-			
-			if(sellShares == null) {
-				System.out.println("Can't find any shares");
-				return;
-			}
-			
-			this.wallStreet.registerSellorShortOrder(sellShares, order);
+			this.wallStreet.submitSellOrder(order);
 			
 		});
 
@@ -72,7 +64,7 @@ public class StockBroker extends Agent {
 
 		}).delayElements(Duration.ofSeconds(this.buyOrderDelay.get())).subscribe(order -> {
 			
-			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
+			this.wallStreet.submitBuyOrder(order, order.getOrderRequestedAtTime());
 			
 		});
 		
