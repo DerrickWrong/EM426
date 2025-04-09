@@ -30,10 +30,10 @@ class ListingStockTest {
 
 	@BeforeEach
 	void setup() {
-
+		this.listing.registerShares2Pool(myShare);
 		StockOrder sellOrder = new StockOrder(this.owner, type.SELL, this.sellPrice, this.sellNum,
 				SimAgentTypeEnum.Retail, 1L);
-		this.listing.registerShareAndSellOrder(myShare, sellOrder);
+		this.listing.registerShareAndSellOrder(sellOrder);
 	}
 
 	@Test
@@ -42,8 +42,8 @@ class ListingStockTest {
 		UUID newOwner = UUID.randomUUID();
 		Share cheapShares = new Share(newOwner, 10, 100, SimAgentTypeEnum.Retail);
 		StockOrder cheapSellOrder = new StockOrder(newOwner, type.SELL, 29, 100, SimAgentTypeEnum.Retail, 10L);
-
-		this.listing.registerShareAndSellOrder(cheapShares, cheapSellOrder);
+		this.listing.registerShares2Pool(cheapShares);
+		this.listing.registerShareAndSellOrder(cheapSellOrder);
 
 		double cheapestNum = this.listing.sellOrderQueue.peek().getNumOfShares();
 		double cheapestPrice = this.listing.sellOrderQueue.peek().getBidPrice();

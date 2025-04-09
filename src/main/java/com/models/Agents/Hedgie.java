@@ -35,7 +35,6 @@ public class Hedgie extends Agent {
 	private int numberOfDump = 10; // default is 10 (1 is to short everythign at once)
 
 	private double currSellingPrice;
-	private double borrowedShares;
 
 	private DoubleProperty balance = new SimpleDoubleProperty(originalPrinciple);
 	private DoubleProperty currBalance = new SimpleDoubleProperty(0);
@@ -92,7 +91,7 @@ public class Hedgie extends Agent {
 		// Processed Orders
 		this.processedOrderFlux.filter(f -> {
 
-			return (f.getUUID() == this.getId()) && (f.getActState() == ActState.COMMITTED);
+			return (f.getUUID() == this.getId()) && (f.getActState() == ActState.COMPLETE);
 
 		}).subscribe(po -> {
 
@@ -101,6 +100,8 @@ public class Hedgie extends Agent {
 			if (currOrder.getUUID() == this.getId()) {
 				return; // can't short more stock until supply has been consumed
 			}
+			
+			
 
 			stateMachine.send(HedgieState.IDLEMSG);
 

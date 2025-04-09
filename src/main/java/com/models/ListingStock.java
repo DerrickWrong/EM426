@@ -24,13 +24,26 @@ public class ListingStock {
 
 	public final PriorityQueue<StockOrder> sellOrderQueue = new PriorityQueue<StockOrder>(Comparator.comparingDouble(o->o.getBidPrice()));
 
-	public void registerShareAndSellOrder(Share s, StockOrder sellOrder) {
+	public void registerShareAndSellOrder(StockOrder sellOrder) {
 		
+		//get the shares needed
+		Share existing = this.sharesRegistry.get(sellOrder.getUUID());
+		
+		// figure out the remainder
+		int remainder = existing.getQuantity() - sellOrder.getNumOfShares();
+		
+		if(remainder > 1) {
+			Share remainingShares = new Share(existing, remainder);
+			this.sharesRegistry.put(sellOrder.getUUID(), remainingShares);
+		}else {
+			this.sharesRegistry.remove(sellOrder.getUUID());
+		}
+		
+		// publish the shares and order
+		Share toBeSold = new Share(existing, sellOrder.getNumOfShares());
+		
+		this.sellingSharesQueue.add(toBeSold);
 		this.sellOrderQueue.add(sellOrder);
-		this.registerShares2Pool(s);
-		Share sellingShares = this.sharesRegistry.get(s.getOwner());
-		this.sellingSharesQueue.add(sellingShares);
-		
 	}
 	
 	public void registerShares2Pool(Share s) {
@@ -172,4 +185,19 @@ public class ListingStock {
 
 	}
 
+	
+	public void withdrawSellOrder(StockOrder sellOrder) {
+		
+		Share sellingShares = this.sharesRegistry.get(sellOrder.getUUID());
+		this.sellOrderQueue.remove(sellOrder);
+		this.sellingSharesQueue.remove(sellingShares);
+		
+	}
+	
+	public void purge() {
+		
+		this.sharesRegistry.clear();
+		this.sellingSharesQueue.clear();
+		this.sellOrderQueue.clear();
+	}
 }

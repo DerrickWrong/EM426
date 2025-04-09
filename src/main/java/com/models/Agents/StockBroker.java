@@ -53,7 +53,7 @@ public class StockBroker extends Agent {
 		}).subscribe(order -> {
 			
 			// look up the share owned by the seller
-			this.wallStreet.submitSellOrder(order);
+			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 			
 		});
 
@@ -64,7 +64,7 @@ public class StockBroker extends Agent {
 
 		}).delayElements(Duration.ofSeconds(this.buyOrderDelay.get())).subscribe(order -> {
 			
-			this.wallStreet.submitBuyOrder(order, order.getOrderRequestedAtTime());
+			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 			
 		});
 		

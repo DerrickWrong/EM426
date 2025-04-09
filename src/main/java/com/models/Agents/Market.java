@@ -107,7 +107,7 @@ public class Market extends Agent {
 				int numShares = (int) this.computeSharesToProcess();
 				double price = this.sellBelowPricePercentage * latestPrice;
 				StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, SimAgentTypeEnum.Market, latest.getTimestamp());
-				this.stockOrderStream.tryEmitNext(order);
+				this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 				
 				System.out.println("Market selling " + numShares + " @ $" + price);
 			}

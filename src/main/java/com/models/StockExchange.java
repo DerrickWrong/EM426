@@ -21,9 +21,6 @@ public class StockExchange {
 	Sinks.Many<Pair<Long, StockOrder>> internalBuySink = Sinks.many().multicast().directBestEffort();
 
 	@Autowired
-	Sinks.Many<Pair<Share, StockOrder>> ShortOrderSink;
-
-	@Autowired
 	@Qualifier("completedOrder")
 	Sinks.Many<StockOrder> completedOrderSink;
 
@@ -43,19 +40,6 @@ public class StockExchange {
 			// long timestamp = p.getKey();
 
 			this.processImmediateBuyOrder(p.getKey(), p.getValue());
-
-		});
-
-		// process sell or short orders
-		this.ShortOrderSink.asFlux().filter(p -> {
-
-			StockOrder order = p.getValue();
-
-			return order.getOrderType() == type.SHORT;
-
-		}).subscribe(p -> {
-
-			this.stockListing.registerShareAndSellOrder(p.getKey(), p.getValue());
 
 		});
 
@@ -85,16 +69,17 @@ public class StockExchange {
 				if (buyerNO.getActState() == ActState.COMPLETE) {
 					this.stockListing.sellingSharesQueue.poll(); // remove from the queue
 					this.stockListing.sellOrderQueue.poll();
-					this.stockListing.sharesRegistry.remove(sellerNO.getUUID());
-
+					
 					// re-register the selling stocks
-					this.stockListing.registerShareAndSellOrder(sellerShare, sellerNO);
-					break; // break the while loop and done
+					this.stockListing.registerShares2Pool(sellerShare);
+					this.stockListing.registerShareAndSellOrder(sellerNO);
+					return; // break the while loop and done
 				}
 
 				if (buyerNO.getActState() == ActState.PARTIAL) {
 					this.stockListing.sellOrderQueue.poll();
 					this.stockListing.sellingSharesQueue.poll();
+					this.stockListing.sharesRegistry.remove(currSellOrder.getUUID());
 					continue; // continue to the next available
 				}
 
@@ -114,24 +99,24 @@ public class StockExchange {
 	}
 
 	// this is what StockBroker use to call under normal circumstance
-	public void submitBuyOrder(StockOrder order, long timestamp) {
-		this.internalBuySink.tryEmitNext(new Pair<>(timestamp, order));
+	public void submitOrder(StockOrder order, long timestamp) {
+		
+		if (order.getOrderType() == type.SELL) {
+			this.submitSellOrder(order);
+		}else {
+			this.internalBuySink.tryEmitNext(new Pair<>(timestamp, order));
+		} 
+		
 	}
 
 	// method to process short, cover and sell orders
-	public void registerSellorShortOrder(Share shares, StockOrder sellOrder) {
-		this.stockListing.registerShareAndSellOrder(shares, sellOrder);
+	public void registerSellorShortOrder(StockOrder sellOrder) {
+		this.stockListing.registerShareAndSellOrder(sellOrder);
 	}
 	
-	public void submitSellOrder(StockOrder sellOrder) {
+	private void submitSellOrder(StockOrder sellOrder) {
 		
-		Share sellingShares = this.stockListing.sharesRegistry.get(sellOrder.getUUID());
-		
-		if(sellingShares == null) {
-			return;
-		}
-		
-		this.stockListing.registerShareAndSellOrder(sellingShares, sellOrder);
+		this.stockListing.registerShareAndSellOrder(sellOrder);
 		
 	}
 
