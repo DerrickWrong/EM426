@@ -8,14 +8,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.models.Agents.StockBroker;
 import com.models.demands.Share;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.SimAgentTypeEnum;
 
 import javafx.application.Platform;
+import reactor.core.publisher.Sinks;
 
 @SpringBootTest
 class TestingStockExchange {
@@ -23,6 +26,13 @@ class TestingStockExchange {
 	@Autowired
 	StockExchange exchange;
 
+	@Autowired
+	@Qualifier("stockOrderStream")
+	Sinks.Many<StockOrder> stockOrderStream;
+	
+	@Autowired
+	StockBroker broker;
+	
 	@BeforeAll
 	static void initJfxRuntime() {
 		// kick off javafx stuff
@@ -47,7 +57,7 @@ class TestingStockExchange {
 
 		StockOrder shortOrder = new StockOrder(testUUID, type.SHORT, stockPrice, volume, SimAgentTypeEnum.Hedgie, 0L);
 
-		this.exchange.registerSellorShortOrder(shortOrder);
+		this.stockOrderStream.tryEmitNext(shortOrder);
 
 		// buy order
 		StockOrder buyOrder = new StockOrder(UUID.randomUUID(), type.BUY, 11, 49, SimAgentTypeEnum.Retail, 1L);

@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.IntStream;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,11 +81,6 @@ public class ReactorStreamConfig {
 	@Bean
 	Flux<ShareInfo> shareInfoFlux() {
 		return this.shareInfoStream().asFlux();
-	}
-
-	@Bean
-	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink() {
-		return Sinks.many().multicast().directBestEffort();
 	}
 
 	@Bean

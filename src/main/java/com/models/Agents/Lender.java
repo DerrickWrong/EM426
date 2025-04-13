@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import com.models.StockExchange;
 import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
@@ -36,10 +37,10 @@ public class Lender extends Agent{
 	Map<UUID, Share> borrowersTab = new HashMap<>();
 
 	@Autowired
-	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink;
-
-	@Autowired
 	Sinks.Many<Pair<UUID, Share>> marginCallSink;
+	
+	@Autowired
+	StockExchange exchange;
 
 	@PostConstruct
 	void init() {
@@ -75,7 +76,10 @@ public class Lender extends Agent{
 			this.borrowersTab.put(borrowOrder.getUUID(), newBorrowShares);
 		}
 
-		this.sellOrShortOrderSink.tryEmitNext(new Pair<>(borrowShares, borrowOrder));
+		this.exchange.getStockListing().registerShares2Pool(borrowShares);
+		
+		this.exchange.submitOrder(borrowOrder, borrowOrder.getOrderRequestedAtTime());
+		
 	}
 
 	public void checkTab(ShareInfo info) {

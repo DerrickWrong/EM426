@@ -1,20 +1,22 @@
 package com.configurations;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.models.StockExchange;
 import com.models.Agents.Hedgie;
+import com.models.Agents.Lender;
 import com.models.Agents.Market;
+import com.models.Agents.StockBroker;
 import com.models.demands.Share;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.SimAgentTypeEnum;
 
-import jakarta.annotation.PostConstruct;
-import javafx.util.Pair;
+import jakarta.annotation.PostConstruct; 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -46,15 +48,18 @@ public class WorldSimulator {
 
 	@Autowired
 	Market market;
-
+   
 	@Autowired
-	Sinks.Many<Pair<Share, StockOrder>> sellOrShortOrderSink;
-
+	StockBroker broker;
+	
 	@Autowired
 	StockExchange exchange;
 
 	@Autowired
 	Flux<Long> simulationClock;
+	
+	@Autowired
+	Lender lender;
 
 	boolean onceFlag = false;
 
@@ -86,11 +91,11 @@ public class WorldSimulator {
 		this.exchange.getStockListing().registerShares2Pool(marketShares);
 
 		// add short interest to the market
-		Share shortedShares = new Share(hedgie.getId(), this.stockPrice, shortInterestShares, SimAgentTypeEnum.Hedgie);
 		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, this.stockPrice, shortInterestShares,
-				SimAgentTypeEnum.Hedgie, 0L);
-		this.sellOrShortOrderSink.tryEmitNext(new Pair<>(shortedShares, shortOrder));
-
+				SimAgentTypeEnum.Hedgie, 0L);  
+		
+		this.lender.borrowStock(shortOrder);
+		
 	}
 
 }

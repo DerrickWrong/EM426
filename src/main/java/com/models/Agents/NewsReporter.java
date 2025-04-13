@@ -45,7 +45,7 @@ public class NewsReporter extends Agent {
 	void init() {
 
 		this.simulationClock.subscribe(t -> {
-			
+
 			StockOrder so = this.wallStreet.getStockListing().sellOrderQueue.peek();
 
 			if (so == null) {
@@ -54,7 +54,7 @@ public class NewsReporter extends Agent {
 
 			ShareInfo info = new ShareInfo(so.getBidPrice(), so.getNumOfShares(), t);
 			info = this.computeRatio(info);
-			
+
 			this.shareInfoStream.tryEmitNext(info);
 		});
 
@@ -64,6 +64,7 @@ public class NewsReporter extends Agent {
 	public ShareInfo computeRatio(ShareInfo info) {
 
 		ConcurrentHashMap<UUID, Share> sharesRegistry = this.wallStreet.getStockListing().sharesRegistry;
+		ConcurrentHashMap<UUID, Share> pendingSales = this.wallStreet.getStockListing().pendingSalesRegistry;
 
 		int marketFloat = 0;
 		int shorted = 0;
@@ -94,19 +95,43 @@ public class NewsReporter extends Agent {
 				company += share.getQuantity();
 			}
 		}
-		
+
+		for (Map.Entry<UUID, Share> k : pendingSales.entrySet()) {
+			Share share = k.getValue();
+
+			if (share.getType() == SimAgentTypeEnum.Hedgie) {
+				shorted += share.getQuantity();
+			}
+
+			if (share.getType() == SimAgentTypeEnum.Retail) {
+				apes += share.getQuantity();
+			}
+
+			if (share.getType() == SimAgentTypeEnum.Market) {
+				marketFloat += share.getQuantity();
+			}
+
+			if (share.getType() == SimAgentTypeEnum.MutualFund) {
+				institute += share.getQuantity();
+			}
+
+			if (share.getType() == SimAgentTypeEnum.Company) {
+				company += share.getQuantity();
+			}
+		}
+
 		double marketRatio = marketFloat * 100.0 / this.stockVolume;
 		double shortRatio = shorted * 100.0 / this.stockVolume;
 		double instituteRatio = institute * 100.0 / this.stockVolume;
 		double companyRatio = company * 100.0 / this.stockVolume;
 		double apeRatio = apes * 100.0 / this.stockVolume;
-		
+
 		info.setFloatingShares(marketRatio);
 		info.setShortedShares(shortRatio);
 		info.setInstituShares(instituteRatio);
 		info.setInsiderShares(companyRatio);
 		info.setApeShares(apeRatio);
-		
+
 		return info;
 	}
 

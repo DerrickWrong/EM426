@@ -101,25 +101,14 @@ public class StockExchange {
 	// this is what StockBroker use to call under normal circumstance
 	public void submitOrder(StockOrder order, long timestamp) {
 		
-		if (order.getOrderType() == type.SELL) {
-			this.submitSellOrder(order);
+		if (order.getOrderType() == type.SELL || order.getOrderType() == type.SHORT) {
+			this.stockListing.registerShareAndSellOrder(order);
 		}else {
 			this.internalBuySink.tryEmitNext(new Pair<>(timestamp, order));
 		} 
 		
 	}
-
-	// method to process short, cover and sell orders
-	public void registerSellorShortOrder(StockOrder sellOrder) {
-		this.stockListing.registerShareAndSellOrder(sellOrder);
-	}
-	
-	private void submitSellOrder(StockOrder sellOrder) {
-		
-		this.stockListing.registerShareAndSellOrder(sellOrder);
-		
-	}
-
+ 
 	public ListingStock getStockListing() {
 		return stockListing;
 	}

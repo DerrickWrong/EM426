@@ -19,50 +19,54 @@ public class ListingStock {
 	// This is the pool of the stock
 	public final ConcurrentHashMap<UUID, Share> sharesRegistry = new ConcurrentHashMap<>();
 
-	// Floating Share Priority Queue
-	public final PriorityQueue<Share> sellingSharesQueue = new PriorityQueue<Share>(Comparator.comparingDouble(o->o.getPrice()));
+	public final ConcurrentHashMap<UUID, Share> pendingSalesRegistry = new ConcurrentHashMap<>();
 
-	public final PriorityQueue<StockOrder> sellOrderQueue = new PriorityQueue<StockOrder>(Comparator.comparingDouble(o->o.getBidPrice()));
+	// Floating Share Priority Queue
+	public final PriorityQueue<Share> sellingSharesQueue = new PriorityQueue<Share>(
+			Comparator.comparingDouble(o -> o.getPrice()));
+
+	public final PriorityQueue<StockOrder> sellOrderQueue = new PriorityQueue<StockOrder>(
+			Comparator.comparingDouble(o -> o.getBidPrice()));
 
 	public void registerShareAndSellOrder(StockOrder sellOrder) {
-		
-		//get the shares needed
+
+		// get the shares needed
 		Share existing = this.sharesRegistry.get(sellOrder.getUUID());
-		
+
 		// figure out the remainder
 		int remainder = existing.getQuantity() - sellOrder.getNumOfShares();
-		
-		if(remainder > 1) {
+
+		if (remainder > 1) {
 			Share remainingShares = new Share(existing, remainder);
 			this.sharesRegistry.put(sellOrder.getUUID(), remainingShares);
-		}else {
+		} else {
 			this.sharesRegistry.remove(sellOrder.getUUID());
 		}
-		
+
 		// publish the shares and order
 		Share toBeSold = new Share(existing, sellOrder.getNumOfShares());
-		
+
+		this.pendingSalesRegistry.put(sellOrder.getUUID(), toBeSold);
 		this.sellingSharesQueue.add(toBeSold);
 		this.sellOrderQueue.add(sellOrder);
 	}
-	
+
 	public void registerShares2Pool(Share s) {
-		
-		if(this.sharesRegistry.containsKey(s.getOwner())) {
-			
+
+		if (this.sharesRegistry.containsKey(s.getOwner())) {
+
 			Share oldShares = this.sharesRegistry.get(s.getOwner());
 			Share comb = oldShares.combineShare(s);
 			this.sharesRegistry.put(s.getOwner(), comb);
-		}else { 
+		} else {
 			this.sharesRegistry.put(s.getOwner(), s);
 		}
 	}
-	 
+
 	public void checkExpirations(Long currTimestamp) {
-		
-		//TODO write code to verify the content is still valid
-		
-		
+
+		// TODO write code to verify the content is still valid
+
 	}
 
 	// Helper function to create buyer shares
@@ -185,17 +189,16 @@ public class ListingStock {
 
 	}
 
-	
 	public void withdrawSellOrder(StockOrder sellOrder) {
-		
+
 		Share sellingShares = this.sharesRegistry.get(sellOrder.getUUID());
 		this.sellOrderQueue.remove(sellOrder);
 		this.sellingSharesQueue.remove(sellingShares);
-		
+
 	}
-	
+
 	public void purge() {
-		
+
 		this.sharesRegistry.clear();
 		this.sellingSharesQueue.clear();
 		this.sellOrderQueue.clear();

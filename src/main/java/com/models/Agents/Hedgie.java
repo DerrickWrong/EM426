@@ -64,6 +64,9 @@ public class Hedgie extends Agent {
 	@Autowired
 	Flux<Pair<UUID, Share>> marginCallFlux;
 	
+	@Autowired
+	Lender lender;
+	
 	@PostConstruct
 	public void init() {
 
@@ -101,8 +104,6 @@ public class Hedgie extends Agent {
 				return; // can't short more stock until supply has been consumed
 			}
 			
-			
-
 			stateMachine.send(HedgieState.IDLEMSG);
 
 		});
@@ -111,7 +112,7 @@ public class Hedgie extends Agent {
 		this.marginCallFlux.subscribe(call->{
 			
 			// this is when the hedgie had to buy back all the stocks
-			System.out.println("Hedgie getting Margin call!!!");
+			System.out.println("Hedgie getting Margin call!!!" );
 			
 		});
 		
@@ -128,7 +129,8 @@ public class Hedgie extends Agent {
 		StockOrder order = new StockOrder(this.getId(), type.SHORT, currSellingPrice, share2Short,
 				SimAgentTypeEnum.Hedgie, s.getTimestamp());
 		
-		this.orderSink.tryEmitNext(order);
+		this.lender.borrowStock(order);
+		
 		this.balance.set(this.balance.get() - fund);
 
 		System.out.println("Hedgie: selling " + share2Short + " which is " + (100.0 * share2Short / s.getCurrVolume())
