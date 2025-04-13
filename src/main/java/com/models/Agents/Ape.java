@@ -91,7 +91,7 @@ public class Ape extends Agent {
 
 		// listen and watch for stock volume change (additional float shares from
 		// Hedgie)
-		shareInfoFlux.sample(Duration.ofSeconds(payDay)).subscribe(shareInfo -> {
+		shareInfoFlux.sample(Duration.ofMillis(payDay)).subscribe(shareInfo -> {
 
 			// getting paid
 			this.balance.set(this.balance.get() + this.salary4Invest);

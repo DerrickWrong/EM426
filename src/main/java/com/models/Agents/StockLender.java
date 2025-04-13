@@ -6,8 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.models.StockExchange;
@@ -22,13 +21,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 @Component
-@PropertySource("classpath:app.properties")
-public class Lender extends Agent{
+@Scope("prototype")
+public class StockLender extends Agent{
 
 	@Autowired
 	Flux<ShareInfo> shareInfoFlux;
-
-	@Value("${MarginCallPercentage}")
+ 
 	private double triggerMarginPercentage;
 
 	AtomicReference<ShareInfo> cache = new AtomicReference<ShareInfo>();
@@ -42,6 +40,15 @@ public class Lender extends Agent{
 	@Autowired
 	StockExchange exchange;
 
+	public StockLender() {}
+	
+	public void setMargineCall(double triggerMarginCall) {
+		
+		this.triggerMarginPercentage = triggerMarginCall;
+		
+	}
+	
+	
 	@PostConstruct
 	void init() {
 
@@ -97,4 +104,5 @@ public class Lender extends Agent{
 
 	}
 
+	
 }

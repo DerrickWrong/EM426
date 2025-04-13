@@ -45,6 +45,10 @@ public class StockExchange {
 
 	}
 
+	public void reset() {
+		this.stockListing.purge();
+	}
+
 	// This method is only called by external when using Cover order
 	public void processImmediateBuyOrder(Long timestamp, StockOrder BuyerOrder) {
 		while (!this.stockListing.sellOrderQueue.isEmpty()) {
@@ -69,7 +73,7 @@ public class StockExchange {
 				if (buyerNO.getActState() == ActState.COMPLETE) {
 					this.stockListing.sellingSharesQueue.poll(); // remove from the queue
 					this.stockListing.sellOrderQueue.poll();
-					
+
 					// re-register the selling stocks
 					this.stockListing.registerShares2Pool(sellerShare);
 					this.stockListing.registerShareAndSellOrder(sellerNO);
@@ -95,20 +99,20 @@ public class StockExchange {
 		StockOrder UnprocessedOrder = new StockOrder(BuyerOrder, ActState.INCOMPLETE,
 				BuyerOrder.getOrderRequestedAtTime());
 		completedOrderSink.tryEmitNext(UnprocessedOrder);
-		
+
 	}
 
 	// this is what StockBroker use to call under normal circumstance
 	public void submitOrder(StockOrder order, long timestamp) {
-		
+
 		if (order.getOrderType() == type.SELL || order.getOrderType() == type.SHORT) {
 			this.stockListing.registerShareAndSellOrder(order);
-		}else {
+		} else {
 			this.internalBuySink.tryEmitNext(new Pair<>(timestamp, order));
-		} 
-		
+		}
+
 	}
- 
+
 	public ListingStock getStockListing() {
 		return stockListing;
 	}

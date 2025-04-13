@@ -1,16 +1,15 @@
 package com.configurations;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.models.StockExchange;
-import com.models.Agents.Hedgie;
-import com.models.Agents.Lender;
+import com.models.Agents.HedgeFund; 
 import com.models.Agents.Market;
 import com.models.Agents.StockBroker;
+import com.models.Agents.StockLender;
 import com.models.demands.Share;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
@@ -18,7 +17,6 @@ import com.utils.SimAgentTypeEnum;
 
 import jakarta.annotation.PostConstruct; 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
 @Configuration
 @PropertySource("classpath:app.properties")
@@ -44,45 +42,49 @@ public class WorldSimulator {
 	private double shortedRatio;
 
 	@Autowired
-	Hedgie hedgie;
-
+	ReactorStreamConfig streamConfig;
+	
 	@Autowired
 	Market market;
    
-	@Autowired
-	StockBroker broker;
-	
 	@Autowired
 	StockExchange exchange;
 
 	@Autowired
 	Flux<Long> simulationClock;
-	
+
+	boolean simEndFlag = false;
+
 	@Autowired
-	Lender lender;
-
-	boolean onceFlag = false;
-
+	SimAgentFactory agentFactory;
+	
+	int counter = 0;
+	int stopAt = 100;
 	@PostConstruct
 	void init() {
 
+		
 		this.simulationClock.subscribe(t -> {
 
-			if (!onceFlag) {
+			if (!simEndFlag) {
 				this.setupSim(); // run once
-				onceFlag = true;
+				simEndFlag = true;
 			}
-
+			
+			this.counter += 1;
+			
+			if(counter == stopAt) {
+				simEndFlag = true;
+				streamConfig.stopSim();
+			}
 		});
-
+		 
 	}
 
 	void setupSim() {
 
 		// TODO put this in a factory and kick it out at the simulate command
 
-		int companyShares = (int) ((this.insiderR / 100.0) * this.stockVolume);
-		int mutualFundsShares = (int) ((this.instituteR / 100.0) * this.stockVolume);
 		int shortInterestShares = (int) ((this.shortedRatio / 100.0) * this.stockVolume);
 		int marketNumShares = (int) ((1.0 - ((this.insiderR + this.instituteR) / 100.0)) * this.stockVolume);
 
@@ -90,11 +92,19 @@ public class WorldSimulator {
 		Share marketShares = new Share(market.getId(), this.stockPrice, marketNumShares, SimAgentTypeEnum.Market);
 		this.exchange.getStockListing().registerShares2Pool(marketShares);
 
-		// add short interest to the market
-		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, this.stockPrice, shortInterestShares,
-				SimAgentTypeEnum.Hedgie, 0L);  
+		StockLender lender = this.agentFactory.createLender();
+		lender.setMargineCall(0.3);
 		
-		this.lender.borrowStock(shortOrder);
+		StockBroker broker = this.agentFactory.createStockBroker();
+		broker.setLender(lender);
+		
+		HedgeFund hedgie = this.agentFactory.createHedgie();
+		hedgie.setParameter(lender, 7.5E9, 0.95, 0.5, 10, 0.5);
+		
+		// add short interest to the market
+		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, this.stockPrice, shortInterestShares, SimAgentTypeEnum.Hedgie, 0L);  
+		
+		lender.borrowStock(shortOrder);
 		
 	}
 

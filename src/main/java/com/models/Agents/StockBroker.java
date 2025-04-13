@@ -1,7 +1,9 @@
 package com.models.Agents;
-  
+ 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.models.StockExchange;
@@ -10,16 +12,16 @@ import com.models.demands.StockOrder.type;
 
 import em426.agents.Agent;
 import em426.api.ActState;
-import jakarta.annotation.PostConstruct;
-import javafx.beans.property.SimpleIntegerProperty;
+import jakarta.annotation.PostConstruct; 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 @Component
+@Scope("prototype")
 public class StockBroker extends Agent {
 
-	// processing delay for all buy orders
-	SimpleIntegerProperty buyOrderDelay = new SimpleIntegerProperty(2);
+	// processing delay for all buy orders 
+	private Long delayBuyOrder = 1L;
 
 	@Autowired
 	@Qualifier("stockOpenOrderFlux")
@@ -34,10 +36,15 @@ public class StockBroker extends Agent {
 	@Autowired
 	@Qualifier("completedOrder")
 	Sinks.Many<StockOrder> completedOrderStream;
+	
+	private StockLender lender;
 
-	@Autowired
-	Lender lender;
-
+	public StockBroker() {}
+	
+	public void setLender(StockLender lender) {
+		this.lender = lender;
+	}
+	
 	@PostConstruct
 	void init() {
 
@@ -45,7 +52,8 @@ public class StockBroker extends Agent {
 		// listen for all traditional sell orders
 		this.stockOrderStream.filter(order -> {
 
-			return order.getActState() == ActState.START && (order.getOrderType() != type.SHORT);
+			return order.getActState() == ActState.START
+					&& (order.getOrderType() == type.SELL || order.getOrderType() == type.COVER);
 
 		}).subscribe(order -> {
 
@@ -53,7 +61,18 @@ public class StockBroker extends Agent {
 			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 
 		});
- 
+		
+		
+		this.stockOrderStream.filter(order->{
+			
+			return order.getActState() == ActState.START && order.getOrderType() == type.BUY;
+		
+		}).subscribe(order->{
+			
+			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
+		});
+		
+
 		this.stockOrderStream.filter(order -> {
 
 			return order.getActState() == ActState.START && order.getOrderType() == type.SHORT;

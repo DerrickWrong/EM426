@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
 import com.configurations.ReactorStreamConfig; 
-import com.models.Agents.Hedgie;
 import com.models.Agents.StockBroker;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
@@ -37,12 +36,6 @@ public class MainSimWindowController {
 
 	@FXML
 	LineChart<Long, Double> stockPricePlot;
-
-	@Autowired
-	StockBroker broker;
-
-	@Autowired
-	Hedgie hedgie;
 
 	@FXML
 	Button simulatedBtn, stepButton;

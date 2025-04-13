@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import com.configurations.AgentStateConfig.MarketState; 
+import com.configurations.AgentStateConfig.MarketState;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.model.State;
 import com.models.StockExchange;
@@ -62,18 +62,15 @@ public class Market extends Agent {
 	void init() {
 
 		this.stockHolding = this.stockVolume * (this.floatingRatio / 100);
- 
- 
+
 		this.shareInfoFlux.buffer(this.numTicksToObserve).subscribe(shareInfo -> {
 
 			ShareInfo latest = shareInfo.get(numTicksToObserve - 1);
 			double latestPrice = latest.getCurrentPrice();
-			double der = HelperFn.getDerivative(this.initialHoldingPrice, latestPrice, 1);
 
-			double percent = (der / this.initialHoldingPrice) * 100.0;
+			double probability = Math.random(); // completely random
 
-			if (percent > 1 && percent > this.triggerBuyPercentage) {
-				System.out.println("Market buy ");
+			if (probability >= 0.5) {
 
 				if (this.MarketStateMachine.getCurrent() == MarketState.IDLE) {
 
@@ -83,17 +80,16 @@ public class Market extends Agent {
 					this.MarketStateMachine.send(MarketState.NEXTSTATE);
 				}
 
-				
 				int numShares = (int) this.computeSharesToProcess();
 				double price = this.buyAbovePricePercentage * latestPrice;
-				StockOrder order = new StockOrder(this.getId(), type.BUY, price, numShares, SimAgentTypeEnum.Market, latest.getTimestamp());
+				StockOrder order = new StockOrder(this.getId(), type.BUY, price, numShares, SimAgentTypeEnum.Market,
+						latest.getTimestamp());
 				this.stockOrderStream.tryEmitNext(order);
-				
-				System.out.println("Market buying " + numShares + " @ $" + price);
-			}
 
-			if (percent < 0 && percent < this.triggerSellPercentage) {
-				
+				System.out.println("Market buying " + numShares + " @ $" + price);
+
+			} else {
+
 				this.MarketStateMachine.send(MarketState.SELLNOW);
 
 				if (this.MarketStateMachine.getCurrent() == MarketState.IDLE) {
@@ -106,10 +102,12 @@ public class Market extends Agent {
 
 				int numShares = (int) this.computeSharesToProcess();
 				double price = this.sellBelowPricePercentage * latestPrice;
-				StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, SimAgentTypeEnum.Market, latest.getTimestamp());
+				StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, SimAgentTypeEnum.Market,
+						latest.getTimestamp());
 				this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
-				
+
 				System.out.println("Market selling " + numShares + " @ $" + price);
+
 			}
 
 			this.MarketStateMachine.send(MarketState.BACK2IDLE);
@@ -125,16 +123,16 @@ public class Market extends Agent {
 		State currState = this.MarketStateMachine.getCurrent();
 
 		if (currState == MarketState.SELL1P || currState == MarketState.BUY1P) {
-			shares = this.stockHolding * 0.005;
+			shares = this.stockHolding * 0.01;
 		}
 
 		if (currState == MarketState.SELL5P || currState == MarketState.BUY5P) {
 
-			shares = this.stockHolding * 0.01;
+			shares = this.stockHolding * 0.05;
 		}
 
 		if (currState == MarketState.SELL10P || currState == MarketState.BUY10P) {
-			shares = this.stockHolding * 0.02;
+			shares = this.stockHolding * 0.1;
 		}
 
 		return shares;

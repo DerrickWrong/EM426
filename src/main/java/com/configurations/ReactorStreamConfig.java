@@ -20,7 +20,7 @@ import reactor.core.publisher.Sinks;
 public class ReactorStreamConfig {
 
 	// periodicity of the simulation clock
-	private Duration simPeriodicity = Duration.ofSeconds(1);
+	private Duration simPeriodicity = Duration.ofMillis(1);
 
 	private final AtomicLong simClockCounter = new AtomicLong(0L);
 	AtomicBoolean simClockToggleFlag = new AtomicBoolean(false);
@@ -31,6 +31,18 @@ public class ReactorStreamConfig {
 		// Turn off the tradeClockFlag
 		simClockToggleFlag.set(false);
 		simulationClockStream.tryEmitNext(simClockCounter.getAndIncrement());
+	}
+	
+	public void stopSim() {
+		this.simClockToggleFlag.set(false);
+	}
+	
+	public void startSim() {
+		this.simClockToggleFlag.set(true);
+	}
+	
+	public void resetSim() {
+		this.simClockCounter.set(0L);
 	}
 
 	@Bean
