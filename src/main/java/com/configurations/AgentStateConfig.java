@@ -82,6 +82,7 @@ public class AgentStateConfig {
 	}
 	
 	@Bean
+	@Scope("prototype")
 	StateMachine BrokerStateMachine() {
 		// See Broker State Diagram for more information
 		return StateMachine.newBuilder()
@@ -103,6 +104,7 @@ public class AgentStateConfig {
 	}
 	
 	@Bean
+	@Scope("prototype")
 	StateMachine InstitutionalStateMachine() {
 		
 		// See Institutional Investor diagram for more information

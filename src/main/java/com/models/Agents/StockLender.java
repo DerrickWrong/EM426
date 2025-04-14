@@ -34,8 +34,6 @@ public class StockLender extends Agent{
 
 	final Map<UUID, Share> borrowersTab = new HashMap<>();
 
-	
-
 	@Autowired
 	Sinks.Many<Pair<UUID, Share>> marginCallSink;
 	
@@ -62,7 +60,6 @@ public class StockLender extends Agent{
 			this.checkTab(info);
 
 		});
-
 	}
 
 	// The magic method of creating new shares. :) 

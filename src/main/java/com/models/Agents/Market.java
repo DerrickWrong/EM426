@@ -18,6 +18,7 @@ import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -58,6 +59,11 @@ public class Market extends Agent {
 	Sinks.Many<StockOrder> stockOrderStream;
 
 	public Market(){}
+	
+	@PreDestroy
+	void tearDown() {
+		System.out.println("Destroying Market object");
+	}
 	
 	@PostConstruct
 	void init() {

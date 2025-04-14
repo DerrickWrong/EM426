@@ -83,13 +83,6 @@ public class HedgeFund extends Agent {
 				this.shortingStock(fund, s);
 			}
 
-			double der = HelperFn.getDerivative(this.currSellingPrice, s.getCurrentPrice(), 1);
-			double stat = (der / this.currSellingPrice);
-
-			if (stat > 0 && stat >= cashoutProfitAt) {
-				// cover position
-				this.coverPosition();
-			}
 
 		});
 
@@ -131,7 +124,7 @@ public class HedgeFund extends Agent {
 				return;
 			}
 			
-			this.coverPosition();
+			//this.coverPosition();
 			this.stateMachine.send(HedgieState.CMMESSAGE);  
 			// this is when the hedgie had to buy back all the stocks
 			System.out.println("Hedgie getting Margin call!!!");

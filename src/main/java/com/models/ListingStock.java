@@ -205,6 +205,7 @@ public class ListingStock {
 	public void purge() {
 
 		this.sharesRegistry.clear();
+		this.pendingSalesRegistry.clear();
 		this.sellingSharesQueue.clear();
 		this.sellOrderQueue.clear();
 	}
