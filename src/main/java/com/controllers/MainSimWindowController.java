@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
-import com.configurations.ReactorStreamConfig; 
-import com.models.Agents.StockBroker;
+import com.configurations.ReactorStreamConfig;
+import com.configurations.WorldSimulator; 
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import jakarta.annotation.PostConstruct;
@@ -65,7 +65,8 @@ public class MainSimWindowController {
 	@FXML
 	PieChart pieChart;
 
- 
+	@Autowired
+	WorldSimulator simulation;
 
 	@FXML
 	public void initialize() {
@@ -112,7 +113,19 @@ public class MainSimWindowController {
 			dateCounter++;
 
 		});
-
+	}
+	
+	private void cleanGraphData() {
+		
+		// clean up volume graph
+		this.supplySeries.getData().clear();
+		this.demandSeries.getData().clear();
+		this.agentSeries.getData().clear();
+		
+		// clean up price graph
+		this.priceSeries.getData().clear();
+		
+		this.dateCounter = 0L; // reset the x-axis
 	}
 
 	@FXML
@@ -152,33 +165,18 @@ public class MainSimWindowController {
 
 		this.simulationStarted = !this.simulationStarted; // toggle the simulation status
 
-		this.reactorConfig.toggleSimulationClock();
-
 		if (this.simulationStarted) {
-			this.simulatedBtn.setText("Pause");
+			this.simulatedBtn.setText("Re-Run");
+			
+			this.reactorConfig.toggleSimulationClock();
 		} else {
+			
+			//clean up the plots 
+			this.cleanGraphData();
+			
+			this.simulation.reRunSimulation();
 			this.simulatedBtn.setText("Simulate");
 		}
-	}
-
-	@FXML
-	public void startSimulationClicked() {
-
-		this.simulationStarted = true;
-
-		this.reactorConfig.toggleSimulationClock();
-
-		this.simulatedBtn.setText("Pause");
-	}
-
-	@FXML
-	public void onPauseClicked() {
-
-		this.simulationStarted = false;
-
-		this.reactorConfig.toggleSimulationClock();
-
-		this.simulatedBtn.setText("Simulate");
 	}
 
 	@FXML

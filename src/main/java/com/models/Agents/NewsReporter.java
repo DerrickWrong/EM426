@@ -37,10 +37,12 @@ public class NewsReporter extends Agent {
 
 	@Autowired
 	Flux<Long> simulationClock;
+	
+	StockLender lender;
 
 	@Value("${stockVolume}")
 	private int stockVolume;
-
+	 
 	@PostConstruct
 	void init() {
 
@@ -60,12 +62,18 @@ public class NewsReporter extends Agent {
 
 	}
 
+	public void setLender(StockLender lender) {
+		this.lender = lender;
+	}
+	
 	// Review the ratio
 	public ShareInfo computeRatio(ShareInfo info) {
 
 		ConcurrentHashMap<UUID, Share> sharesRegistry = this.wallStreet.getStockListing().sharesRegistry;
 		ConcurrentHashMap<UUID, Share> pendingSales = this.wallStreet.getStockListing().pendingSalesRegistry;
-
+		Map<UUID, Share> borrowsTab = this.lender.getBorrowersTab();
+		
+		
 		int marketFloat = 0;
 		int shorted = 0;
 		int institute = 0;
@@ -74,10 +82,6 @@ public class NewsReporter extends Agent {
 
 		for (Map.Entry<UUID, Share> k : sharesRegistry.entrySet()) {
 			Share share = k.getValue();
-
-			if (share.getType() == SimAgentTypeEnum.Hedgie) {
-				shorted += share.getQuantity();
-			}
 
 			if (share.getType() == SimAgentTypeEnum.Retail) {
 				apes += share.getQuantity();
@@ -99,10 +103,6 @@ public class NewsReporter extends Agent {
 		for (Map.Entry<UUID, Share> k : pendingSales.entrySet()) {
 			Share share = k.getValue();
 
-			if (share.getType() == SimAgentTypeEnum.Hedgie) {
-				shorted += share.getQuantity();
-			}
-
 			if (share.getType() == SimAgentTypeEnum.Retail) {
 				apes += share.getQuantity();
 			}
@@ -118,6 +118,12 @@ public class NewsReporter extends Agent {
 			if (share.getType() == SimAgentTypeEnum.Company) {
 				company += share.getQuantity();
 			}
+		}
+		
+		for(Map.Entry<UUID, Share> k : borrowsTab.entrySet()) {
+			
+			Share share = k.getValue();
+			shorted += share.getQuantity();
 		}
 
 		double marketRatio = marketFloat * 100.0 / this.stockVolume;

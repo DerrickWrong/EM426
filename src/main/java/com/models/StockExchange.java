@@ -1,5 +1,9 @@
 package com.models;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -7,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.models.demands.Share;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
+import com.utils.SimAgentTypeEnum;
 
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
@@ -105,12 +110,34 @@ public class StockExchange {
 	// this is what StockBroker use to call under normal circumstance
 	public void submitOrder(StockOrder order, long timestamp) {
 
-		if (order.getOrderType() == type.SELL || order.getOrderType() == type.SHORT) {
+		if (order.getOrderType() == type.SELL) {
 			this.stockListing.registerShareAndSellOrder(order);
 		} else {
 			this.internalBuySink.tryEmitNext(new Pair<>(timestamp, order));
 		}
-
+	}
+	
+	public void submitShortOrder(StockOrder shortOrder, Share borrowedshares) {
+		
+		ConcurrentHashMap<UUID, Share> sharesRegistry = stockListing.sharesRegistry;
+		
+		// Find the market repo  
+		for (Map.Entry<UUID, Share> k : sharesRegistry.entrySet()) {
+			Share share = k.getValue();
+			
+			if (share.getType() == SimAgentTypeEnum.Market) {
+				
+				// add the short to the market repo - simulate order being absorbed by the market
+				Share comb = share.combineShare(borrowedshares);
+				stockListing.sharesRegistry.replace(k.getKey(), comb);
+				
+				StockOrder completedShort = new StockOrder(shortOrder, ActState.COMPLETE, shortOrder.getOrderRequestedAtTime() + 1);
+				completedOrderSink.tryEmitNext(completedShort);
+				break;
+			}
+			
+		} 
+		
 	}
 
 	public ListingStock getStockListing() {

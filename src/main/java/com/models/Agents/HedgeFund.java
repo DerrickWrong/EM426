@@ -22,8 +22,7 @@ import em426.agents.Agent;
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
 import javafx.util.Pair;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Flux; 
 
 @Component
 @Scope("prototype")
@@ -38,11 +37,7 @@ public class HedgeFund extends Agent {
 	private double cashoutProfitAt;
 
 	private StockLender lender;
-
-	@Autowired
-	@Qualifier("stockOrderStream")
-	Sinks.Many<StockOrder> orderSink;
-
+  
 	@Autowired
 	Flux<ShareInfo> shareInfoFlux;
 
@@ -60,12 +55,13 @@ public class HedgeFund extends Agent {
 	@Autowired
 	Flux<Pair<UUID, Share>> marginCallFlux;
 
-	public HedgeFund(){}
-	
-	public void setParameter(StockLender lender, double principle, double shortBidPercent, double marginReqPercent, int numberOfDump,
-			double cashOutProfitAt) {
+	public HedgeFund() {
+	}
+
+	public void setParameter(StockLender lender, double principle, double shortBidPercent, double marginReqPercent,
+			int numberOfDump, double cashOutProfitAt) {
 		this.lender = lender;
-		
+
 		this.originalPrinciple = principle;
 		this.shortBidPercent = shortBidPercent;
 		this.marginReqPercent = marginReqPercent;
@@ -78,7 +74,7 @@ public class HedgeFund extends Agent {
 
 		double fund = this.originalPrinciple / this.numberOfDump;
 
-		stateMachine.send(Messages.EMPTY);
+		this.stateMachine.send(Messages.EMPTY);
 
 		this.shareInfoFlux.subscribe(s -> {
 
@@ -92,7 +88,7 @@ public class HedgeFund extends Agent {
 
 			if (stat > 0 && stat >= cashoutProfitAt) {
 				// cover position
-				this.coverPosition(fund, s);
+				this.coverPosition();
 			}
 
 		});
@@ -106,20 +102,39 @@ public class HedgeFund extends Agent {
 
 			StockOrder currOrder = this.stockExchange.getStockListing().sellOrderQueue.peek();
 
+			// TODO - hack
+			if (currOrder == null) {
+				return;
+			}
+
 			if (currOrder.getUUID() == this.getId()) {
 				return; // can't short more stock until supply has been consumed
 			}
-
+			
+			if(po.getOrderType() == type.COVER ) {
+				this.stateMachine.send(HedgieState.CMMESSAGE); // move to cover state & lock the agent
+			}
+			
 			stateMachine.send(HedgieState.IDLEMSG);
 
 		});
 
 		// signal for getting margin call
-		this.marginCallFlux.subscribe(call -> {
+		this.marginCallFlux.filter(f -> {
 
+			return this.stateMachine.getCurrent() != HedgieState.COVER;
+
+		}).subscribe(call -> {
+  
+			
+			if(this.stateMachine.getAllTransitions() == HedgieState.COVER) {
+				return;
+			}
+			
+			this.coverPosition();
+			this.stateMachine.send(HedgieState.CMMESSAGE);  
 			// this is when the hedgie had to buy back all the stocks
 			System.out.println("Hedgie getting Margin call!!!");
-
 		});
 	}
 
@@ -144,8 +159,19 @@ public class HedgeFund extends Agent {
 		stateMachine.send(Messages.EMPTY);
 	}
 
-	private void coverPosition(double fund, ShareInfo s) {
+	private void coverPosition() {
 
+		Share borrowedShares = this.lender.getBorrowersTab().get(this.getId());
+
+		StockOrder currOrder = this.stockExchange.getStockListing().sellOrderQueue.peek();
+
+		double bidPrice = currOrder.getBidPrice() * 1.05;
+
+		StockOrder coverOrder = new StockOrder(this.getId(), type.COVER, bidPrice, borrowedShares.getQuantity(),
+				SimAgentTypeEnum.Hedgie, currOrder.getOrderRequestedAtTime() + 1L);
+		
+		this.stockExchange.processImmediateBuyOrder(coverOrder.getOrderRequestedAtTime(), coverOrder);
+		
 	}
 
 }

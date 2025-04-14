@@ -57,6 +57,7 @@ public class AgentStateConfig {
 	}
 	
 	@Bean
+	@Scope("prototype")
 	StateMachine HedgieStateMachine(){
 		// See Hedgies State Diagram for more information
 		return StateMachine.newBuilder()
@@ -129,6 +130,7 @@ public class AgentStateConfig {
 	}
 	
 	@Bean
+	@Scope("prototype")
 	StateMachine MarketStateMachine() {
 		return StateMachine.newBuilder()
 				.from(MarketState.IDLE).to(MarketState.SELL1P).on(MarketState.SELLNOW)

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.configurations.AgentStateConfig.MarketState;
@@ -12,8 +13,7 @@ import com.github.pnavais.machine.model.State;
 import com.models.StockExchange;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
-import com.models.demands.StockOrder.type;
-import com.utils.HelperFn;
+import com.models.demands.StockOrder.type; 
 import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;
@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 @Component
+@Scope("prototype")
 @PropertySource("classpath:stock.properties")
 public class Market extends Agent {
 
@@ -40,8 +41,6 @@ public class Market extends Agent {
 
 	private int numTicksToObserve = 5; // use for computing the average performance of the stock
 
-	private double triggerSellPercentage = -5;
-	private double triggerBuyPercentage = 5;
 	private double sellBelowPricePercentage = 0.95;
 	private double buyAbovePricePercentage = 1.05;
 
@@ -58,11 +57,13 @@ public class Market extends Agent {
 	@Autowired
 	Sinks.Many<StockOrder> stockOrderStream;
 
+	public Market(){}
+	
 	@PostConstruct
 	void init() {
 
 		this.stockHolding = this.stockVolume * (this.floatingRatio / 100);
-
+		
 		this.shareInfoFlux.buffer(this.numTicksToObserve).subscribe(shareInfo -> {
 
 			ShareInfo latest = shareInfo.get(numTicksToObserve - 1);

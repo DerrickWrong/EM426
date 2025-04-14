@@ -32,7 +32,9 @@ public class StockLender extends Agent{
 	AtomicReference<ShareInfo> cache = new AtomicReference<ShareInfo>();
 	// lend stocks and margin call
 
-	Map<UUID, Share> borrowersTab = new HashMap<>();
+	final Map<UUID, Share> borrowersTab = new HashMap<>();
+
+	
 
 	@Autowired
 	Sinks.Many<Pair<UUID, Share>> marginCallSink;
@@ -63,6 +65,7 @@ public class StockLender extends Agent{
 
 	}
 
+	// The magic method of creating new shares. :) 
 	public void borrowStock(StockOrder borrowOrder) {
 
 		// create shares to be borrowed
@@ -83,9 +86,7 @@ public class StockLender extends Agent{
 			this.borrowersTab.put(borrowOrder.getUUID(), newBorrowShares);
 		}
 
-		this.exchange.getStockListing().registerShares2Pool(borrowShares);
-		
-		this.exchange.submitOrder(borrowOrder, borrowOrder.getOrderRequestedAtTime());
+		this.exchange.submitShortOrder(borrowOrder, borrowShares);
 		
 	}
 
@@ -102,6 +103,10 @@ public class StockLender extends Agent{
 			}
 		}
 
+	}
+	
+	public Map<UUID, Share> getBorrowersTab() {
+		return borrowersTab;
 	}
 
 	

@@ -1,13 +1,18 @@
 package com.configurations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.models.StockExchange;
+import com.models.Agents.Ape;
 import com.models.Agents.HedgeFund; 
 import com.models.Agents.Market;
+import com.models.Agents.NewsReporter;
 import com.models.Agents.StockBroker;
 import com.models.Agents.StockLender;
 import com.models.demands.Share;
@@ -15,6 +20,7 @@ import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.SimAgentTypeEnum;
 
+import em426.agents.Agent;
 import jakarta.annotation.PostConstruct; 
 import reactor.core.publisher.Flux;
 
@@ -43,38 +49,42 @@ public class WorldSimulator {
 
 	@Autowired
 	ReactorStreamConfig streamConfig;
-	
-	@Autowired
-	Market market;
    
 	@Autowired
 	StockExchange exchange;
 
 	@Autowired
+	NewsReporter report;
+	
+	@Autowired
 	Flux<Long> simulationClock;
 
-	boolean simEndFlag = false;
+	boolean simRunOnce = false;
 
 	@Autowired
 	SimAgentFactory agentFactory;
 	
+	private List<Agent> agentList = new ArrayList<>();
+	
 	int counter = 0;
 	int stopAt = 100;
+	
+	int numOfMonteCarlo = 10000; // TODO - TBD
+	
 	@PostConstruct
 	void init() {
 
 		
 		this.simulationClock.subscribe(t -> {
 
-			if (!simEndFlag) {
+			if (!simRunOnce) {
 				this.setupSim(); // run once
-				simEndFlag = true;
+				simRunOnce = true;
 			}
 			
 			this.counter += 1;
 			
 			if(counter == stopAt) {
-				simEndFlag = true;
 				streamConfig.stopSim();
 			}
 		});
@@ -88,24 +98,60 @@ public class WorldSimulator {
 		int shortInterestShares = (int) ((this.shortedRatio / 100.0) * this.stockVolume);
 		int marketNumShares = (int) ((1.0 - ((this.insiderR + this.instituteR) / 100.0)) * this.stockVolume);
 
-		// register
-		Share marketShares = new Share(market.getId(), this.stockPrice, marketNumShares, SimAgentTypeEnum.Market);
-		this.exchange.getStockListing().registerShares2Pool(marketShares);
-
-		StockLender lender = this.agentFactory.createLender();
-		lender.setMargineCall(0.3);
+		Market marketAgent = this.agentFactory.createMarketAgent();
+		this.agentList.add(marketAgent);
 		
+		// register the market
+		Share marketShares = new Share(marketAgent.getId(), this.stockPrice, marketNumShares + shortInterestShares, SimAgentTypeEnum.Market);
+		this.exchange.getStockListing().registerShares2Pool(marketShares);
+		
+		StockOrder firstSell = new StockOrder(marketAgent.getId(), type.SELL, this.stockPrice, shortInterestShares, SimAgentTypeEnum.Market, 0L);
+		this.exchange.submitOrder(firstSell, 0L);
+		
+		// create lender agent
+		StockLender lender = this.agentFactory.createLender();
+		lender.setMargineCall(0.5); //50% price increase 
+		this.agentList.add(lender);
+		
+		// set reporter
+		this.report.setLender(lender);
+		/*
+		
+		
+		// create broker agent
 		StockBroker broker = this.agentFactory.createStockBroker();
 		broker.setLender(lender);
+		this.agentList.add(broker);
 		
+		// create hedgie
 		HedgeFund hedgie = this.agentFactory.createHedgie();
-		hedgie.setParameter(lender, 7.5E9, 0.95, 0.5, 10, 0.5);
+		hedgie.setParameter(lender, 7.5E9, 0.95, 0.5, 20, 0.5);
+		this.agentList.add(hedgie);
 		
 		// add short interest to the market
 		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, this.stockPrice, shortInterestShares, SimAgentTypeEnum.Hedgie, 0L);  
-		
 		lender.borrowStock(shortOrder);
+	
 		
+		
+		// create retail investors
+		List<Ape> retailInvestorAgents = new ArrayList<>();
+		int numOf100kApes = 10;
+		
+		for(int i = 0; i < numOf100kApes; i++) {
+			Ape ape = this.agentFactory.createApe();
+			retailInvestorAgents.add(ape);
+			this.agentList.add(ape);
+		}
+		*/
 	}
 
+	public void reRunSimulation() {
+		this.agentList.clear();
+		this.exchange.reset();
+		this.counter = 0;
+		this.simRunOnce = false;
+		this.streamConfig.resetSim();
+	}
+	
 }

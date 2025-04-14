@@ -32,7 +32,12 @@ public class ListingStock {
 
 		// get the shares needed
 		Share existing = this.sharesRegistry.get(sellOrder.getUUID());
-
+		
+		// TODO - hack - need to fix
+		if(existing == null) {
+			return;
+		}
+		
 		// figure out the remainder
 		int remainder = existing.getQuantity() - sellOrder.getNumOfShares();
 

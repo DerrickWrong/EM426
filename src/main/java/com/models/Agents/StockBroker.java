@@ -1,5 +1,6 @@
 package com.models.Agents;
- 
+
+import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,7 +13,7 @@ import com.models.demands.StockOrder.type;
 
 import em426.agents.Agent;
 import em426.api.ActState;
-import jakarta.annotation.PostConstruct; 
+import jakarta.annotation.PostConstruct;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -20,8 +21,8 @@ import reactor.core.publisher.Sinks;
 @Scope("prototype")
 public class StockBroker extends Agent {
 
-	// processing delay for all buy orders 
-	private Long delayBuyOrder = 1L;
+	// processing delay for all buy orders
+	private Duration delay = Duration.ZERO;
 
 	@Autowired
 	@Qualifier("stockOpenOrderFlux")
@@ -36,15 +37,20 @@ public class StockBroker extends Agent {
 	@Autowired
 	@Qualifier("completedOrder")
 	Sinks.Many<StockOrder> completedOrderStream;
-	
+
 	private StockLender lender;
 
-	public StockBroker() {}
-	
+	public StockBroker() {
+	}
+
 	public void setLender(StockLender lender) {
 		this.lender = lender;
 	}
-	
+
+	public void setDuration(long milliseconds) {
+		this.delay = Duration.ofMillis(milliseconds);
+	}
+
 	@PostConstruct
 	void init() {
 
@@ -61,17 +67,15 @@ public class StockBroker extends Agent {
 			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 
 		});
-		
-		
-		this.stockOrderStream.filter(order->{
-			
+
+		this.stockOrderStream.filter(order -> {
+
 			return order.getActState() == ActState.START && order.getOrderType() == type.BUY;
-		
-		}).subscribe(order->{
-			
+
+		}).delayElements(this.delay).subscribe(order -> {
+
 			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 		});
-		
 
 		this.stockOrderStream.filter(order -> {
 
