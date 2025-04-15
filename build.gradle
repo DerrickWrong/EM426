@@ -7,10 +7,13 @@ plugins {
 
 repositories {
     mavenCentral() 
+    maven {
+        url "https://maven.jzy3d.org/releases"
+    }
 }
 
 javafx {
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing', 'javafx.base' ]
 }
 
 
@@ -43,7 +46,9 @@ dependencies{
 	
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-math4-core
 	implementation 'org.apache.commons:commons-math4-core:4.0-beta1'
-	  
+	
+	// https://mvnrepository.com/artifact/org.jzy3d/jzy3d-native-jogl-javafx
+	implementation 'org.jzy3d:jzy3d-native-jogl-javafx:2.2.1'
 	
 }
 
