@@ -13,6 +13,7 @@ import com.models.Agents.Ape;
 import com.models.Agents.HedgeFund;
 import com.models.Agents.Market;
 import com.models.Agents.NewsReporter;
+import com.models.Agents.ScoreKeeper;
 import com.models.Agents.StockBroker;
 import com.models.Agents.StockLender;
 import com.models.demands.Share;
@@ -57,6 +58,9 @@ public class WorldSimulator {
 	NewsReporter report;
 
 	@Autowired
+	ScoreKeeper scoreKeeper;
+
+	@Autowired
 	Flux<Long> simulationClock;
 
 	boolean simRunOnce = false;
@@ -85,6 +89,7 @@ public class WorldSimulator {
 
 			if (counter == stopAt) {
 				streamConfig.stopSim();
+				this.wrapUp();
 			}
 		});
 
@@ -121,6 +126,8 @@ public class WorldSimulator {
 		StockBroker broker = this.agentFactory.createStockBroker();
 		broker.setLender(lender);
 		this.agentList.add(broker);
+		long buyOrderDelay = 1L; // setting delay
+		broker.setBuyOrderDelay(buyOrderDelay);
 
 		// create hedgie
 		HedgeFund hedgie = this.agentFactory.createHedgie();
@@ -128,32 +135,57 @@ public class WorldSimulator {
 		this.agentList.add(hedgie);
 
 		// add short interest to the market
-		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, this.stockPrice, shortInterestShares * 7,
+		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, this.stockPrice, shortInterestShares,
 				SimAgentTypeEnum.Hedgie, 0L);
 		lender.borrowStock(shortOrder);
 
+		double totalShort = this.stockPrice * shortInterestShares;
+		this.scoreKeeper.setKeeper(lender, totalShort, hedgie.getId());
+
 		// create retail investors
 		List<Ape> retailInvestorAgents = new ArrayList<>();
-		int numOf100kApes = 0;
+		int numOfAgent2Create = 10;
+		 
+		// tunable parameters for Ape
+		double initialBalance = 500;
+		int numAgent = 100000;
+		long disclosureDelay = 30;
+		double bidAbovePercent = 1.05;
+		long payFrequency = 20;
 
-		for (int i = 0; i < numOf100kApes; i++) {
-			Ape ape = this.agentFactory.createApe();
+		for (int i = 0; i < numOfAgent2Create; i++) {
+			Ape ape = this.agentFactory.createApe(initialBalance, numAgent, disclosureDelay, bidAbovePercent, payFrequency);
 			retailInvestorAgents.add(ape);
 			this.agentList.add(ape);
 		}
 
 	}
 
+	public void wrapUp() {
+
+		double gainOrLoss = this.scoreKeeper.computeHedgieGainOrLoss() / 10E6;
+
+		if (gainOrLoss > 0) {
+			System.out.println("**********************************");
+			System.out.format("Profit: %.2f mil \n", gainOrLoss);
+			System.out.println("**********************************");
+		} else {
+			System.out.println("**********************************");
+			System.out.format("Loss: %.2f mil \n", gainOrLoss);
+			System.out.println("**********************************");
+		}
+
+	}
+
 	public void reRunSimulation() {
-		
-		
-		this.agentList.forEach(agent ->{
-			
+
+		this.agentList.forEach(agent -> {
+
 			this.agentFactory.destroyAgent(agent);
 		});
-		
+
 		this.agentList.clear();
-		
+
 		this.exchange.reset();
 		this.counter = 0;
 		this.simRunOnce = false;

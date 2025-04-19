@@ -47,7 +47,7 @@ public class StockBroker extends Agent {
 		this.lender = lender;
 	}
 
-	public void setDuration(long milliseconds) {
+	public void setBuyOrderDelay(long milliseconds) {
 		this.delay = Duration.ofMillis(milliseconds);
 	}
 

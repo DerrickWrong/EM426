@@ -152,19 +152,4 @@ public class HedgeFund extends Agent {
 		stateMachine.send(Messages.EMPTY);
 	}
 
-	private void coverPosition() {
-
-		Share borrowedShares = this.lender.getBorrowersTab().get(this.getId());
-
-		StockOrder currOrder = this.stockExchange.getStockListing().sellOrderQueue.peek();
-
-		double bidPrice = currOrder.getBidPrice() * 1.05;
-
-		StockOrder coverOrder = new StockOrder(this.getId(), type.COVER, bidPrice, borrowedShares.getQuantity(),
-				SimAgentTypeEnum.Hedgie, currOrder.getOrderRequestedAtTime() + 1L);
-		
-		this.stockExchange.processImmediateBuyOrder(coverOrder.getOrderRequestedAtTime(), coverOrder);
-		
-	}
-
 }
