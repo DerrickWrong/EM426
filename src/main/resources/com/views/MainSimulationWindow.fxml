@@ -32,6 +32,7 @@
             <items>
                   <MenuItem mnemonicParsing="false" onAction="#clickViewDemands" text="View Demands " />
                   <MenuItem mnemonicParsing="false" onAction="#clickConfig" text="Change Config" />
+                  <MenuItem mnemonicParsing="false" onAction="#runMonteCarlo" text="Run Monte Carlo Sim" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
@@ -45,20 +46,6 @@
    <left>
       <VBox alignment="CENTER" prefHeight="488.0" prefWidth="189.0" BorderPane.alignment="CENTER">
          <children>
-            <Pane onMouseClicked="#supplyClicked" prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: #D3D3D3;" VBox.vgrow="NEVER">
-               <VBox.margin>
-                  <Insets bottom="50.0" />
-               </VBox.margin>
-               <children>
-                  <ImageView fitHeight="70.0" fitWidth="90.0" layoutX="14.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/MarketPlace.jpg" />
-                     </image>
-                  </ImageView>
-                  <Label layoutX="80.0" layoutY="42.0" text="Market &amp; Lenders" />
-                  <Label layoutX="109.0" layoutY="14.0" text="Supply" />
-               </children>
-            </Pane>
             <Pane onMouseClicked="#demandClicked" prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: #D3D3D3;">
                <VBox.margin>
                   <Insets bottom="50.0" />

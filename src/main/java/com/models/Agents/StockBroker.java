@@ -48,6 +48,11 @@ public class StockBroker extends Agent {
 	}
 
 	public void setBuyOrderDelay(long milliseconds) {
+		
+		if(milliseconds == 0L) {
+			this.delay = Duration.ZERO;
+		}
+		
 		this.delay = Duration.ofMillis(milliseconds);
 	}
 

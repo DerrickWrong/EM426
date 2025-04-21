@@ -24,6 +24,7 @@ import com.utils.SimAgentTypeEnum;
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 @Configuration
 @PropertySource("classpath:app.properties")
@@ -63,17 +64,20 @@ public class WorldSimulator {
 	@Autowired
 	Flux<Long> simulationClock;
 
+	@Autowired
+	SimConfiguration simConfig;
+
 	boolean simRunOnce = false;
 
 	@Autowired
 	SimAgentFactory agentFactory;
+	
+	@Autowired
+	Sinks.Many<Double> resultSink;
 
 	private List<Agent> agentList = new ArrayList<>();
 
 	int counter = 0;
-	int stopAt = 100;
-
-	int numOfMonteCarlo = 10000; // TODO - TBD
 
 	@PostConstruct
 	void init() {
@@ -87,7 +91,7 @@ public class WorldSimulator {
 
 			this.counter += 1;
 
-			if (counter == stopAt) {
+			if (counter == simConfig.simulationDuration) {
 				streamConfig.stopSim();
 				this.wrapUp();
 			}
@@ -125,36 +129,29 @@ public class WorldSimulator {
 		// create broker agent
 		StockBroker broker = this.agentFactory.createStockBroker();
 		broker.setLender(lender);
-		this.agentList.add(broker);
-		long buyOrderDelay = 1L; // setting delay
-		broker.setBuyOrderDelay(buyOrderDelay);
+		this.agentList.add(broker); 
+		broker.setBuyOrderDelay(simConfig.brokerDelay);
 
 		// create hedgie
 		HedgeFund hedgie = this.agentFactory.createHedgie();
-		hedgie.setParameter(lender, 7.5E9, 0.95, 0.5, 20, 0.5);
 		this.agentList.add(hedgie);
-
+		
+		double shortPrice = simConfig.dicountPercent * this.stockPrice;
+		int shares2Short = (int) (simConfig.shortRatio * this.stockVolume);
+		
 		// add short interest to the market
-		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, this.stockPrice, shortInterestShares,
+		StockOrder shortOrder = new StockOrder(hedgie.getId(), type.SHORT, shortPrice, shares2Short,
 				SimAgentTypeEnum.Hedgie, 0L);
 		lender.borrowStock(shortOrder);
-
-		double totalShort = this.stockPrice * shortInterestShares;
-		this.scoreKeeper.setKeeper(lender, totalShort, hedgie.getId());
+ 
+		this.scoreKeeper.setKeeper(lender, shortPrice * shares2Short, hedgie.getId());
 
 		// create retail investors
 		List<Ape> retailInvestorAgents = new ArrayList<>();
-		int numOfAgent2Create = 10;
-		 
-		// tunable parameters for Ape
-		double initialBalance = 500;
-		int numAgent = 100000;
-		long disclosureDelay = 30;
-		double bidAbovePercent = 1.05;
-		long payFrequency = 20;
 
-		for (int i = 0; i < numOfAgent2Create; i++) {
-			Ape ape = this.agentFactory.createApe(initialBalance, numAgent, disclosureDelay, bidAbovePercent, payFrequency);
+		for (int i = 0; i < simConfig.numOfAgents; i++) {
+			Ape ape = this.agentFactory.createApe(simConfig.initialBalance, simConfig.multiplier,
+					simConfig.disclosureDelay, simConfig.bidAbovePercent, simConfig.payFrequency);
 			retailInvestorAgents.add(ape);
 			this.agentList.add(ape);
 		}
@@ -174,7 +171,9 @@ public class WorldSimulator {
 			System.out.format("Loss: %.2f mil \n", gainOrLoss);
 			System.out.println("**********************************");
 		}
-
+		
+		this.resultSink.tryEmitNext(gainOrLoss);
+		
 	}
 
 	public void reRunSimulation() {
@@ -191,5 +190,4 @@ public class WorldSimulator {
 		this.simRunOnce = false;
 		this.streamConfig.resetSim();
 	}
-
 }

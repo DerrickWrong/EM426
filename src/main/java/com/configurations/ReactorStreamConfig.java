@@ -104,5 +104,11 @@ public class ReactorStreamConfig {
 	Flux<Pair<UUID, Share>> marginCallFlux() {
 		return this.marginCallSink().asFlux();
 	}
+	
+	@Bean
+	Sinks.Many<Double> resultSink(){
+		
+		return Sinks.many().multicast().directBestEffort();
+	}
 
 }

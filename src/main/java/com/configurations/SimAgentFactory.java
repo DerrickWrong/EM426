@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import com.models.Agents.Ape;
 import com.models.Agents.HedgeFund;
 import com.models.Agents.Market;
-import com.models.Agents.PaperHand;
 import com.models.Agents.StockBroker;
 import com.models.Agents.StockLender;
 
@@ -51,11 +50,6 @@ public class SimAgentFactory {
 		Ape ape = (Ape) this.springContext.getBean(Ape.class, initialBalance, numAgent, disclosureDelay,
 				bidAbovePercent, payFreq);
 		return ape;
-	}
-
-	public PaperHand createPaperhand() {
-		PaperHand ph = this.springContext.getBean(PaperHand.class);
-		return ph;
 	}
 
 	public void destroyAgent(Agent agent) {

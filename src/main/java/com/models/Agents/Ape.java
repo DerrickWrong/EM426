@@ -85,12 +85,8 @@ public class Ape extends Agent {
 
 		}).subscribe(o -> {
 
-			if (o.getOrderType() == type.BUY) {
-
-				this.holdingshares = this.holdingshares + o.getNumOfShares();
-				this.balance = 0; // clean out the balance
-			}
-
+			this.holdingshares = this.holdingshares + o.getNumOfShares();
+			this.balance = 0; // clean out the balance
 			apeState.send(Messages.EMPTY);// move to hold state
 		});
 
@@ -102,17 +98,6 @@ public class Ape extends Agent {
 		}).subscribe(data -> {
 
 			if (apeState.getCurrent() == ApeState.OBSERVE) {
- 
-				double bidPrice = this.buyBidPercent * data.getT2().getCurrentPrice();
-				int numShares = (int) (this.balance / bidPrice);
-
-				StockOrder order = new StockOrder(this.getId(), type.BUY, bidPrice, numShares, SimAgentTypeEnum.Retail,
-						data.getT1());
-				
-				this.stockOrderStream.tryEmitNext(order);
-				
-				System.out.println("Agent " + this.getId() + " buying at $" + data.getT2().getCurrentPrice() + " on "
-						+ data.getT1() + "day - number of shares " + numShares);
 
 				apeState.send(ApeState.BUYMOREMESSAGE);
 			}
@@ -126,16 +111,18 @@ public class Ape extends Agent {
 					double bidPrice = this.buyBidPercent * data.getT2().getCurrentPrice();
 					int numShares = (int) (this.balance / bidPrice);
 
-					StockOrder order = new StockOrder(this.getId(), type.BUY, bidPrice, numShares, SimAgentTypeEnum.Retail,
-							data.getT1());
-					
+					StockOrder order = new StockOrder(this.getId(), type.BUY, bidPrice, numShares,
+							SimAgentTypeEnum.Retail, data.getT1());
+
 					this.stockOrderStream.tryEmitNext(order);
-					
+
 					System.out.println("Agent " + this.getId() + " buying at $" + data.getT2().getCurrentPrice()
 							+ " on " + data.getT1() + "day (payday) - number of shares " + numShares);
-
 				}
-
+			}
+			
+			if(apeState.getCurrent() == ApeState.SELL) {
+				
 			}
 
 		});

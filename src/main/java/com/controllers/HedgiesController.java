@@ -3,31 +3,46 @@ package com.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.SpringFXManager;
+import com.configurations.SimConfiguration;
 
-import jakarta.annotation.PostConstruct;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
-import javafx.util.converter.NumberStringConverter;
 
 @Component
 public class HedgiesController {
 
 	@FXML
-	TextField startingBalance, currentBalance, percent2Short, sellBelowPrice, decayPercent, cashout;
+	TextField borrow2short, dicountPercent;
 
-
- 
+	@Autowired
+	SimConfiguration simConfg;
 
 	@FXML
 	void initialize() {
+		
+		
+		this.borrow2short.setText(String.valueOf(this.simConfg.shortRatio));
+		this.dicountPercent.setText(String.valueOf(this.simConfg.dicountPercent)); 
+		
 
+		this.borrow2short.textProperty().addListener((obs, oldVal, newVal) -> {
 
-	}
+			if (newVal.isBlank()) {
+				return;
+			}
 
-	@FXML
-	public void closeBtn() {
-		SpringFXManager.getInstance().getSubStage().close();
+			this.simConfg.shortRatio = Double.valueOf(newVal);
+		});
+
+		this.dicountPercent.textProperty().addListener((obs, oldVal, newVal) -> {
+
+			if (newVal.isBlank()) {
+				return;
+			}
+
+			this.simConfg.dicountPercent = Double.valueOf(newVal);
+		});
+ 
 	}
 
 }

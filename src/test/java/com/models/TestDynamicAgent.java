@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.configurations.SimAgentFactory;
-import com.models.Agents.PaperHand;
-
 import javafx.application.Platform;
 
 @SpringBootTest

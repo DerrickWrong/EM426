@@ -34,7 +34,6 @@ public class HedgeFund extends Agent {
 	private int numberOfDump = 10; // default is 10 (1 is to short everything at once)
 	private double currSellingPrice;
 	private double balance;
-	private double cashoutProfitAt;
 
 	private StockLender lender;
   
@@ -66,7 +65,6 @@ public class HedgeFund extends Agent {
 		this.shortBidPercent = shortBidPercent;
 		this.marginReqPercent = marginReqPercent;
 		this.numberOfDump = numberOfDump;
-		this.cashoutProfitAt = cashOutProfitAt;
 	}
 
 	@PostConstruct

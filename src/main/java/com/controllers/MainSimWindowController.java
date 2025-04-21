@@ -208,4 +208,18 @@ public class MainSimWindowController {
 		
 	}
 	
+	@FXML
+	public void runMonteCarlo() throws IOException {
+		
+		// TODO - trigger monte carlo sim
+		
+		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/HedgeGainWindow.fxml");
+		Pane p = loader.load();
+		Stage ns = SpringFXManager.getInstance().getSubStage();
+		ns.setTitle("Configuration");
+		ns.setScene(new Scene(p));
+		ns.show();
+		 
+	}
+	
 }

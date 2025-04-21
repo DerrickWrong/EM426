@@ -28,7 +28,7 @@ public class MarkovModel {
 	// For Hedgies
 	public StateMachine HedgieW2ShortOrCover(StateMachine mach) {
 		
-		if(Math.random() >= 0.3) {
+		if(Math.random() >= 0.5) {
 			// 0.3 to double down...
 			return mach.send(HedgieState.SMMESSAGE);
 		}else {
