@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
 public class RetailInvestorController {
 
 	@FXML
-	TextField numAgentBox, multiplierBox, balanceBox, buybidPercentBox, payFreqBox, shortDisclosureDelayBox;
+	TextField numAgentBox, multiplierBox, balanceBox, buybidPercentBox, payFreqBox;
 
 	@FXML
 	Slider agentStability;
@@ -29,7 +29,7 @@ public class RetailInvestorController {
 		this.balanceBox.setText(String.valueOf(simConfig.initialBalance));
 		this.buybidPercentBox.setText(String.valueOf(simConfig.bidAbovePercent));
 		this.payFreqBox.setText(String.valueOf(simConfig.payFrequency));
-		this.shortDisclosureDelayBox.setText(String.valueOf(simConfig.disclosureDelay));
+		
 		this.agentStability.setMax(1.0);
 		this.agentStability.setMin(0.0);
 		this.agentStability.setValue(simConfig.diamondHandRatio);
@@ -77,16 +77,7 @@ public class RetailInvestorController {
 			simConfig.payFrequency = Long.valueOf(newVal);
 
 		});
-
-		this.shortDisclosureDelayBox.textProperty().addListener((obs, old, newVal) -> {
-
-			if (newVal.isBlank()) {
-				return;
-			}
-			simConfig.disclosureDelay = Long.valueOf(newVal);
-
-		});
-
+ 
 		this.agentStability.valueProperty().addListener((obs, old, newVal) -> {
 
 			simConfig.diamondHandRatio = newVal.doubleValue();

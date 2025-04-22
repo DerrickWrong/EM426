@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="381.0" prefWidth="372.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.RetailInvestorController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="333.0" prefWidth="353.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.RetailInvestorController">
    <top>
       <HBox alignment="CENTER" prefHeight="53.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
@@ -31,7 +31,7 @@
                   <Insets top="5.0" />
                </VBox.margin>
             </Label>
-            <Label text="Multiplier">
+            <Label text="Agent Scale">
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin>
@@ -47,11 +47,6 @@
                </VBox.margin>
             </Label>
             <Label text="Pay Freq">
-               <VBox.margin>
-                  <Insets top="20.0" />
-               </VBox.margin>
-            </Label>
-            <Label text="S Interest Delay">
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin>
@@ -90,11 +85,6 @@
                      </VBox.margin>
                   </TextField>
                   <TextField fx:id="payFreqBox" text="10">
-                     <VBox.margin>
-                        <Insets top="15.0" />
-                     </VBox.margin>
-                  </TextField>
-                  <TextField fx:id="shortDisclosureDelayBox" text="30">
                      <VBox.margin>
                         <Insets top="15.0" />
                      </VBox.margin>

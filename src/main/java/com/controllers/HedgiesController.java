@@ -12,18 +12,18 @@ import javafx.scene.control.TextField;
 public class HedgiesController {
 
 	@FXML
-	TextField borrow2short, dicountPercent, brokerDelayBox;
+	TextField borrow2short, dicountPercent, brokerDelayBox, shortDisclosureDelayBox;
 
 	@Autowired
-	SimConfiguration simConfg;
+	SimConfiguration simConfig;
 
 	@FXML
 	void initialize() {
 		
-		
-		this.borrow2short.setText(String.valueOf(this.simConfg.shortRatio));
-		this.dicountPercent.setText(String.valueOf(this.simConfg.shortSellDisountRate)); 
-		this.brokerDelayBox.setText(String.valueOf(this.simConfg.brokerDelay));
+		this.borrow2short.setText(String.valueOf(this.simConfig.shortRatio));
+		this.dicountPercent.setText(String.valueOf(this.simConfig.shortSellDisountRate)); 
+		this.brokerDelayBox.setText(String.valueOf(this.simConfig.brokerDelay));
+		this.shortDisclosureDelayBox.setText(String.valueOf(simConfig.disclosureDelay));
 
 		this.borrow2short.textProperty().addListener((obs, oldVal, newVal) -> {
 
@@ -31,7 +31,7 @@ public class HedgiesController {
 				return;
 			}
 
-			this.simConfg.shortRatio = Double.valueOf(newVal);
+			this.simConfig.shortRatio = Double.valueOf(newVal);
 		});
 
 		this.dicountPercent.textProperty().addListener((obs, oldVal, newVal) -> {
@@ -40,7 +40,7 @@ public class HedgiesController {
 				return;
 			}
 
-			this.simConfg.shortSellDisountRate = Double.valueOf(newVal);
+			this.simConfig.shortSellDisountRate = Double.valueOf(newVal);
 		});
 		
 		this.brokerDelayBox.textProperty().addListener((obs, oldVal, newVal)->{
@@ -49,8 +49,17 @@ public class HedgiesController {
 				return;
 			}
 			
-			this.simConfg.brokerDelay = Long.valueOf(newVal);
+			this.simConfig.brokerDelay = Long.valueOf(newVal);
 			
+		});
+		
+		this.shortDisclosureDelayBox.textProperty().addListener((obs, old, newVal) -> {
+
+			if (newVal.isBlank()) {
+				return;
+			}
+			simConfig.disclosureDelay = Long.valueOf(newVal);
+
 		});
  
 	}
