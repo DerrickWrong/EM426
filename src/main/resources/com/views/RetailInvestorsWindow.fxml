@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="336.0" prefWidth="368.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.RetailInvestorController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="381.0" prefWidth="372.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.controllers.RetailInvestorController">
    <top>
       <HBox alignment="CENTER" prefHeight="53.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
@@ -41,7 +41,7 @@
                   <Insets top="25.0" />
                </VBox.margin>
             </Label>
-            <Label text="Buy Bid %">
+            <Label text="BuyPrice Ratio">
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin>
@@ -51,12 +51,12 @@
                   <Insets top="20.0" />
                </VBox.margin>
             </Label>
-            <Label text="Short Delay">
+            <Label text="S Interest Delay">
                <VBox.margin>
                   <Insets top="20.0" />
                </VBox.margin>
             </Label>
-            <Label text="Agent Stability">
+            <Label text="Hand Firmness">
                <padding>
                   <Insets top="20.0" />
                </padding>
@@ -106,47 +106,29 @@
                   </Slider>
                </children>
             </VBox>
-            <VBox prefHeight="302.0" prefWidth="209.0">
-               <children>
-                  <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0">
-                     <children>
-                        <ImageView fitHeight="65.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
-                           <HBox.margin>
-                              <Insets left="5.0" />
-                           </HBox.margin>
-                           <image>
-                              <Image url="@../images/diamondHand.jpg" />
-                           </image>
-                        </ImageView>
-                     </children>
-                  </HBox>
-                  <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0">
-                     <children>
-                        <ImageView fitHeight="65.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
-                           <HBox.margin>
-                              <Insets left="5.0" />
-                           </HBox.margin>
-                           <image>
-                              <Image url="@../images/paperHand.jpg" />
-                           </image>
-                        </ImageView>
-                     </children>
-                  </HBox>
-                  <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0">
-                     <children>
-                        <ImageView fitHeight="65.0" fitWidth="69.0" pickOnBounds="true" preserveRatio="true">
-                           <HBox.margin>
-                              <Insets left="5.0" />
-                           </HBox.margin>
-                           <image>
-                              <Image url="@../images/bagHolder.jpg" />
-                           </image>
-                        </ImageView>
-                     </children>
-                  </HBox>
-               </children>
-            </VBox>
          </children>
       </HBox>
    </center>
+   <bottom>
+      <HBox alignment="CENTER_LEFT" prefHeight="73.0" prefWidth="187.0" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+               <HBox.margin>
+                  <Insets left="80.0" />
+               </HBox.margin>
+               <image>
+                  <Image url="@../images/paperHand.jpg" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+               <HBox.margin>
+                  <Insets left="150.0" />
+               </HBox.margin>
+               <image>
+                  <Image url="@../images/diamondHand.jpg" />
+               </image>
+            </ImageView>
+         </children>
+      </HBox>
+   </bottom>
 </BorderPane>

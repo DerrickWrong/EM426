@@ -14,16 +14,17 @@
    <left>
       <VBox alignment="TOP_CENTER" prefHeight="356.0" prefWidth="112.0">
          <children>
-            <Label text="Borrow to Short (%)">
+            <Label text="Short Ratio">
                <VBox.margin>
                   <Insets bottom="20.0" top="15.0" />
                </VBox.margin>
             </Label>
-            <Label text="Sell @% Under">
+            <Label text="Short Sell Price Ratio">
                <VBox.margin>
                   <Insets bottom="20.0" />
                </VBox.margin>
             </Label>
+            <Label text="Broker Delay " />
          </children>
       </VBox>
    </left>
@@ -51,14 +52,19 @@
          <children>
             <VBox prefHeight="250.0" prefWidth="488.0">
                <children>
-                  <TextField fx:id="borrow2short" maxWidth="100.0" text="5">
+                  <TextField fx:id="borrow2short" maxWidth="100.0" text="0.1">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
                   </TextField>
-                  <TextField fx:id="dicountPercent" maxWidth="100.0" text="95">
+                  <TextField fx:id="dicountPercent" maxWidth="100.0" text="0.95">
                      <VBox.margin>
                         <Insets top="10.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <TextField fx:id="brokerDelayBox" maxWidth="100.0" prefWidth="0.0">
+                     <VBox.margin>
+                        <Insets top="15.0" />
                      </VBox.margin>
                   </TextField>
                </children>
