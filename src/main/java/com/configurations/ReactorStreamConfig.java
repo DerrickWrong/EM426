@@ -32,15 +32,15 @@ public class ReactorStreamConfig {
 		simClockToggleFlag.set(false);
 		simulationClockStream.tryEmitNext(simClockCounter.getAndIncrement());
 	}
-	
+
 	public void stopSim() {
 		this.simClockToggleFlag.set(false);
 	}
-	
+
 	public void startSim() {
 		this.simClockToggleFlag.set(true);
 	}
-	
+
 	public void resetSim() {
 		this.simClockCounter.set(0L);
 	}
@@ -62,7 +62,8 @@ public class ReactorStreamConfig {
 		boolean flag = this.simClockToggleFlag.get();
 		this.simClockToggleFlag.set(!flag);
 	}
-	
+	 
+
 	// This stream is used to pass stock order (requesting)
 	@Bean
 	Sinks.Many<StockOrder> stockOrderStream() {
@@ -104,10 +105,15 @@ public class ReactorStreamConfig {
 	Flux<Pair<UUID, Share>> marginCallFlux() {
 		return this.marginCallSink().asFlux();
 	}
-	
+
 	@Bean
-	Sinks.Many<Double> resultSink(){
-		
+	Sinks.Many<Double> resultSink() {
+
+		return Sinks.many().multicast().directBestEffort();
+	}
+
+	@Bean
+	Sinks.Many<Integer> simulationCompletion() {
 		return Sinks.many().multicast().directBestEffort();
 	}
 

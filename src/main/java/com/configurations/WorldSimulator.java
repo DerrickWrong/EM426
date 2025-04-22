@@ -67,36 +67,37 @@ public class WorldSimulator {
 	@Autowired
 	SimConfiguration simConfig;
 
-	boolean simRunOnce = false;
-
 	@Autowired
 	SimAgentFactory agentFactory;
 	
 	@Autowired
 	Sinks.Many<Double> resultSink;
 
+	@Autowired
+	Sinks.Many<Integer> simulationCompletion;
+	
 	private List<Agent> agentList = new ArrayList<>();
 
 	int counter = 0;
-
+	
 	@PostConstruct
 	void init() {
 
 		this.simulationClock.subscribe(t -> {
 
-			if (!simRunOnce) {
-				this.setupSim(); // run once
-				simRunOnce = true;
+			if (counter == 0) {
+				this.setupSim(); // run once 
 			}
 
-			this.counter += 1;
-
-			if (counter == simConfig.simulationDuration) {
+			if (counter == simConfig.simulationDuration) {   
 				streamConfig.stopSim();
 				this.wrapUp();
+				this.simulationCompletion.tryEmitNext(1);
 			}
+			
+			this.counter += 1;
 		});
-
+		
 	}
 
 	void setupSim() {
@@ -136,7 +137,7 @@ public class WorldSimulator {
 		HedgeFund hedgie = this.agentFactory.createHedgie();
 		this.agentList.add(hedgie);
 		
-		double shortPrice = simConfig.dicountPercent * this.stockPrice;
+		double shortPrice = simConfig.shortSellDisountRate * this.stockPrice;
 		int shares2Short = (int) (simConfig.shortRatio * this.stockVolume);
 		
 		// add short interest to the market
@@ -176,7 +177,7 @@ public class WorldSimulator {
 		
 	}
 
-	public void reRunSimulation() {
+	public void resetSimulation() {
 
 		this.agentList.forEach(agent -> {
 
@@ -187,7 +188,6 @@ public class WorldSimulator {
 
 		this.exchange.reset();
 		this.counter = 0;
-		this.simRunOnce = false;
 		this.streamConfig.resetSim();
 	}
 }

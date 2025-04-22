@@ -29,7 +29,7 @@ public class RetailInvestorController {
 		this.buybidPercentBox.setText(String.valueOf(simConfig.bidAbovePercent));
 		this.payFreqBox.setText(String.valueOf(simConfig.payFrequency));
 		this.shortDisclosureDelayBox.setText(String.valueOf(simConfig.disclosureDelay));
-		this.agentStability.setValue(simConfig.agentMix);
+		this.agentStability.setValue(simConfig.diamondHandRatio);
 		
 		this.numAgentBox.textProperty().addListener((observable, oldValue, newValue) -> {
 
@@ -85,7 +85,7 @@ public class RetailInvestorController {
 
 		this.agentStability.valueProperty().addListener((obs, old, newVal) -> {
 
-			simConfig.agentMix = newVal.doubleValue();
+			simConfig.diamondHandRatio = newVal.doubleValue();
 		});
 	}
 

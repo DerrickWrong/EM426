@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.configurations.AgentStateConfig.ApeState;
+import com.configurations.AgentStateFactory;
+import com.configurations.AgentStateFactory.ApeState;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.api.message.Messages;
 import com.models.MarkovModel;
@@ -30,9 +31,11 @@ public class Ape extends Agent {
 	private int agentScaleFactor = 1; // number of agents to scale
 	private double holdingshares = 0;
 	private long shortDisclosureDelay = 30; // time for hedge fund to report short interest
+	private double initialBalance;
 
 	@Autowired
-	@Qualifier("ApeStateMachine")
+	AgentStateFactory agentFactory;
+
 	private StateMachine apeState;
 
 	@Autowired
@@ -59,43 +62,56 @@ public class Ape extends Agent {
 		this.shortDisclosureDelay = disclosureDelay;
 		this.buyBidPercent = bidAbovePercent;
 		this.payDay = payInvestFrequency;
-
+		this.initialBalance = initialBalance;
 		this.balance = initialBalance * this.agentScaleFactor;
 	}
 
 	@PostConstruct
 	void init() {
 
+		this.apeState = this.agentFactory.ApeStateMachine();
+
 		apeState.send(Messages.EMPTY); // move to observe state
-
-		this.completedOrderFlux.filter(o -> {
-
-			return (o.getOrderType() == type.SHORT && o.getOrderState() == ActState.COMMITTED);
-
-		}).subscribe(o -> {
-
-			// change the state to buy move due to seeing the demand (short)!
-			apeState.send(ApeState.BUYMOREMESSAGE); // move to buy state
-
-		});
 
 		this.completedOrderFlux.filter(o -> {
 
 			return o.getUUID() == this.getId() && o.getOrderState() == ActState.COMMITTED;
 
 		}).subscribe(o -> {
-
-			this.holdingshares = this.holdingshares + o.getNumOfShares();
-			this.balance = 0; // clean out the balance
-			apeState.send(Messages.EMPTY);// move to hold state
+			
+			if(o.getOrderType() == type.BUY) {
+				this.holdingshares = this.holdingshares + o.getNumOfShares();
+				this.balance = 0; // clean out the balance 
+				this.apeState.setCurrent(ApeState.HOLD);
+			}
+			
+			if(o.getOrderType() == type.SELL) {
+				
+				this.balance = this.holdingshares * o.getBidPrice();
+				this.holdingshares = 0; 
+				this.apeState.setCurrent(ApeState.OBSERVE);
+			}
+			
 		});
+		
+		// getting paid
+		this.simulationClock.subscribe(d->{
+			
+			if(d % this.payDay == 0) {
+				this.balance += this.initialBalance * this.agentScaleFactor;
+			}
+			
+		});
+		
 
 		// combining two flux
 		Flux.zip(this.simulationClock, this.shareInfoFlux).filter(d -> {
 
-			return d.getT1() >= this.shortDisclosureDelay;
+			return d.getT1() >= this.shortDisclosureDelay && (this.balance > 0);
 
 		}).subscribe(data -> {
+
+			this.model.ApeHandW2BuyorSell(this.apeState);
 
 			if (apeState.getCurrent() == ApeState.OBSERVE) {
 
@@ -116,12 +132,18 @@ public class Ape extends Agent {
 
 					this.stockOrderStream.tryEmitNext(order);
 
-					System.out.println("Agent " + this.getId() + " buying at $" + data.getT2().getCurrentPrice()
-							+ " on " + data.getT1() + "day (payday) - number of shares " + numShares);
 				}
 			}
-			
-			if(apeState.getCurrent() == ApeState.SELL) {
+
+			if (apeState.getCurrent() == ApeState.SELL) {
+
+				double bidPrice = data.getT2().getCurrentPrice() * (2.0 - this.buyBidPercent); 
+
+				StockOrder order = new StockOrder(this.getId(), type.SELL, bidPrice, (int) this.holdingshares,
+						SimAgentTypeEnum.Retail, data.getT1());
+				
+				this.stockOrderStream.tryEmitNext(order);
+
 				
 			}
 

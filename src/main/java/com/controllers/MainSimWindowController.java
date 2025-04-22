@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.SpringFXManager;
 import com.configurations.ReactorStreamConfig;
-import com.configurations.WorldSimulator; 
+import com.configurations.SimConfiguration;
+import com.configurations.WorldSimulator;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import jakarta.annotation.PostConstruct;
@@ -32,7 +33,7 @@ import reactor.core.scheduler.Scheduler;
 public class MainSimWindowController {
 
 	@FXML
-	Label dayLabel, currStockPriceLabel;
+	Label dayLabel, currStockPriceLabel, monteCarloLabel;
 
 	@FXML
 	LineChart<Long, Double> stockPricePlot;
@@ -51,7 +52,13 @@ public class MainSimWindowController {
 	@Autowired
 	ReactorStreamConfig reactorConfig;
 
+	@Autowired
+	SimConfiguration simConfig;
+
 	boolean simulationStarted = false;
+
+	@Autowired
+	Sinks.Many<Integer> simulationCompletion;
 
 	// XYChart
 	@FXML
@@ -72,13 +79,13 @@ public class MainSimWindowController {
 	public void initialize() {
 
 		// setup pie chart
-		//this.pieChart.setData(stockConfig.getStockHoldingDistribution());
+		// this.pieChart.setData(stockConfig.getStockHoldingDistribution());
 		this.pieChart.setTitle("Share Distribution");
 
 		supplySeries.setName("Market(Supply)");
 		demandSeries.setName("Hedgies(Demand)");
 		agentSeries.setName("Apes(Agents)");
-		
+
 		this.hedgieVsApesPlot.getData().addAll(supplySeries, demandSeries, agentSeries);
 
 		this.stockPricePlot.getData().addAll(this.priceSeries);
@@ -94,7 +101,11 @@ public class MainSimWindowController {
 	public void init() {
 
 		// update the price board
-		this.shareInfoFlux.publishOn(fxScheduler).subscribe(info -> {
+		this.shareInfoFlux.filter(f -> {
+
+			return this.simConfig.MonteCarloTrials == 1;
+
+		}).publishOn(fxScheduler).subscribe(info -> {
 
 			String timestamp = String.valueOf(dateCounter);
 			this.dayLabel.setText(timestamp);
@@ -113,18 +124,33 @@ public class MainSimWindowController {
 			dateCounter++;
 
 		});
-	}
-	
-	private void cleanGraphData() {
 		
+		
+		this.simulationCompletion.asFlux().publishOn(fxScheduler).subscribe(data->{
+			
+			int count = this.simConfig.monteCarloCounter.incrementAndGet();
+			
+			this.monteCarloLabel.setText(String.valueOf(count));
+			
+			if(count <= this.simConfig.MonteCarloTrials) {
+				this.simulation.resetSimulation();
+				this.reactorConfig.startSim();
+			}
+			 
+		});
+		
+	}
+
+	private void cleanGraphData() {
+
 		// clean up volume graph
 		this.supplySeries.getData().clear();
 		this.demandSeries.getData().clear();
 		this.agentSeries.getData().clear();
-		
+
 		// clean up price graph
 		this.priceSeries.getData().clear();
-		
+
 		this.dateCounter = 0L; // reset the x-axis
 	}
 
@@ -163,20 +189,33 @@ public class MainSimWindowController {
 	@FXML
 	public void onSimulateClicked() {
 
-		this.simulationStarted = !this.simulationStarted; // toggle the simulation status
+		if (this.simConfig.MonteCarloTrials == 1) {
 
-		if (this.simulationStarted) {
-			this.simulatedBtn.setText("Re-Run");
-			
-			this.reactorConfig.toggleSimulationClock();
-		} else {
-			
-			//clean up the plots 
-			this.cleanGraphData();
-			
-			this.simulation.reRunSimulation();
+			this.simulationStarted = !this.simulationStarted; // toggle the simulation status
+
+			if (this.simulationStarted) {
+				this.simulatedBtn.setText("Re-Run");
+
+				this.reactorConfig.toggleSimulationClock();
+			} else {
+
+				// clean up the plots
+				this.cleanGraphData();
+
+				this.simulation.resetSimulation();
+				this.simulatedBtn.setText("Simulate");
+			}
+
+		}  
+		
+		String d = this.simulatedBtn.getText();
+		
+		if(d.compareToIgnoreCase("Stop") == 0) {
+			this.reactorConfig.stopSim();
+			this.simulation.resetSimulation();
 			this.simulatedBtn.setText("Simulate");
 		}
+
 	}
 
 	@FXML
@@ -195,31 +234,35 @@ public class MainSimWindowController {
 		newStage.setScene(new Scene(bp));
 		newStage.show();
 	}
-	
+
 	@FXML
 	public void clickConfig() throws IOException {
-		
+
 		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/ConfigurationWindow.fxml");
 		Pane p = loader.load();
 		Stage ns = SpringFXManager.getInstance().getSubStage();
 		ns.setTitle("Configuration");
 		ns.setScene(new Scene(p));
 		ns.show();
-		
+
 	}
-	
+
 	@FXML
-	public void runMonteCarlo() throws IOException {
-		
-		// TODO - trigger monte carlo sim
-		
+	public void viewMonteCarlo() throws IOException {
+  
 		FXMLLoader loader = SpringFXManager.getInstance().loadFxml("views/HedgeGainWindow.fxml");
 		Pane p = loader.load();
 		Stage ns = SpringFXManager.getInstance().getSubStage();
 		ns.setTitle("Configuration");
 		ns.setScene(new Scene(p));
 		ns.show();
-		 
 	}
 	
+	@FXML
+	public void runMonteCarloSim() { 
+		
+		this.reactorConfig.toggleSimulationClock();
+		this.simulatedBtn.setText("Stop");
+	}
+
 }

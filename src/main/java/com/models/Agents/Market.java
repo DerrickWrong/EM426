@@ -1,13 +1,13 @@
 package com.models.Agents;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.configurations.AgentStateConfig.MarketState;
+import com.configurations.AgentStateFactory;
+import com.configurations.AgentStateFactory.MarketState;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.model.State;
 import com.models.StockExchange;
@@ -18,7 +18,6 @@ import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -46,7 +45,8 @@ public class Market extends Agent {
 	private double buyAbovePricePercentage = 1.05;
 
 	@Autowired
-	@Qualifier("MarketStateMachine")
+	AgentStateFactory agentFactory; 
+	
 	StateMachine MarketStateMachine;
 
 	@Autowired
@@ -60,13 +60,10 @@ public class Market extends Agent {
 
 	public Market(){}
 	
-	@PreDestroy
-	void tearDown() {
-		System.out.println("Destroying Market object");
-	}
-	
 	@PostConstruct
 	void init() {
+		
+		this.MarketStateMachine = this.agentFactory.MarketStateMachine();
 
 		this.stockHolding = this.stockVolume * (this.floatingRatio / 100);
 		
@@ -93,8 +90,6 @@ public class Market extends Agent {
 						latest.getTimestamp());
 				this.stockOrderStream.tryEmitNext(order);
 
-				System.out.println("Market buying " + numShares + " @ $" + price);
-
 			} else {
 
 				this.MarketStateMachine.send(MarketState.SELLNOW);
@@ -112,8 +107,6 @@ public class Market extends Agent {
 				StockOrder order = new StockOrder(this.getId(), type.SELL, price, numShares, SimAgentTypeEnum.Market,
 						latest.getTimestamp());
 				this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
-
-				System.out.println("Market selling " + numShares + " @ $" + price);
 
 			}
 

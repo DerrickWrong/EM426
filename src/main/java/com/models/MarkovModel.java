@@ -1,10 +1,12 @@
 package com.models;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.configurations.AgentStateConfig.ApeState;
-import com.configurations.AgentStateConfig.HedgieState;
+import com.configurations.AgentStateFactory.ApeState;
+import com.configurations.AgentStateFactory.HedgieState;
+import com.configurations.SimConfiguration;
 import com.github.pnavais.machine.StateMachine; 
 
 // This class defines the probabilities of agent state transition in AgentStateConfig. This agent class will define the triggers.
@@ -13,11 +15,14 @@ import com.github.pnavais.machine.StateMachine;
 @Scope("prototype")
 public class MarkovModel { 
 	
+	@Autowired
+	SimConfiguration simConfig;
+	
 	// For Apes
 	public StateMachine ApeHandW2BuyorSell(StateMachine mach) {
 		
 		// Transition from hold and wait to either buy or sell
-		if(Math.random() >= 0.5) {
+		if(Math.random() <= simConfig.diamondHandRatio) {
 			
 			return mach.send(ApeState.BUYMOREMESSAGE);
 		}else {

@@ -1,8 +1,6 @@
 package com.configurations;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+  
+import org.springframework.stereotype.Component;
 
 import com.github.pnavais.machine.StateMachine; 
 import com.github.pnavais.machine.api.message.Messages;
@@ -10,8 +8,8 @@ import com.github.pnavais.machine.model.State;
 
 // This class is for defining the states and transitions for all the agents.
 
-@Configuration
-public class AgentStateConfig {
+@Component
+public class AgentStateFactory {
 
 	// Retail Investors States
 	public static class ApeState{
@@ -25,10 +23,8 @@ public class AgentStateConfig {
 		public static String BUYMOREMESSAGE = "Buy More Stonk!"; 
 	}
 	
-
-	@Bean 
-	@Scope("prototype")
-	StateMachine ApeStateMachine() {
+ 
+	public StateMachine ApeStateMachine() {
 		
 		// See Ape States Diagram for more information
 		return StateMachine.newBuilder()
@@ -55,10 +51,8 @@ public class AgentStateConfig {
 		public static String CMMESSAGE = "Cover Now";
 		public static String GMMESSAGE = "Game Over";
 	}
-	
-	@Bean
-	@Scope("prototype")
-	StateMachine HedgieStateMachine(){
+	 
+	public StateMachine HedgieStateMachine(){
 		// See Hedgies State Diagram for more information
 		return StateMachine.newBuilder()
 				.from(HedgieState.IDLE).to(HedgieState.BNS).on(Messages.EMPTY)
@@ -80,9 +74,7 @@ public class AgentStateConfig {
 		public static String HALTMESSAGE = "Halt all buy orders";
 		public static String IDLEMESSAGE = "Return to Idle";
 	}
-	
-	@Bean
-	@Scope("prototype")
+	 
 	StateMachine BrokerStateMachine() {
 		// See Broker State Diagram for more information
 		return StateMachine.newBuilder()
@@ -102,10 +94,8 @@ public class AgentStateConfig {
 		public static String TUMMESSAGE = "Price tumpled";
 		public static String RIMESSAGE = "Re-invest message";
 	}
-	
-	@Bean
-	@Scope("prototype")
-	StateMachine InstitutionalStateMachine() {
+	 
+	public StateMachine InstitutionalStateMachine() {
 		
 		// See Institutional Investor diagram for more information
 		return StateMachine.newBuilder()
@@ -130,10 +120,8 @@ public class AgentStateConfig {
 		public static String BUYNOW = "Buy";
 		public static String NEXTSTATE = "NEXT";
 	}
-	
-	@Bean
-	@Scope("prototype")
-	StateMachine MarketStateMachine() {
+	 
+	public StateMachine MarketStateMachine() {
 		return StateMachine.newBuilder()
 				.from(MarketState.IDLE).to(MarketState.SELL1P).on(MarketState.SELLNOW)
 				.from(MarketState.SELL1P).to(MarketState.SELL5P).on(MarketState.NEXTSTATE)

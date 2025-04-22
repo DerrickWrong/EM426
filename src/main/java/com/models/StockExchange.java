@@ -76,8 +76,11 @@ public class StockExchange {
 				completedOrderSink.tryEmitNext(sellerNO);
 
 				if (buyerNO.getActState() == ActState.COMPLETE) {
-					this.stockListing.sellingSharesQueue.poll(); // remove from the queue
-					this.stockListing.sellOrderQueue.poll();
+
+					if (!this.stockListing.sellingSharesQueue.isEmpty()) {
+						this.stockListing.sellingSharesQueue.poll(); // remove from the queue
+						this.stockListing.sellOrderQueue.poll();
+					}
 
 					// re-register the selling stocks
 					this.stockListing.registerShares2Pool(sellerShare);
@@ -116,28 +119,30 @@ public class StockExchange {
 			this.internalBuySink.tryEmitNext(new Pair<>(timestamp, order));
 		}
 	}
-	
+
 	public void submitShortOrder(StockOrder shortOrder, Share borrowedshares) {
-		
+
 		ConcurrentHashMap<UUID, Share> sharesRegistry = stockListing.sharesRegistry;
-		
-		// Find the market repo  
+
+		// Find the market repo
 		for (Map.Entry<UUID, Share> k : sharesRegistry.entrySet()) {
 			Share share = k.getValue();
-			
+
 			if (share.getType() == SimAgentTypeEnum.Market) {
-				
-				// add the short to the market repo - simulate order being absorbed by the market
+
+				// add the short to the market repo - simulate order being absorbed by the
+				// market
 				Share comb = share.combineShare(borrowedshares);
 				stockListing.sharesRegistry.replace(k.getKey(), comb);
-				
-				StockOrder completedShort = new StockOrder(shortOrder, ActState.COMPLETE, shortOrder.getOrderRequestedAtTime() + 1);
+
+				StockOrder completedShort = new StockOrder(shortOrder, ActState.COMPLETE,
+						shortOrder.getOrderRequestedAtTime() + 1);
 				completedOrderSink.tryEmitNext(completedShort);
 				break;
 			}
-			
-		} 
-		
+
+		}
+
 	}
 
 	public ListingStock getStockListing() {

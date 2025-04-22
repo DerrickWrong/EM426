@@ -53,7 +53,7 @@ public class ListingStock {
 
 		this.pendingSalesRegistry.put(sellOrder.getUUID(), toBeSold);
 		this.sellingSharesQueue.add(toBeSold);
-		this.sellOrderQueue.add(sellOrder);
+		this.sellOrderQueue.offer(sellOrder);
 	}
 
 	public void registerShares2Pool(Share s) {

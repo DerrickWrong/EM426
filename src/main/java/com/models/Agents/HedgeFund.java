@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.configurations.AgentStateConfig.HedgieState;
+import com.configurations.AgentStateFactory;
+import com.configurations.AgentStateFactory.HedgieState;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.api.message.Messages;
 import com.models.StockExchange;
@@ -45,7 +46,8 @@ public class HedgeFund extends Agent {
 	Flux<StockOrder> processedOrderFlux;
 
 	@Autowired
-	@Qualifier("HedgieStateMachine")
+	AgentStateFactory agentFactory; 
+	
 	StateMachine stateMachine;
 
 	@Autowired
@@ -69,7 +71,9 @@ public class HedgeFund extends Agent {
 
 	@PostConstruct
 	public void init() {
-
+		
+		this.stateMachine = this.agentFactory.HedgieStateMachine();
+		
 		double fund = this.originalPrinciple / this.numberOfDump;
 
 		this.stateMachine.send(Messages.EMPTY);
@@ -125,7 +129,7 @@ public class HedgeFund extends Agent {
 			//this.coverPosition();
 			this.stateMachine.send(HedgieState.CMMESSAGE);  
 			// this is when the hedgie had to buy back all the stocks
-			System.out.println("Hedgie getting Margin call!!!");
+			//System.out.println("Hedgie getting Margin call!!!");
 		});
 	}
 

@@ -22,7 +22,7 @@ public class HedgiesController {
 		
 		
 		this.borrow2short.setText(String.valueOf(this.simConfg.shortRatio));
-		this.dicountPercent.setText(String.valueOf(this.simConfg.dicountPercent)); 
+		this.dicountPercent.setText(String.valueOf(this.simConfg.shortSellDisountRate)); 
 		
 
 		this.borrow2short.textProperty().addListener((obs, oldVal, newVal) -> {
@@ -40,7 +40,7 @@ public class HedgiesController {
 				return;
 			}
 
-			this.simConfg.dicountPercent = Double.valueOf(newVal);
+			this.simConfg.shortSellDisountRate = Double.valueOf(newVal);
 		});
  
 	}

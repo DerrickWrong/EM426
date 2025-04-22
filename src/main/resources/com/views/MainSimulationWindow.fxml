@@ -28,13 +28,18 @@
               <MenuItem mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Simulate">
+          <Menu mnemonicParsing="false" text="View">
             <items>
                   <MenuItem mnemonicParsing="false" onAction="#clickViewDemands" text="View Demands " />
-                  <MenuItem mnemonicParsing="false" onAction="#clickConfig" text="Change Config" />
-                  <MenuItem mnemonicParsing="false" onAction="#runMonteCarlo" text="Run Monte Carlo Sim" />
+                  <MenuItem mnemonicParsing="false" onAction="#viewMonteCarlo" text="View Monte Carlo Results" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="Run">
+              <items>
+                  <MenuItem mnemonicParsing="false" onAction="#clickConfig" text="Change Config" />
+                <MenuItem fx:id="runMCSim" mnemonicParsing="false" onAction="#runMonteCarloSim" text="Run MC Sim" />
+              </items>
+            </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
               <MenuItem mnemonicParsing="false" text="About" />
@@ -83,6 +88,16 @@
             <Insets />
          </BorderPane.margin>
          <children>
+            <Label text="Monte Carlo #:">
+               <HBox.margin>
+                  <Insets right="20.0" />
+               </HBox.margin>
+            </Label>
+            <Label fx:id="monteCarloLabel" text="1">
+               <HBox.margin>
+                  <Insets right="50.0" />
+               </HBox.margin>
+            </Label>
             <Label prefWidth="50.0" text="Step:">
                <HBox.margin>
                   <Insets right="10.0" />
