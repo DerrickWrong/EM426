@@ -16,7 +16,6 @@ import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
-import com.utils.HelperFn;
 import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;

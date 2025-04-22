@@ -19,7 +19,8 @@ public class RetailInvestorController {
 
 	@Autowired
 	SimConfiguration simConfig;
-
+	
+	
 	@FXML
 	public void initialize() {
 		
@@ -29,7 +30,10 @@ public class RetailInvestorController {
 		this.buybidPercentBox.setText(String.valueOf(simConfig.bidAbovePercent));
 		this.payFreqBox.setText(String.valueOf(simConfig.payFrequency));
 		this.shortDisclosureDelayBox.setText(String.valueOf(simConfig.disclosureDelay));
+		this.agentStability.setMax(1.0);
+		this.agentStability.setMin(0.0);
 		this.agentStability.setValue(simConfig.diamondHandRatio);
+		
 		
 		this.numAgentBox.textProperty().addListener((observable, oldValue, newValue) -> {
 

@@ -21,7 +21,7 @@ public class SimConfiguration {
 	// Hedgie parameters
 	public double shortRatio = .1;
 	public double shortSellDisountRate = .95;
-	public long brokerDelay = 1L; 
+	public long brokerDelay = 0L; 
 	
 	// Agent Parameters
 	public int numOfAgents = 1;

@@ -125,14 +125,14 @@ public class MainSimWindowController {
 
 		});
 		
-		
+		// only execute during monte carlo set to more than 1 case
 		this.simulationCompletion.asFlux().publishOn(fxScheduler).subscribe(data->{
 			
 			int count = this.simConfig.monteCarloCounter.incrementAndGet();
 			
-			this.monteCarloLabel.setText(String.valueOf(count));
+			this.monteCarloLabel.setText(String.valueOf(count - 1));
 			
-			if(count <= this.simConfig.MonteCarloTrials) {
+			if(count < this.simConfig.MonteCarloTrials) {
 				this.simulation.resetSimulation();
 				this.reactorConfig.startSim();
 			}

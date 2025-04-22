@@ -78,7 +78,10 @@ public class StockExchange {
 				if (buyerNO.getActState() == ActState.COMPLETE) {
 
 					if (!this.stockListing.sellingSharesQueue.isEmpty()) {
-						this.stockListing.sellingSharesQueue.poll(); // remove from the queue
+						this.stockListing.sellingSharesQueue.poll(); // remove from the queue 
+					}
+					
+					if(!this.stockListing.sellOrderQueue.isEmpty()) {
 						this.stockListing.sellOrderQueue.poll();
 					}
 

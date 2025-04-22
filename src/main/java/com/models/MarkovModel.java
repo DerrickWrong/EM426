@@ -1,7 +1,6 @@
 package com.models;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import org.springframework.beans.factory.annotation.Autowired; 
 import org.springframework.stereotype.Component;
 
 import com.configurations.AgentStateFactory.ApeState;
@@ -11,8 +10,7 @@ import com.github.pnavais.machine.StateMachine;
 
 // This class defines the probabilities of agent state transition in AgentStateConfig. This agent class will define the triggers.
  
-@Component
-@Scope("prototype")
+@Component 
 public class MarkovModel { 
 	
 	@Autowired

@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.configurations.SimConfiguration;
-import com.utils.FxScheduler;
 import jakarta.annotation.PostConstruct;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
@@ -21,7 +20,7 @@ public class HedgeFundGainController {
 
 	private final XYChart.Series series = new XYChart.Series<>();
 
-	private final int bin[] = new int[5];
+	private final int bin[] = new int[7];
 
 	@Autowired
 	SimConfiguration simConfig; //
@@ -37,11 +36,13 @@ public class HedgeFundGainController {
 	public void initialize() {
 
 		// add the series
-		this.series.getData().add(new XYChart.Data("Loss > 10m", bin[0]));
-		this.series.getData().add(new XYChart.Data("Loss < 10m", bin[1]));
+		this.series.getData().add(new XYChart.Data<>("Loss > 10m", bin[0]));
+		this.series.getData().add(new XYChart.Data<>("Loss < 7m", bin[1]));
 		this.series.getData().add(new XYChart.Data<>("Loss < 5m", bin[2]));
-		this.series.getData().add(new XYChart.Data<>("Gain < 5m", bin[3]));
-		this.series.getData().add(new XYChart.Data<>("Gain > 5m", bin[4]));
+		this.series.getData().add(new XYChart.Data<>("Tie", bin[3]));
+		this.series.getData().add(new XYChart.Data<>("Gain < 5m", bin[4]));
+		this.series.getData().add(new XYChart.Data<>("Gain < 7m", bin[5]));
+		this.series.getData().add(new XYChart.Data<>("Gain > 10m", bin[6]));
 
 		this.hedgeGainLossHistogram.getData().addAll(this.series);
 		this.hedgeGainLossHistogram.setLegendVisible(false);
@@ -63,17 +64,23 @@ public class HedgeFundGainController {
 		if (gainOrLoss <= -10) {
 			bin[0] = bin[0] + 1;
 
-		} else if (gainOrLoss > -10 && gainOrLoss <= -5) {
+		} else if (gainOrLoss > -10 && gainOrLoss <= -7) {
 			bin[1] = bin[1] + 1;
 
-		} else if (gainOrLoss > -5 && gainOrLoss <= 0) {
+		} else if (gainOrLoss > -7 && gainOrLoss <= -5) {
 			bin[2] = bin[2] + 1;
 
-		} else if (gainOrLoss > 0 && gainOrLoss <= 5) {
+		} else if (gainOrLoss > -5 && gainOrLoss <= 5) {
 			bin[3] = bin[3] + 1;
 
-		} else {
+		} else if (gainOrLoss > 5 && gainOrLoss <= 7) {
 			bin[4] = bin[4] + 1;
+
+		} else if (gainOrLoss > 7 && gainOrLoss <= 10) {
+			bin[5] = bin[5] + 1;
+
+		} else {
+			bin[6] = bin[6] + 1;
 		}
 	}
 

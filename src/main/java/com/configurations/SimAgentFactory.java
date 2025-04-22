@@ -2,7 +2,7 @@ package com.configurations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration; 
 
 import com.models.Agents.Ape;
 import com.models.Agents.HedgeFund;
@@ -12,7 +12,7 @@ import com.models.Agents.StockLender;
 
 import em426.agents.Agent;
 
-@Component
+@Configuration
 public class SimAgentFactory {
 
 	private final ConfigurableApplicationContext springContext;
@@ -44,6 +44,7 @@ public class SimAgentFactory {
 		return hedgie;
 	}
 
+	
 	public Ape createApe(double initialBalance, int numAgent, long disclosureDelay, double bidAbovePercent,
 			long payFreq) {
 
