@@ -5,14 +5,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import org.springframework.beans.factory.annotation.Autowired; 
 import org.springframework.stereotype.Component;
 
+import com.configurations.SimConfiguration;
 import com.models.StockExchange;
 import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
+import com.utils.Simulatible;
 
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
@@ -20,15 +21,15 @@ import javafx.util.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
-@Component
-@Scope("prototype")
-public class StockLender extends Agent{
+@Component 
+public class StockLender extends Agent implements Simulatible{
 
 	@Autowired
 	Flux<ShareInfo> shareInfoFlux;
- 
-	private double triggerMarginPercentage;
-
+   
+	@Autowired
+	private SimConfiguration simConfig;
+	 
 	AtomicReference<ShareInfo> cache = new AtomicReference<ShareInfo>();
 	// lend stocks and margin call
 
@@ -39,16 +40,7 @@ public class StockLender extends Agent{
 	
 	@Autowired
 	StockExchange exchange;
-
-	public StockLender() {}
-	
-	public void setMargineCall(double triggerMarginCall) {
-		
-		this.triggerMarginPercentage = triggerMarginCall;
-		
-	}
-	
-	
+ 
 	@PostConstruct
 	void init() {
 
@@ -94,7 +86,7 @@ public class StockLender extends Agent{
 			double deltaPercent = 100.0
 					* (info.getCurrentPrice() - entry.getValue().getPrice()) / info.getCurrentPrice();
 
-			if (deltaPercent > this.triggerMarginPercentage) {
+			if (deltaPercent > this.simConfig.triggerMarginCall) {
 
 				this.marginCallSink.tryEmitNext(new Pair<>(entry.getKey(), entry.getValue()));
 			}
@@ -104,6 +96,12 @@ public class StockLender extends Agent{
 	
 	public Map<UUID, Share> getBorrowersTab() {
 		return borrowersTab;
+	}
+
+	@Override
+	public void resetAgent() {
+		// TODO Auto-generated method stub
+		this.borrowersTab.clear();
 	}
 
 	

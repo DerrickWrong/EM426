@@ -1,4 +1,4 @@
-package com.models.Agents;
+package com.models.Agents.HedgeFund;
 
 import java.util.UUID;
 
@@ -12,21 +12,23 @@ import com.configurations.AgentStateFactory.HedgieState;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.api.message.Messages;
 import com.models.StockExchange;
+import com.models.Agents.StockLender;
 import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.SimAgentTypeEnum;
+import com.utils.Simulatible;
 
 import em426.agents.Agent;
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
 import javafx.util.Pair;
-import reactor.core.publisher.Flux; 
+import reactor.core.publisher.Flux;
 
 @Component
 @Scope("prototype")
-public class HedgeFund extends Agent {
+public class HedgeFund extends Agent implements Simulatible{
 
 	private double originalPrinciple = 7.5E9; // 7 billion dollar
 	private double shortBidPercent = 0.95;
@@ -35,8 +37,9 @@ public class HedgeFund extends Agent {
 	private double currSellingPrice;
 	private double balance;
 
+	@Autowired
 	private StockLender lender;
-  
+
 	@Autowired
 	Flux<ShareInfo> shareInfoFlux;
 
@@ -45,8 +48,8 @@ public class HedgeFund extends Agent {
 	Flux<StockOrder> processedOrderFlux;
 
 	@Autowired
-	AgentStateFactory agentFactory; 
-	
+	AgentStateFactory agentFactory;
+
 	StateMachine stateMachine;
 
 	@Autowired
@@ -54,25 +57,12 @@ public class HedgeFund extends Agent {
 
 	@Autowired
 	Flux<Pair<UUID, Share>> marginCallFlux;
-
-	public HedgeFund() {
-	}
-
-	public void setParameter(StockLender lender, double principle, double shortBidPercent, double marginReqPercent,
-			int numberOfDump, double cashOutProfitAt) {
-		this.lender = lender;
-
-		this.originalPrinciple = principle;
-		this.shortBidPercent = shortBidPercent;
-		this.marginReqPercent = marginReqPercent;
-		this.numberOfDump = numberOfDump;
-	}
-
+ 
 	@PostConstruct
 	public void init() {
-		
+
 		this.stateMachine = this.agentFactory.HedgieStateMachine();
-		
+
 		double fund = this.originalPrinciple / this.numberOfDump;
 
 		this.stateMachine.send(Messages.EMPTY);
@@ -83,7 +73,6 @@ public class HedgeFund extends Agent {
 
 				this.shortingStock(fund, s);
 			}
-
 
 		});
 
@@ -104,11 +93,11 @@ public class HedgeFund extends Agent {
 			if (currOrder.getUUID() == this.getId()) {
 				return; // can't short more stock until supply has been consumed
 			}
-			
-			if(po.getOrderType() == type.COVER ) {
-				this.stateMachine.send(HedgieState.CMMESSAGE); // move to cover state & lock the agent
+
+			if (po.getOrderType() == type.COVER) {
+				this.stateMachine.setCurrent(HedgieState.COVER);// move to cover state & lock the agent
 			}
-			
+
 			stateMachine.send(HedgieState.IDLEMSG);
 
 		});
@@ -119,16 +108,15 @@ public class HedgeFund extends Agent {
 			return this.stateMachine.getCurrent() != HedgieState.COVER;
 
 		}).subscribe(call -> {
-  
-			
-			if(this.stateMachine.getAllTransitions() == HedgieState.COVER) {
+
+			if (this.stateMachine.getAllTransitions() == HedgieState.COVER) {
 				return;
 			}
-			
-			//this.coverPosition();
-			this.stateMachine.send(HedgieState.CMMESSAGE);  
+
+			// this.coverPosition();
+			this.stateMachine.setCurrent(HedgieState.COVER);
 			// this is when the hedgie had to buy back all the stocks
-			//System.out.println("Hedgie getting Margin call!!!");
+			// System.out.println("Hedgie getting Margin call!!!");
 		});
 	}
 
@@ -153,4 +141,21 @@ public class HedgeFund extends Agent {
 		stateMachine.send(Messages.EMPTY);
 	}
 
+	@Override
+	public void resetAgent() {
+		// TODO Auto-generated method stub
+		this.balance = 0;
+		this.stateMachine.setCurrent(HedgieState.IDLE);
+		
+	}
+
+	
+	public double getTab() {
+		
+		Share borrowedShares = this.lender.getBorrowersTab().get(this.getId());
+		
+		return borrowedShares.getQuantity() * borrowedShares.getPrice();
+		
+	}
+	
 }

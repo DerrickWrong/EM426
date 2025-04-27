@@ -18,13 +18,16 @@ public class SimConfiguration {
 	// Mutual Fund 
 	public double mutualBuyRatio = 1.05;
 	
+	// Lender
+	public double triggerMarginCall = 0.5; // 50% gain in price
+	
 	// Hedgie parameters
 	public double shortRatio = .1;
 	public double shortSellDisountRate = .95;
 	public long brokerDelay = 0L; 
 	
 	// Agent Parameters
-	public int numOfAgents = 1;
+	public int numOfAgents = 0;
 	public double initialBalance = 500;
 	public int multiplier = 100000;
 	public long disclosureDelay = 30;

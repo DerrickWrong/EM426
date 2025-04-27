@@ -10,12 +10,10 @@ import org.springframework.context.annotation.PropertySource;
 
 import com.models.StockExchange;
 import com.models.Agents.Ape;
-import com.models.Agents.HedgeFund;
 import com.models.Agents.Market;
 import com.models.Agents.NewsReporter;
 import com.models.Agents.ScoreKeeper;
-import com.models.Agents.StockBroker;
-import com.models.Agents.StockLender;
+import com.models.Agents.HedgeFund.HedgeFund;
 import com.models.demands.Share;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
@@ -63,20 +61,27 @@ public class WorldSimulator {
 
 	@Autowired
 	Flux<Long> simulationClock;
-
+	
+	// Agents
+	@Autowired
+	Market market;
+	
+	@Autowired
+	HedgeFund hedgie;
+	
 	@Autowired
 	SimConfiguration simConfig;
 
 	@Autowired
-	SimAgentFactory agentFactory;
+	Sinks.Many<Integer> simulationCompletion;
 	
 	@Autowired
 	Sinks.Many<Double> resultSink;
-
-	@Autowired
-	Sinks.Many<Integer> simulationCompletion;
 	
-	private List<Agent> agentList = new ArrayList<>();
+	@Autowired
+	SimAgentFactory apeFactory;
+	
+	private final List<Agent> agentList = new ArrayList<>();
 
 	int counter = 0;
 	
@@ -102,8 +107,23 @@ public class WorldSimulator {
 
 	void setupSim() {
 
+		int shortInterestShares = (int) ((this.shortedRatio / 100.0) * this.stockVolume);
+		int marketNumShares = (int) ((1.0 - ((this.insiderR + this.instituteR) / 100.0)) * this.stockVolume);
+		
+		// register the market
+		Share marketShares = new Share(this.market.getId(), this.stockPrice, marketNumShares + shortInterestShares,
+						SimAgentTypeEnum.Market);
+		this.exchange.getStockListing().registerShares2Pool(marketShares);
+		
+		StockOrder firstSell = new StockOrder(this.market.getId(), type.SELL, this.stockPrice, shortInterestShares,
+				SimAgentTypeEnum.Market, 0L);
+		this.exchange.submitOrder(firstSell, 0L);
+		
+		List<Ape> apes = apeFactory.createApe(simConfig.numOfAgents);
+		this.agentList.addAll(apes);
+		
 		// TODO put this in a factory and kick it out at the simulate command
-
+/*
 		int shortInterestShares = (int) ((this.shortedRatio / 100.0) * this.stockVolume);
 		int marketNumShares = (int) ((1.0 - ((this.insiderR + this.instituteR) / 100.0)) * this.stockVolume);
 
@@ -119,10 +139,7 @@ public class WorldSimulator {
 				SimAgentTypeEnum.Market, 0L);
 		this.exchange.submitOrder(firstSell, 0L);
 
-		// create lender agent
-		StockLender lender = this.agentFactory.createLender();
-		lender.setMargineCall(0.5); // 50% price increase
-		this.agentList.add(lender);
+		// create lender agent  
 
 		// set reporter
 		this.report.setLender(lender);
@@ -156,7 +173,8 @@ public class WorldSimulator {
 			retailInvestorAgents.add(ape);
 			this.agentList.add(ape);
 		}
-
+*/
+		
 	}
 
 	public void wrapUp() {
@@ -179,11 +197,14 @@ public class WorldSimulator {
 
 	public void resetSimulation() {
 
-		this.agentList.forEach(agent -> {
-
-			this.agentFactory.destroyAgent(agent);
+		this.market.resetAgent();
+		this.hedgie.resetAgent();
+		
+		// remove all the apes
+		this.agentList.forEach(a->{
+			this.apeFactory.destroyAgent(a);
 		});
-
+	
 		this.agentList.clear();
 
 		this.exchange.reset();

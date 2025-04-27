@@ -1,21 +1,22 @@
 package com.models.Agents;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.List; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.models.Agents.HedgeFund.HedgeFund;
 import com.models.demands.Share;
 import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
+import com.utils.Simulatible;
 
 import jakarta.annotation.PostConstruct;
 import reactor.core.publisher.Flux;
 
 @Component
-public class ScoreKeeper {
+public class ScoreKeeper implements Simulatible{
 
 	@Autowired
 	Flux<StockOrder> completedOrderFlux;
@@ -27,9 +28,11 @@ public class ScoreKeeper {
 	
 	final List<StockOrder> completedOrders = new ArrayList<>();
 	
+	@Autowired
 	StockLender lender;
-	double hedgieInvestment;
-	UUID hedgieUUID;
+	
+	@Autowired
+	HedgeFund hedgie;
 	
 	
 	// This role of this class if to compute the result 
@@ -47,23 +50,26 @@ public class ScoreKeeper {
 			this.info = i;
 		});
 	}
-	
-	public void setKeeper(StockLender lender, double hedgieInvestment, UUID hedgieID) {
-		
-		this.lender = lender;
-		this.hedgieInvestment = hedgieInvestment;
-		this.hedgieUUID = hedgieID;
-	}
-	
+	 
 	public double computeHedgieGainOrLoss() {
 		
-		Share borrowedShares = this.lender.getBorrowersTab().get(this.hedgieUUID);
+		Share borrowedShares = this.lender.getBorrowersTab().get(this.hedgie.getId());
+		
+		if(borrowedShares == null) {
+			return 0;
+		}
 		
 		double gainOrLoss = borrowedShares.getQuantity() * this.info.getCurrentPrice();
 		
 		this.completedOrders.clear();
 		
-		return this.hedgieInvestment - gainOrLoss;
+		return this.hedgie.getTab() - gainOrLoss;
+	}
+
+	@Override
+	public void resetAgent() {
+		// TODO Auto-generated method stub
+		this.completedOrders.clear();
 	}
 	
 	

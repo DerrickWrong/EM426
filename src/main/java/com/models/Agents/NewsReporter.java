@@ -38,6 +38,7 @@ public class NewsReporter extends Agent {
 	@Autowired
 	Flux<Long> simulationClock;
 	
+	@Autowired
 	StockLender lender;
 
 	@Value("${stockVolume}")

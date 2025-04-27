@@ -3,7 +3,6 @@ package com.models.Agents;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.configurations.AgentStateFactory;
@@ -15,6 +14,7 @@ import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type; 
 import com.utils.SimAgentTypeEnum;
+import com.utils.Simulatible;
 
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
@@ -22,9 +22,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 @Component
-@Scope("prototype")
 @PropertySource("classpath:stock.properties")
-public class Market extends Agent {
+public class Market extends Agent implements Simulatible {
 
 	@Value("${stockPrice}")
 	private double initialHoldingPrice;
@@ -57,8 +56,6 @@ public class Market extends Agent {
 
 	@Autowired
 	Sinks.Many<StockOrder> stockOrderStream;
-
-	public Market(){}
 	
 	@PostConstruct
 	void init() {
@@ -110,8 +107,6 @@ public class Market extends Agent {
 
 			}
 
-			this.MarketStateMachine.send(MarketState.BACK2IDLE);
-
 		});
 
 	}
@@ -140,6 +135,14 @@ public class Market extends Agent {
 
 	public double getBalance() {
 		return balance;
+	}
+
+	@Override
+	public void resetAgent() {
+		// TODO Auto-generated method stub
+		this.balance = 0;
+		this.stockHolding = this.stockVolume * (this.floatingRatio / 100);
+		this.wallStreet.reset();
 	}
 
 }

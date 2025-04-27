@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.configurations.AgentStateFactory;
 import com.configurations.AgentStateFactory.ApeState;
+import com.configurations.SimConfiguration;
 import com.github.pnavais.machine.StateMachine;
 import com.github.pnavais.machine.api.message.Messages;
 import com.models.MarkovModel;
@@ -14,6 +15,7 @@ import com.models.demands.ShareInfo;
 import com.models.demands.StockOrder;
 import com.models.demands.StockOrder.type;
 import com.utils.SimAgentTypeEnum;
+import com.utils.Simulatible;
 
 import em426.agents.Agent;
 import em426.api.ActState;
@@ -23,7 +25,7 @@ import reactor.core.publisher.Sinks;
 
 @Component
 @Scope("prototype")
-public class Ape extends Agent {
+public class Ape extends Agent implements Simulatible {
 
 	private long payDay = 10; // every biweekly
 	private double buyBidPercent = 1.05; // default 5% higher than the sell price
@@ -54,21 +56,27 @@ public class Ape extends Agent {
 	@Autowired
 	@Qualifier("completedOrderFlux")
 	Flux<StockOrder> completedOrderFlux;
+	
+	@Autowired
+	SimConfiguration simConfig;
 
-	public Ape(double initialBalance, int numAgent, long disclosureDelay, double bidAbovePercent,
-			long payInvestFrequency) {
-
-		this.agentScaleFactor = numAgent;
-		this.shortDisclosureDelay = disclosureDelay;
-		this.buyBidPercent = bidAbovePercent;
-		this.payDay = payInvestFrequency;
-		this.initialBalance = initialBalance;
-		this.balance = initialBalance * this.agentScaleFactor;
+	@Override
+	public void resetAgent() {
+		// TODO Auto-generated method stub
+		this.payDay = simConfig.payFrequency;
+		this.buyBidPercent = simConfig.bidAbovePercent;
+		this.initialBalance = simConfig.initialBalance;
+		this.agentScaleFactor = simConfig.multiplier;
+		this.shortDisclosureDelay = simConfig.disclosureDelay;
+		
+		this.balance = this.initialBalance * this.agentScaleFactor;
+		 
+		this.holdingshares = 0;
 	}
-
+	
 	@PostConstruct
 	void init() {
-
+		
 		this.apeState = this.agentFactory.ApeStateMachine();
 
 		apeState.send(Messages.EMPTY); // move to observe state
@@ -143,42 +151,12 @@ public class Ape extends Agent {
 						SimAgentTypeEnum.Retail, data.getT1());
 				
 				this.stockOrderStream.tryEmitNext(order);
-
-				
 			}
 
 		});
-
-		// listen and watch for stock volume change (additional float shares from
-		// Hedgie)
-		/*
-		 * shareInfoFlux.subscribe(shareInfo -> {
-		 * 
-		 * // getting paid this.balance.set(this.balance.get() + this.salary4Invest);
-		 * 
-		 * if (apeState.getCurrent() == ApeState.BUY) {
-		 * 
-		 * double buyPrice = shareInfo.getCurrentPrice() * buyBidPercent.get(); // this
-		 * should be a bid price int numShare = (int) (this.balance.get() / buyPrice);
-		 * 
-		 * StockOrder order = new StockOrder(this.getId(), type.BUY, buyPrice, numShare,
-		 * SimAgentTypeEnum.Retail, shareInfo.getTimestamp());
-		 * this.stockOrderStream.tryEmitNext(order);
-		 * 
-		 * System.out.println("Ape buying " + numShare + " @ $" + buyPrice + " UUID - "
-		 * + this.getId()); }
-		 * 
-		 * if (apeState.getCurrent() == ApeState.HOLD) {
-		 * 
-		 * if (this.balance.get() >= initialBalance) {
-		 * System.out.println("Ape Buy more " + this.getId());
-		 * apeState.send(ApeState.BUYMOREMESSAGE); // go back to buy state } }
-		 * 
-		 * // add randomness to the actions this.apeState =
-		 * this.model.ApeHandW2BuyorSell(this.apeState);
-		 * 
-		 * });
-		 */
+ 
 	}
+
+	
 
 }
