@@ -29,3 +29,17 @@ illustrate the relationships)
 (per Bryan's recommendations)
 decouple information between stock and agent
 heterogenous behaviors of the agent (retail, hedgie and mutual funds)
+
+
+April 28 - Bryan's Recommendations
+-> Find a historical cases and try validating the simulation using those cases.
+
+Potential Cases:
+- 2022 suspension of Nickel trading by the LME
+- 1923 Piggy Wiggly Short Squeeze
+- 2008 Volkswagen Short Squeeze
+
+
+
+
+

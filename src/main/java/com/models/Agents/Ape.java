@@ -18,6 +18,8 @@ import com.utils.SimAgentTypeEnum;
 import em426.agents.Agent;
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -55,6 +57,9 @@ public class Ape extends Agent {
 	@Qualifier("completedOrderFlux")
 	Flux<StockOrder> completedOrderFlux;
 
+	// disposables
+	Disposable completeStreamDisposable, clockDisposable, zipDisposable;
+
 	public Ape(double initialBalance, int numAgent, long disclosureDelay, double bidAbovePercent,
 			long payInvestFrequency) {
 
@@ -66,6 +71,15 @@ public class Ape extends Agent {
 		this.balance = initialBalance * this.agentScaleFactor;
 	}
 
+	@PreDestroy
+	void destroy() {
+  
+		this.completeStreamDisposable.dispose();
+		this.zipDisposable.dispose();
+		this.clockDisposable.dispose();
+		
+	}
+
 	@PostConstruct
 	void init() {
 
@@ -73,39 +87,38 @@ public class Ape extends Agent {
 
 		apeState.send(Messages.EMPTY); // move to observe state
 
-		this.completedOrderFlux.filter(o -> {
+		this.completeStreamDisposable = completedOrderFlux.filter(o -> {
 
 			return o.getUUID() == this.getId() && o.getOrderState() == ActState.COMMITTED;
 
 		}).subscribe(o -> {
-			
-			if(o.getOrderType() == type.BUY) {
+
+			if (o.getOrderType() == type.BUY) {
 				this.holdingshares = this.holdingshares + o.getNumOfShares();
-				this.balance = 0; // clean out the balance 
+				this.balance = 0; // clean out the balance
 				this.apeState.setCurrent(ApeState.HOLD);
 			}
-			
-			if(o.getOrderType() == type.SELL) {
-				
+
+			if (o.getOrderType() == type.SELL) {
+
 				this.balance = this.holdingshares * o.getBidPrice();
-				this.holdingshares = 0; 
+				this.holdingshares = 0;
 				this.apeState.setCurrent(ApeState.OBSERVE);
 			}
-			
+
 		});
-		
+
 		// getting paid
-		this.simulationClock.subscribe(d->{
-			
-			if(d % this.payDay == 0) {
+		this.clockDisposable = simulationClock.subscribe(d -> {
+
+			if (d % this.payDay == 0) {
 				this.balance += this.initialBalance * this.agentScaleFactor;
 			}
-			
+
 		});
-		
 
 		// combining two flux
-		Flux.zip(this.simulationClock, this.shareInfoFlux).filter(d -> {
+		zipDisposable = Flux.zip(this.simulationClock, this.shareInfoFlux).filter(d -> {
 
 			return d.getT1() >= this.shortDisclosureDelay && (this.balance > 0);
 
@@ -137,14 +150,13 @@ public class Ape extends Agent {
 
 			if (apeState.getCurrent() == ApeState.SELL) {
 
-				double bidPrice = data.getT2().getCurrentPrice() * (2.0 - this.buyBidPercent); 
+				double bidPrice = data.getT2().getCurrentPrice() * (2.0 - this.buyBidPercent);
 
 				StockOrder order = new StockOrder(this.getId(), type.SELL, bidPrice, (int) this.holdingshares,
 						SimAgentTypeEnum.Retail, data.getT1());
-				
+
 				this.stockOrderStream.tryEmitNext(order);
 
-				
 			}
 
 		});
