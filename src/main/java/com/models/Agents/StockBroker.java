@@ -14,8 +14,11 @@ import com.models.demands.StockOrder.type;
 import em426.agents.Agent;
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Scheduler;
 
 @Component
 @Scope("prototype")
@@ -37,8 +40,14 @@ public class StockBroker extends Agent {
 	@Autowired
 	@Qualifier("completedOrder")
 	Sinks.Many<StockOrder> completedOrderStream;
+	
+	@Autowired
+	@Qualifier("sellScheduler")
+	Scheduler sellerScheduler;
 
 	private StockLender lender;
+	
+	Disposable a1, a2, a3;
 
 	public StockBroker() {
 	}
@@ -56,37 +65,44 @@ public class StockBroker extends Agent {
 		this.delay = Duration.ofMillis(milliseconds);
 	}
 
+	@PreDestroy
+	void destroy() {
+		this.a1.dispose();
+		this.a2.dispose();
+		this.a3.dispose();
+	}
+	
 	@PostConstruct
 	void init() {
 
 		// listen to stock orders
 		// listen for all traditional sell orders
-		this.stockOrderStream.filter(order -> {
+		a1 = this.stockOrderStream.filter(order -> {
 
 			return order.getActState() == ActState.START
 					&& (order.getOrderType() == type.SELL || order.getOrderType() == type.COVER);
 
-		}).subscribe(order -> {
+		}).publishOn(sellerScheduler).subscribe(order -> {
 
 			// look up the share owned by the seller
 			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 
 		});
 
-		this.stockOrderStream.filter(order -> {
+		a2 = this.stockOrderStream.filter(order -> {
 
 			return order.getActState() == ActState.START && order.getOrderType() == type.BUY;
 
-		}).delayElements(this.delay).subscribe(order -> {
+		}).delayElements(this.delay).publishOn(sellerScheduler).subscribe(order -> {
 
 			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());
 		});
 
-		this.stockOrderStream.filter(order -> {
+		a3 = this.stockOrderStream.filter(order -> {
 
 			return order.getActState() == ActState.START && order.getOrderType() == type.SHORT;
 
-		}).subscribe(order -> {
+		}).publishOn(sellerScheduler).subscribe(order -> {
 
 			this.lender.borrowStock(order);
 			this.wallStreet.submitOrder(order, order.getOrderRequestedAtTime());

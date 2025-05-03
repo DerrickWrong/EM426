@@ -16,6 +16,11 @@ public class SchedulersConfig {
 		return FxScheduler.fxThread();
 	}
 	 
+    @Bean
+    Scheduler sellScheduler() {
+    	return Schedulers.newSingle("SellingScheduler");
+    }
+    
 	@Bean
 	Scheduler ioScheduler() {
 		// ideal for IO, database and 3rd party accesses

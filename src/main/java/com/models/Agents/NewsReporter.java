@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Scheduler;
 
 /**
  * This class is to report the current market status to all agents. In a sense,
@@ -42,11 +44,15 @@ public class NewsReporter extends Agent {
 
 	@Value("${stockVolume}")
 	private int stockVolume;
+	
+	@Autowired
+	@Qualifier("sellScheduler")
+	Scheduler sellerScheduler;
 	 
 	@PostConstruct
 	void init() {
 
-		this.simulationClock.subscribe(t -> {
+		this.simulationClock.publishOn(sellerScheduler).subscribe(t -> {
 
 			StockOrder so = this.wallStreet.getStockListing().sellOrderQueue.peek();
 

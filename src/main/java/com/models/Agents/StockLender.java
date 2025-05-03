@@ -16,7 +16,9 @@ import com.models.demands.StockOrder;
 
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import javafx.util.Pair;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -39,6 +41,8 @@ public class StockLender extends Agent{
 	
 	@Autowired
 	StockExchange exchange;
+	
+	Disposable d;
 
 	public StockLender() {}
 	
@@ -48,11 +52,16 @@ public class StockLender extends Agent{
 		
 	}
 	
+	@PreDestroy
+	void destroy() {
+		d.dispose();
+	}
+	
 	
 	@PostConstruct
 	void init() {
 
-		this.shareInfoFlux.subscribe(info -> {
+		d = this.shareInfoFlux.subscribe(info -> {
 
 			this.cache.set(info);
 

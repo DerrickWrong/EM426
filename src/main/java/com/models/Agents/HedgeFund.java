@@ -21,8 +21,11 @@ import com.utils.SimAgentTypeEnum;
 import em426.agents.Agent;
 import em426.api.ActState;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import javafx.util.Pair;
-import reactor.core.publisher.Flux; 
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler; 
 
 @Component
 @Scope("prototype")
@@ -54,6 +57,12 @@ public class HedgeFund extends Agent {
 
 	@Autowired
 	Flux<Pair<UUID, Share>> marginCallFlux;
+	
+	@Autowired
+	@Qualifier("sellScheduler")
+	Scheduler sellerScheduler;
+	
+	Disposable a1, a2, a3;
 
 	public HedgeFund() {
 	}
@@ -67,6 +76,14 @@ public class HedgeFund extends Agent {
 		this.marginReqPercent = marginReqPercent;
 		this.numberOfDump = numberOfDump;
 	}
+	
+	@PreDestroy
+	void destroy() {
+		
+		this.a1.dispose();
+		this.a2.dispose();
+		this.a3.dispose();
+	}
 
 	@PostConstruct
 	public void init() {
@@ -77,7 +94,7 @@ public class HedgeFund extends Agent {
 
 		this.stateMachine.send(Messages.EMPTY);
 
-		this.shareInfoFlux.subscribe(s -> {
+		this.a1 = shareInfoFlux.publishOn(sellerScheduler).subscribe(s -> {
 
 			if (stateMachine.getCurrent() == HedgieState.BNS) {
 
@@ -88,7 +105,7 @@ public class HedgeFund extends Agent {
 		});
 
 		// Processed Orders
-		this.processedOrderFlux.filter(f -> {
+		this.a2 = processedOrderFlux.filter(f -> {
 
 			return (f.getUUID() == this.getId()) && (f.getActState() == ActState.COMPLETE);
 
@@ -114,7 +131,7 @@ public class HedgeFund extends Agent {
 		});
 
 		// signal for getting margin call
-		this.marginCallFlux.filter(f -> {
+		this.a3 = marginCallFlux.filter(f -> {
 
 			return this.stateMachine.getCurrent() != HedgieState.COVER;
 

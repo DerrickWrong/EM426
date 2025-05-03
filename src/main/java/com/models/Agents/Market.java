@@ -1,6 +1,7 @@
 package com.models.Agents;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
@@ -18,8 +19,11 @@ import com.utils.SimAgentTypeEnum;
 
 import em426.agents.Agent;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Scheduler;
 
 @Component
 @Scope("prototype")
@@ -58,7 +62,18 @@ public class Market extends Agent {
 	@Autowired
 	Sinks.Many<StockOrder> stockOrderStream;
 
+	@Autowired
+	@Qualifier("sellScheduler")
+	Scheduler sellerScheduler;
+	
+	Disposable ds;
+	
 	public Market(){}
+	
+	@PreDestroy
+	void destroy() {
+		ds.dispose();
+	}
 	
 	@PostConstruct
 	void init() {
@@ -67,7 +82,7 @@ public class Market extends Agent {
 
 		this.stockHolding = this.stockVolume * (this.floatingRatio / 100);
 		
-		this.shareInfoFlux.buffer(this.numTicksToObserve).subscribe(shareInfo -> {
+		ds = this.shareInfoFlux.buffer(this.numTicksToObserve).publishOn(sellerScheduler).subscribe(shareInfo -> {
 
 			ShareInfo latest = shareInfo.get(numTicksToObserve - 1);
 			double latestPrice = latest.getCurrentPrice();
