@@ -32,7 +32,7 @@ heterogenous behaviors of the agent (retail, hedgie and mutual funds)
 
 
 April 28 - Bryan's Recommendations
--> Find a historical cases and try validating the simulation using those cases.
+-> Find some historical cases and use them to validate the simulator.
 
 Potential Cases:
 - 2022 suspension of Nickel trading by the LME
